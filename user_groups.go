@@ -11,7 +11,7 @@ type addUserGroupBody struct {
 	UserGroup UserGroup `json:"user_group"`
 }
 
-func (c client) UserGroups(
+func (c Client) UserGroups(
 	productSlug string,
 	releaseID int,
 ) ([]UserGroup, error) {
@@ -37,7 +37,7 @@ func (c client) UserGroups(
 	return response.UserGroups, nil
 }
 
-func (c client) AddUserGroup(
+func (c Client) AddUserGroup(
 	productSlug string,
 	releaseID int,
 	userGroupID int,

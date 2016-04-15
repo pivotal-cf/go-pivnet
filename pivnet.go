@@ -16,28 +16,7 @@ const (
 	path     = "/api/v2"
 )
 
-type Client interface {
-	ProductVersions(productSlug string, releases []Release) ([]string, error)
-	CreateRelease(CreateReleaseConfig) (Release, error)
-	ReleasesForProductSlug(string) ([]Release, error)
-	GetRelease(string, string) (Release, error)
-	UpdateRelease(string, Release) (Release, error)
-	DeleteRelease(Release, string) error
-	GetProductFiles(Release) (ProductFiles, error)
-	GetProductFile(productSlug string, releaseID int, productID int) (ProductFile, error)
-	EULAs() ([]EULA, error)
-	AcceptEULA(productSlug string, releaseID int) error
-	CreateProductFile(CreateProductFileConfig) (ProductFile, error)
-	DeleteProductFile(productSlug string, id int) (ProductFile, error)
-	AddProductFile(productID int, releaseID int, productFileID int) error
-	FindProductForSlug(slug string) (Product, error)
-	UserGroups(productSlug string, releaseID int) ([]UserGroup, error)
-	AddUserGroup(productSlug string, releaseID int, userGroupID int) error
-	ReleaseETag(string, Release) (string, error)
-	ReleaseTypes() ([]string, error)
-}
-
-type client struct {
+type Client struct {
 	url       string
 	token     string
 	userAgent string
@@ -53,7 +32,7 @@ type NewClientConfig struct {
 func NewClient(config NewClientConfig, logger lager.Logger) Client {
 	url := fmt.Sprintf("%s%s", config.Endpoint, path)
 
-	return &client{
+	return Client{
 		url:       url,
 		token:     config.Token,
 		userAgent: config.UserAgent,
@@ -61,21 +40,7 @@ func NewClient(config NewClientConfig, logger lager.Logger) Client {
 	}
 }
 
-func (c client) ProductVersions(productSlug string, releases []Release) ([]string, error) {
-	var versions []string
-	for _, r := range releases {
-		etag, err := c.ReleaseETag(productSlug, r)
-		if err != nil {
-			return nil, err
-		}
-		version := fmt.Sprintf("%s#%s", r.Version, etag)
-		versions = append(versions, version)
-	}
-
-	return versions, nil
-}
-
-func (c client) makeRequestWithHTTPResponse(
+func (c Client) makeRequestWithHTTPResponse(
 	requestType string,
 	url string,
 	expectedStatusCode int,
@@ -130,7 +95,7 @@ func (c client) makeRequestWithHTTPResponse(
 	return resp, nil
 }
 
-func (c client) makeRequest(
+func (c Client) makeRequest(
 	requestType string,
 	url string,
 	expectedStatusCode int,

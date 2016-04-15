@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func (c client) EULAs() ([]EULA, error) {
+func (c Client) EULAs() ([]EULA, error) {
 	url := fmt.Sprintf(
 		"%s/eulas",
 		c.url,
@@ -27,7 +27,7 @@ func (c client) EULAs() ([]EULA, error) {
 	return response.EULAs, nil
 }
 
-func (c client) AcceptEULA(productSlug string, releaseID int) error {
+func (c Client) AcceptEULA(productSlug string, releaseID int) error {
 	url := fmt.Sprintf(
 		"%s/products/%s/releases/%d/eula_acceptance",
 		c.url,

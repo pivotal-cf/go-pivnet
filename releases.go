@@ -31,7 +31,7 @@ type CreateReleaseConfig struct {
 	EndOfAvailabilityDate string
 }
 
-func (c client) ReleasesForProductSlug(productSlug string) ([]Release, error) {
+func (c Client) ReleasesForProductSlug(productSlug string) ([]Release, error) {
 	url := fmt.Sprintf(
 		"%s/products/%s/releases",
 		c.url,
@@ -46,7 +46,7 @@ func (c client) ReleasesForProductSlug(productSlug string) ([]Release, error) {
 	return response.Releases, nil
 }
 
-func (c client) GetRelease(productSlug, version string) (Release, error) {
+func (c Client) GetRelease(productSlug, version string) (Release, error) {
 	url := fmt.Sprintf("%s/products/%s/releases", c.url, productSlug)
 
 	var response ReleasesResponse
@@ -71,7 +71,7 @@ func (c client) GetRelease(productSlug, version string) (Release, error) {
 	return matchingRelease, nil
 }
 
-func (c client) CreateRelease(config CreateReleaseConfig) (Release, error) {
+func (c Client) CreateRelease(config CreateReleaseConfig) (Release, error) {
 	url := fmt.Sprintf("%s/products/%s/releases", c.url, config.ProductSlug)
 
 	body := createReleaseBody{
@@ -114,7 +114,7 @@ func (c client) CreateRelease(config CreateReleaseConfig) (Release, error) {
 	return response.Release, nil
 }
 
-func (c client) UpdateRelease(productSlug string, release Release) (Release, error) {
+func (c Client) UpdateRelease(productSlug string, release Release) (Release, error) {
 	url := fmt.Sprintf("%s/products/%s/releases/%d", c.url, productSlug, release.ID)
 
 	release.OSSCompliant = "confirm"
@@ -137,7 +137,7 @@ func (c client) UpdateRelease(productSlug string, release Release) (Release, err
 	return response.Release, nil
 }
 
-func (c client) ReleaseETag(productSlug string, release Release) (string, error) {
+func (c Client) ReleaseETag(productSlug string, release Release) (string, error) {
 	url := fmt.Sprintf("%s/products/%s/releases/%d", c.url, productSlug, release.ID)
 
 	var response Release
@@ -167,7 +167,7 @@ func (c client) ReleaseETag(productSlug string, release Release) (string, error)
 	return etag, nil
 }
 
-func (c client) DeleteRelease(release Release, productSlug string) error {
+func (c Client) DeleteRelease(release Release, productSlug string) error {
 	url := fmt.Sprintf(
 		"%s/products/%s/releases/%d",
 		c.url,

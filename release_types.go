@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func (c client) ReleaseTypes() ([]string, error) {
+func (c Client) ReleaseTypes() ([]string, error) {
 	url := fmt.Sprintf(
 		"%s/releases/release_types",
 		c.url,

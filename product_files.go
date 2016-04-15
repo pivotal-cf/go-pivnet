@@ -18,7 +18,7 @@ type CreateProductFileConfig struct {
 	Description  string
 }
 
-func (c client) GetProductFiles(release Release) (ProductFiles, error) {
+func (c Client) GetProductFiles(release Release) (ProductFiles, error) {
 	links := release.Links
 	if links == nil {
 		return ProductFiles{}, fmt.Errorf("No links found")
@@ -43,7 +43,7 @@ func (c client) GetProductFiles(release Release) (ProductFiles, error) {
 	return productFiles, nil
 }
 
-func (c client) GetProductFile(productSlug string, releaseID int, productID int) (ProductFile, error) {
+func (c Client) GetProductFile(productSlug string, releaseID int, productID int) (ProductFile, error) {
 	url := fmt.Sprintf("%s/products/%s/releases/%d/product_files/%d",
 		c.url,
 		productSlug,
@@ -66,7 +66,7 @@ func (c client) GetProductFile(productSlug string, releaseID int, productID int)
 	return response.ProductFile, nil
 }
 
-func (c client) CreateProductFile(config CreateProductFileConfig) (ProductFile, error) {
+func (c Client) CreateProductFile(config CreateProductFileConfig) (ProductFile, error) {
 	if config.AWSObjectKey == "" {
 		return ProductFile{}, fmt.Errorf("AWS object key must not be empty")
 	}
@@ -108,7 +108,7 @@ type createProductFileBody struct {
 	ProductFile ProductFile `json:"product_file"`
 }
 
-func (c client) DeleteProductFile(productSlug string, id int) (ProductFile, error) {
+func (c Client) DeleteProductFile(productSlug string, id int) (ProductFile, error) {
 	url := fmt.Sprintf(
 		"%s/products/%s/product_files/%d",
 		c.url,
@@ -131,7 +131,7 @@ func (c client) DeleteProductFile(productSlug string, id int) (ProductFile, erro
 	return response.ProductFile, nil
 }
 
-func (c client) AddProductFile(
+func (c Client) AddProductFile(
 	productID int,
 	releaseID int,
 	productFileID int,
