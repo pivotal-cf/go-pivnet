@@ -23,13 +23,13 @@ type Client struct {
 	logger    lager.Logger
 }
 
-type NewClientConfig struct {
+type ClientConfig struct {
 	Endpoint  string
 	Token     string
 	UserAgent string
 }
 
-func NewClient(config NewClientConfig, logger lager.Logger) Client {
+func NewClient(config ClientConfig, logger lager.Logger) Client {
 	url := fmt.Sprintf("%s%s", config.Endpoint, path)
 
 	return Client{

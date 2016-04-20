@@ -21,7 +21,7 @@ var _ = Describe("PivnetClient", func() {
 		releases   pivnet.ReleasesResponse
 		etagHeader []http.Header
 
-		newClientConfig pivnet.NewClientConfig
+		newClientConfig pivnet.ClientConfig
 		fakeLogger      lager.Logger
 	)
 
@@ -47,7 +47,7 @@ var _ = Describe("PivnetClient", func() {
 		userAgent = "pivnet-resource/0.1.0 (some-url)"
 
 		fakeLogger = lager.NewLogger("pivnet client")
-		newClientConfig = pivnet.NewClientConfig{
+		newClientConfig = pivnet.ClientConfig{
 			Endpoint:  server.URL(),
 			Token:     token,
 			UserAgent: userAgent,

@@ -21,7 +21,7 @@ var _ = Describe("PivnetClient - product files", func() {
 		apiAddress string
 		userAgent  string
 
-		newClientConfig pivnet.NewClientConfig
+		newClientConfig pivnet.ClientConfig
 		fakeLogger      lager.Logger
 	)
 
@@ -32,7 +32,7 @@ var _ = Describe("PivnetClient - product files", func() {
 		userAgent = "pivnet-resource/0.1.0 (some-url)"
 
 		fakeLogger = lager.NewLogger("producrt files")
-		newClientConfig = pivnet.NewClientConfig{
+		newClientConfig = pivnet.ClientConfig{
 			Endpoint:  apiAddress,
 			Token:     token,
 			UserAgent: userAgent,

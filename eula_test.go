@@ -20,7 +20,7 @@ var _ = Describe("PivnetClient - EULA", func() {
 		apiAddress string
 		userAgent  string
 
-		newClientConfig pivnet.NewClientConfig
+		newClientConfig pivnet.ClientConfig
 		fakeLogger      lager.Logger
 	)
 
@@ -31,7 +31,7 @@ var _ = Describe("PivnetClient - EULA", func() {
 		userAgent = "pivnet-resource/0.1.0 (some-url)"
 
 		fakeLogger = lager.NewLogger("eula test")
-		newClientConfig = pivnet.NewClientConfig{
+		newClientConfig = pivnet.ClientConfig{
 			Endpoint:  apiAddress,
 			Token:     token,
 			UserAgent: userAgent,

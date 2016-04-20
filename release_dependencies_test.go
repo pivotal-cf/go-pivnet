@@ -20,7 +20,7 @@ var _ = Describe("PivnetClient - release dependencies", func() {
 		apiAddress string
 		userAgent  string
 
-		newClientConfig pivnet.NewClientConfig
+		newClientConfig pivnet.ClientConfig
 		fakeLogger      lager.Logger
 
 		productID int
@@ -37,7 +37,7 @@ var _ = Describe("PivnetClient - release dependencies", func() {
 		releaseID = 2345
 
 		fakeLogger = lager.NewLogger("release dependencies")
-		newClientConfig = pivnet.NewClientConfig{
+		newClientConfig = pivnet.ClientConfig{
 			Endpoint:  apiAddress,
 			Token:     token,
 			UserAgent: userAgent,
