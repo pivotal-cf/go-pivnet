@@ -1,6 +1,7 @@
 package main_test
 
 import (
+	"fmt"
 	"os/exec"
 
 	. "github.com/onsi/ginkgo"
@@ -11,6 +12,15 @@ import (
 )
 
 func runMainWithArgs(args ...string) *gexec.Session {
+	args = append(
+		args,
+		fmt.Sprintf("--api-token=%s", apiToken),
+		fmt.Sprintf("--endpoint=%s", endpoint),
+	)
+
+	_, err := fmt.Fprintf(GinkgoWriter, "Running command: %v\n", args)
+	Expect(err).NotTo(HaveOccurred())
+
 	command := exec.Command(pivnetBinPath, args...)
 	session, err := gexec.Start(command, GinkgoWriter, GinkgoWriter)
 	Expect(err).NotTo(HaveOccurred())
@@ -26,6 +36,22 @@ var _ = Describe("pivnet cli", func() {
 		args = []string{}
 	})
 
+	Describe("Displaying help", func() {
+		It("displays help with '-h'", func() {
+			session := runMainWithArgs("-h")
+
+			Eventually(session, executableTimeout).Should(gexec.Exit())
+			Expect(session.Err).Should(gbytes.Say("Usage"))
+		})
+
+		It("displays help with '--help'", func() {
+			session := runMainWithArgs("--help")
+
+			Eventually(session, executableTimeout).Should(gexec.Exit())
+			Expect(session.Err).Should(gbytes.Say("Usage"))
+		})
+	})
+
 	Describe("Displaying version", func() {
 		It("displays version with '-v'", func() {
 			session := runMainWithArgs("-v")
@@ -39,6 +65,15 @@ var _ = Describe("pivnet cli", func() {
 
 			Eventually(session, executableTimeout).Should(gexec.Exit(0))
 			Expect(session).Should(gbytes.Say("dev"))
+		})
+	})
+
+	Describe("product", func() {
+		It("displays product for the provided slug", func() {
+			session := runMainWithArgs("product", "-s", "pivnet-resource-test")
+
+			Eventually(session, executableTimeout).Should(gexec.Exit(0))
+			Expect(session).Should(gbytes.Say("pivnet-resource-test"))
 		})
 	})
 })
