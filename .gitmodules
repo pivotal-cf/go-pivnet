@@ -1,6 +1,3 @@
 [submodule "vendor/github.com/pivotal-golang/lager"]
 	path = vendor/github.com/pivotal-golang/lager
 	url = https://github.com/pivotal-golang/lager.git
-[submodule "go-flags"]
-	path = go-flags
-	url = https://github.com/jessevdk/go-flags
