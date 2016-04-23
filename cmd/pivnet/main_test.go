@@ -1,11 +1,15 @@
 package main_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"os/exec"
 
+	"gopkg.in/yaml.v2"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/pivotal-cf-experimental/go-pivnet"
 
 	"github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/gexec"
@@ -65,6 +69,34 @@ var _ = Describe("pivnet cli", func() {
 
 			Eventually(session, executableTimeout).Should(gexec.Exit(0))
 			Expect(session).Should(gbytes.Say("dev"))
+		})
+	})
+
+	Describe("printing as json", func() {
+		It("prints as json", func() {
+			session := runMainWithArgs("--print-as=json", "product", "-s", "pivnet-resource-test")
+
+			Eventually(session, executableTimeout).Should(gexec.Exit(0))
+
+			var product pivnet.Product
+			err := json.Unmarshal(session.Out.Contents(), &product)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(product.Slug).To(Equal("pivnet-resource-test"))
+		})
+	})
+
+	Describe("printing as yaml", func() {
+		It("prints as yaml", func() {
+			session := runMainWithArgs("--print-as=yaml", "product", "-s", "pivnet-resource-test")
+
+			Eventually(session, executableTimeout).Should(gexec.Exit(0))
+
+			var product pivnet.Product
+			err := yaml.Unmarshal(session.Out.Contents(), &product)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(product.Slug).To(Equal("pivnet-resource-test"))
 		})
 	})
 
