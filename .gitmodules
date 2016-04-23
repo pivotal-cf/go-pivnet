@@ -4,3 +4,9 @@
 [submodule "vendor/github.com/jessevdk/go-flags"]
 	path = vendor/github.com/jessevdk/go-flags
 	url = https://github.com/jessevdk/go-flags
+[submodule "vendor/github.com/olekukonko/tablewriter"]
+	path = vendor/github.com/olekukonko/tablewriter
+	url = https://github.com/olekukonko/tablewriter
+[submodule "vendor/gopkg.in/yaml.v2"]
+	path = vendor/gopkg.in/yaml.v2
+	url = https://gopkg.in/yaml.v2
