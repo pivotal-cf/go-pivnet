@@ -10,4 +10,7 @@ ENDPOINT="${ENDPOINT:?"ENDPOINT must be provided"}"
 
 my_dir="$( cd "$( dirname "${0}" )" && pwd )"
 
-"${my_dir}/test" -r cmd
+"${my_dir}/test" \
+  "$@" \
+  -r \
+  cmd
