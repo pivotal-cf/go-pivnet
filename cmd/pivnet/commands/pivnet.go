@@ -23,7 +23,8 @@ type PivnetCommand struct {
 	APIToken string `long:"api-token" description:"Pivnet API token"`
 	Endpoint string `long:"endpoint" description:"Pivnet API Endpoint"`
 
-	Products ProductCommand `command:"product" description:"List products"`
+	EULAs   EULAsCommand   `command:"eulas" description:"List eulas"`
+	Product ProductCommand `command:"product" description:"Show product"`
 }
 
 var Pivnet PivnetCommand

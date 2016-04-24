@@ -29,6 +29,7 @@ var _ = Describe("pivnet cli", func() {
 		args     []string
 
 		product pivnet.Product
+		eulas   []pivnet.EULA
 	)
 
 	BeforeEach(func() {
@@ -43,15 +44,19 @@ var _ = Describe("pivnet cli", func() {
 			Name: "some-product-name",
 		}
 
-		server.AppendHandlers(
-			ghttp.CombineHandlers(
-				ghttp.VerifyRequest(
-					"GET",
-					fmt.Sprintf("%s/products/%s", apiPrefix, product.Slug),
-				),
-				ghttp.RespondWithJSONEncoded(http.StatusOK, product),
-			),
-		)
+		eulas = []pivnet.EULA{
+			{
+				ID:   1234,
+				Name: "some eula",
+				Slug: "some-eula",
+			},
+			{
+				ID:   2345,
+				Name: "another eula",
+				Slug: "another-eula",
+			},
+		}
+
 	})
 
 	runMainWithArgs := func(args ...string) *gexec.Session {
@@ -103,6 +108,18 @@ var _ = Describe("pivnet cli", func() {
 	})
 
 	Describe("printing as json", func() {
+		BeforeEach(func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf("%s/products/%s", apiPrefix, product.Slug),
+					),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, product),
+				),
+			)
+		})
+
 		It("prints as json", func() {
 			session := runMainWithArgs("--print-as=json", "product", "-s", product.Slug)
 
@@ -117,6 +134,18 @@ var _ = Describe("pivnet cli", func() {
 	})
 
 	Describe("printing as yaml", func() {
+		BeforeEach(func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf("%s/products/%s", apiPrefix, product.Slug),
+					),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, product),
+				),
+			)
+		})
+
 		It("prints as yaml", func() {
 			session := runMainWithArgs("--print-as=yaml", "product", "-s", product.Slug)
 
@@ -131,11 +160,46 @@ var _ = Describe("pivnet cli", func() {
 	})
 
 	Describe("product", func() {
+		BeforeEach(func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf("%s/products/%s", apiPrefix, product.Slug),
+					),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, product),
+				),
+			)
+		})
+
 		It("displays product for the provided slug", func() {
 			session := runMainWithArgs("product", "-s", product.Slug)
 
 			Eventually(session, executableTimeout).Should(gexec.Exit(0))
 			Expect(session).Should(gbytes.Say(product.Slug))
+		})
+	})
+
+	Describe("eula", func() {
+		BeforeEach(func() {
+			eulasResponse := pivnet.EULAsResponse{
+				EULAs: eulas,
+			}
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/eulas", apiPrefix)),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, eulasResponse),
+				),
+			)
+		})
+
+		It("displays all eulas", func() {
+			session := runMainWithArgs("eulas")
+
+			Eventually(session, executableTimeout).Should(gexec.Exit(0))
+			Expect(session).Should(gbytes.Say(eulas[0].Name))
+			Expect(session).Should(gbytes.Say(eulas[1].Name))
 		})
 	})
 })
