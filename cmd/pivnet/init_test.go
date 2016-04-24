@@ -1,7 +1,6 @@
 package main_test
 
 import (
-	"os"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -17,8 +16,6 @@ const (
 
 var (
 	pivnetBinPath string
-	apiToken      string
-	endpoint      string
 )
 
 func TestCLI(t *testing.T) {
@@ -27,17 +24,6 @@ func TestCLI(t *testing.T) {
 }
 
 var _ = BeforeSuite(func() {
-	apiToken = os.Getenv("API_TOKEN")
-	endpoint = os.Getenv("ENDPOINT")
-
-	if apiToken == "" {
-		Fail("API_TOKEN must be set for CLI tests to run")
-	}
-
-	if endpoint == "" {
-		Fail("ENDPOINT must be set for CLI tests to run")
-	}
-
 	By("Compiling binary")
 	var err error
 	pivnetBinPath, err = gexec.Build("github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet", "-race")

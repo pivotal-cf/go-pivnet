@@ -2,12 +2,6 @@
 
 set -eu
 
-set +x
-API_TOKEN="${API_TOKEN:?"API_TOKEN must be provided"}"
-set -x
-
-ENDPOINT="${ENDPOINT:?"ENDPOINT must be provided"}"
-
 my_dir="$( cd "$( dirname "${0}" )" && pwd )"
 
 "${my_dir}/test" \

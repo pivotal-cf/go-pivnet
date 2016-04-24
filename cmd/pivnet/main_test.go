@@ -3,6 +3,7 @@ package main_test
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"os/exec"
 
 	"gopkg.in/yaml.v2"
@@ -13,32 +14,61 @@ import (
 
 	"github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/gexec"
+	"github.com/onsi/gomega/ghttp"
 )
 
-func runMainWithArgs(args ...string) *gexec.Session {
-	args = append(
-		args,
-		fmt.Sprintf("--api-token=%s", apiToken),
-		fmt.Sprintf("--endpoint=%s", endpoint),
-	)
-
-	_, err := fmt.Fprintf(GinkgoWriter, "Running command: %v\n", args)
-	Expect(err).NotTo(HaveOccurred())
-
-	command := exec.Command(pivnetBinPath, args...)
-	session, err := gexec.Start(command, GinkgoWriter, GinkgoWriter)
-	Expect(err).NotTo(HaveOccurred())
-	return session
-}
+const (
+	apiPrefix = "/api/v2"
+	apiToken  = "some-api-token"
+)
 
 var _ = Describe("pivnet cli", func() {
 	var (
-		args []string
+		server   *ghttp.Server
+		endpoint string
+		args     []string
+
+		product pivnet.Product
 	)
 
 	BeforeEach(func() {
+		server = ghttp.NewServer()
+		endpoint = server.URL()
+
 		args = []string{}
+
+		product = pivnet.Product{
+			ID:   1234,
+			Slug: "some-product-slug",
+			Name: "some-product-name",
+		}
+
+		server.AppendHandlers(
+			ghttp.CombineHandlers(
+				ghttp.VerifyRequest(
+					"GET",
+					fmt.Sprintf("%s/products/%s", apiPrefix, product.Slug),
+				),
+				ghttp.RespondWithJSONEncoded(http.StatusOK, product),
+			),
+		)
 	})
+
+	runMainWithArgs := func(args ...string) *gexec.Session {
+		args = append(
+			args,
+			fmt.Sprintf("--api-token=%s", apiToken),
+			fmt.Sprintf("--endpoint=%s", endpoint),
+		)
+
+		_, err := fmt.Fprintf(GinkgoWriter, "Running command: %v\n", args)
+		Expect(err).NotTo(HaveOccurred())
+
+		command := exec.Command(pivnetBinPath, args...)
+		session, err := gexec.Start(command, GinkgoWriter, GinkgoWriter)
+		Expect(err).NotTo(HaveOccurred())
+		return session
+	}
 
 	Describe("Displaying help", func() {
 		It("displays help with '-h'", func() {
@@ -74,38 +104,38 @@ var _ = Describe("pivnet cli", func() {
 
 	Describe("printing as json", func() {
 		It("prints as json", func() {
-			session := runMainWithArgs("--print-as=json", "product", "-s", "pivnet-resource-test")
+			session := runMainWithArgs("--print-as=json", "product", "-s", product.Slug)
 
 			Eventually(session, executableTimeout).Should(gexec.Exit(0))
 
-			var product pivnet.Product
-			err := json.Unmarshal(session.Out.Contents(), &product)
+			var receivedProduct pivnet.Product
+			err := json.Unmarshal(session.Out.Contents(), &receivedProduct)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(product.Slug).To(Equal("pivnet-resource-test"))
+			Expect(receivedProduct.Slug).To(Equal(product.Slug))
 		})
 	})
 
 	Describe("printing as yaml", func() {
 		It("prints as yaml", func() {
-			session := runMainWithArgs("--print-as=yaml", "product", "-s", "pivnet-resource-test")
+			session := runMainWithArgs("--print-as=yaml", "product", "-s", product.Slug)
 
 			Eventually(session, executableTimeout).Should(gexec.Exit(0))
 
-			var product pivnet.Product
-			err := yaml.Unmarshal(session.Out.Contents(), &product)
+			var receivedProduct pivnet.Product
+			err := yaml.Unmarshal(session.Out.Contents(), &receivedProduct)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(product.Slug).To(Equal("pivnet-resource-test"))
+			Expect(receivedProduct.Slug).To(Equal(product.Slug))
 		})
 	})
 
 	Describe("product", func() {
 		It("displays product for the provided slug", func() {
-			session := runMainWithArgs("product", "-s", "pivnet-resource-test")
+			session := runMainWithArgs("product", "-s", product.Slug)
 
 			Eventually(session, executableTimeout).Should(gexec.Exit(0))
-			Expect(session).Should(gbytes.Say("pivnet-resource-test"))
+			Expect(session).Should(gbytes.Say(product.Slug))
 		})
 	})
 })
