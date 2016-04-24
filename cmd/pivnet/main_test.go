@@ -27,10 +27,8 @@ var _ = Describe("pivnet cli", func() {
 	var (
 		server   *ghttp.Server
 		endpoint string
-		args     []string
 
-		product  pivnet.Product
-		products []pivnet.Product
+		product pivnet.Product
 
 		eulas []pivnet.EULA
 
@@ -42,21 +40,10 @@ var _ = Describe("pivnet cli", func() {
 		server = ghttp.NewServer()
 		endpoint = server.URL()
 
-		args = []string{}
-
 		product = pivnet.Product{
 			ID:   1234,
 			Slug: "some-product-slug",
 			Name: "some-product-name",
-		}
-
-		products = []pivnet.Product{
-			product,
-			{
-				ID:   2345,
-				Slug: "another-product-slug",
-				Name: "another product name",
-			},
 		}
 
 		eulas = []pivnet.EULA{
@@ -151,7 +138,7 @@ var _ = Describe("pivnet cli", func() {
 		})
 
 		It("prints as json", func() {
-			session := runMainWithArgs("--print-as=json", "product", "-s", product.Slug)
+			session := runMainWithArgs("--format=json", "product", "-s", product.Slug)
 
 			Eventually(session, executableTimeout).Should(gexec.Exit(0))
 
@@ -177,7 +164,7 @@ var _ = Describe("pivnet cli", func() {
 		})
 
 		It("prints as yaml", func() {
-			session := runMainWithArgs("--print-as=yaml", "product", "-s", product.Slug)
+			session := runMainWithArgs("--format=yaml", "product", "-s", product.Slug)
 
 			Eventually(session, executableTimeout).Should(gexec.Exit(0))
 

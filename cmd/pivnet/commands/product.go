@@ -22,7 +22,7 @@ func (command *ProductCommand) Execute([]string) error {
 		return err
 	}
 
-	switch Pivnet.PrintAs {
+	switch Pivnet.Format {
 	case printAsTable:
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"ID", "Slug", "Name"})

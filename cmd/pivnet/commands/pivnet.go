@@ -18,7 +18,7 @@ const (
 type PivnetCommand struct {
 	Version func() `short:"v" long:"version" description:"Print the version of Pivnet and exit"`
 
-	PrintAs string `long:"print-as" description:"Format to print as" default:"table" choice:"table" choice:"json" choice:"yaml"`
+	Format string `long:"format" description:"Format to print as" default:"table" choice:"table" choice:"json" choice:"yaml"`
 
 	APIToken string `long:"api-token" description:"Pivnet API token"`
 	Endpoint string `long:"endpoint" description:"Pivnet API Endpoint"`
