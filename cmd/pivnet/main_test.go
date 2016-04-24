@@ -73,15 +73,17 @@ var _ = Describe("pivnet cli", func() {
 		}
 
 		release = pivnet.Release{
-			ID:      1234,
-			Version: "version 0.2.3",
+			ID:          1234,
+			Version:     "version 0.2.3",
+			Description: "Some release with some description.",
 		}
 
 		releases = []pivnet.Release{
 			release,
 			{
-				ID:      2345,
-				Version: "version 0.3.4",
+				ID:          2345,
+				Version:     "version 0.3.4",
+				Description: "Another release with another description.",
 			},
 		}
 
@@ -267,7 +269,7 @@ var _ = Describe("pivnet cli", func() {
 			releaseTypes = []string{"some release type", "another release type"}
 		})
 
-		It("displays all Release Types", func() {
+		It("displays all release types", func() {
 			releaseTypesResponse := pivnet.ReleaseTypesResponse{
 				ReleaseTypes: releaseTypes,
 			}
@@ -284,6 +286,33 @@ var _ = Describe("pivnet cli", func() {
 			Eventually(session, executableTimeout).Should(gexec.Exit(0))
 			Expect(session).Should(gbytes.Say(releaseTypes[0]))
 			Expect(session).Should(gbytes.Say(releaseTypes[1]))
+		})
+	})
+
+	Describe("Releases", func() {
+		It("displays all releases for the provided product slug", func() {
+			releasesResponse := pivnet.ReleasesResponse{
+				Releases: releases,
+			}
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf("%s/products/%s/releases", apiPrefix, product.Slug),
+					),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, releasesResponse),
+				),
+			)
+
+			session := runMainWithArgs(
+				"releases",
+				"--product-slug", product.Slug,
+			)
+
+			Eventually(session, executableTimeout).Should(gexec.Exit(0))
+			Expect(session).Should(gbytes.Say(releases[0].Version))
+			Expect(session).Should(gbytes.Say(releases[1].Version))
 		})
 	})
 })

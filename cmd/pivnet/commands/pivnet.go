@@ -29,6 +29,8 @@ type PivnetCommand struct {
 	AcceptEULA AcceptEULACommand `command:"accept-eula" description:"Accept EULA"`
 
 	Product ProductCommand `command:"product" description:"Show product"`
+
+	Releases ReleasesCommand `command:"releases" description:"List releases"`
 }
 
 var Pivnet PivnetCommand
