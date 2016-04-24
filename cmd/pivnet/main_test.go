@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os/exec"
+	"strconv"
 
 	"gopkg.in/yaml.v2"
 
@@ -28,8 +29,13 @@ var _ = Describe("pivnet cli", func() {
 		endpoint string
 		args     []string
 
-		product pivnet.Product
-		eulas   []pivnet.EULA
+		product  pivnet.Product
+		products []pivnet.Product
+
+		eulas []pivnet.EULA
+
+		releases []pivnet.Release
+		release  pivnet.Release
 	)
 
 	BeforeEach(func() {
@@ -44,6 +50,15 @@ var _ = Describe("pivnet cli", func() {
 			Name: "some-product-name",
 		}
 
+		products = []pivnet.Product{
+			product,
+			{
+				ID:   2345,
+				Slug: "another-product-slug",
+				Name: "another product name",
+			},
+		}
+
 		eulas = []pivnet.EULA{
 			{
 				ID:   1234,
@@ -54,6 +69,19 @@ var _ = Describe("pivnet cli", func() {
 				ID:   2345,
 				Name: "another eula",
 				Slug: "another-eula",
+			},
+		}
+
+		release = pivnet.Release{
+			ID:      1234,
+			Version: "version 0.2.3",
+		}
+
+		releases = []pivnet.Release{
+			release,
+			{
+				ID:      2345,
+				Version: "version 0.3.4",
 			},
 		}
 
@@ -181,7 +209,7 @@ var _ = Describe("pivnet cli", func() {
 	})
 
 	Describe("eula", func() {
-		BeforeEach(func() {
+		It("displays all EULAs", func() {
 			eulasResponse := pivnet.EULAsResponse{
 				EULAs: eulas,
 			}
@@ -192,14 +220,41 @@ var _ = Describe("pivnet cli", func() {
 					ghttp.RespondWithJSONEncoded(http.StatusOK, eulasResponse),
 				),
 			)
-		})
 
-		It("displays all eulas", func() {
 			session := runMainWithArgs("eulas")
 
 			Eventually(session, executableTimeout).Should(gexec.Exit(0))
 			Expect(session).Should(gbytes.Say(eulas[0].Name))
 			Expect(session).Should(gbytes.Say(eulas[1].Name))
+		})
+
+		It("accepts EULAs", func() {
+			eulaAcceptanceResponse := pivnet.EULAAcceptanceResponse{
+				AcceptedAt: "now",
+			}
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"POST",
+						fmt.Sprintf(
+							"%s/products/%s/releases/%d/eula_acceptance",
+							apiPrefix,
+							product.Slug,
+							release.ID,
+						),
+					),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, eulaAcceptanceResponse),
+				),
+			)
+
+			session := runMainWithArgs(
+				"accept-eula",
+				"--product-slug", product.Slug,
+				"--release-id", strconv.Itoa(release.ID),
+			)
+
+			Eventually(session, executableTimeout).Should(gexec.Exit(0))
 		})
 	})
 })

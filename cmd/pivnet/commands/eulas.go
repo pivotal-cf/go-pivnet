@@ -14,6 +14,11 @@ import (
 type EULAsCommand struct {
 }
 
+type AcceptEULACommand struct {
+	ProductSlug string `long:"product-slug" description:"Product slug e.g. p-mysql" required:"true"`
+	ReleaseID   int    `long:"release-id" description:"Release ID e.g. 1234" required:"true"`
+}
+
 func (command *EULAsCommand) Execute([]string) error {
 	client := NewClient()
 	eulas, err := client.EULAs()
@@ -50,6 +55,16 @@ func (command *EULAsCommand) Execute([]string) error {
 
 		fmt.Printf("---\n%s\n", string(b))
 		return nil
+	}
+
+	return nil
+}
+
+func (command *AcceptEULACommand) Execute([]string) error {
+	client := NewClient()
+	err := client.AcceptEULA(command.ProductSlug, command.ReleaseID)
+	if err != nil {
+		return err
 	}
 
 	return nil
