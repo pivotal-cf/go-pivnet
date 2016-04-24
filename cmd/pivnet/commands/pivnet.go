@@ -23,9 +23,12 @@ type PivnetCommand struct {
 	APIToken string `long:"api-token" description:"Pivnet API token"`
 	Endpoint string `long:"endpoint" description:"Pivnet API Endpoint"`
 
-	EULAs      EULAsCommand      `command:"eulas" description:"List eulas"`
-	AcceptEULA AcceptEULACommand `command:"accept-eula" description:"Accepts eula"`
-	Product    ProductCommand    `command:"product" description:"Show product"`
+	ReleaseTypes ReleaseTypesCommand `command:"release-types" description:"List release types"`
+
+	EULAs      EULAsCommand      `command:"eulas" description:"List EULAs"`
+	AcceptEULA AcceptEULACommand `command:"accept-eula" description:"Accept EULA"`
+
+	Product ProductCommand `command:"product" description:"Show product"`
 }
 
 var Pivnet PivnetCommand

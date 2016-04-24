@@ -208,7 +208,7 @@ var _ = Describe("pivnet cli", func() {
 		})
 	})
 
-	Describe("eula", func() {
+	Describe("EULAs", func() {
 		It("displays all EULAs", func() {
 			eulasResponse := pivnet.EULAsResponse{
 				EULAs: eulas,
@@ -255,6 +255,35 @@ var _ = Describe("pivnet cli", func() {
 			)
 
 			Eventually(session, executableTimeout).Should(gexec.Exit(0))
+		})
+	})
+
+	Describe("Release Types", func() {
+		var (
+			releaseTypes []string
+		)
+
+		BeforeEach(func() {
+			releaseTypes = []string{"some release type", "another release type"}
+		})
+
+		It("displays all Release Types", func() {
+			releaseTypesResponse := pivnet.ReleaseTypesResponse{
+				ReleaseTypes: releaseTypes,
+			}
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/releases/release_types", apiPrefix)),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, releaseTypesResponse),
+				),
+			)
+
+			session := runMainWithArgs("release-types")
+
+			Eventually(session, executableTimeout).Should(gexec.Exit(0))
+			Expect(session).Should(gbytes.Say(releaseTypes[0]))
+			Expect(session).Should(gbytes.Say(releaseTypes[1]))
 		})
 	})
 })
