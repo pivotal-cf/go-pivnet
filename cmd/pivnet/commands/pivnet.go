@@ -35,6 +35,8 @@ type PivnetCommand struct {
 	DeleteRelease DeleteReleaseCommand `command:"delete-release" description:"Delete release"`
 
 	UserGroups UserGroupsCommand `command:"user-groups" description:"List user groups"`
+
+	ReleaseDependencies ReleaseDependenciesCommand `command:"release-dependencies" description:"List user groups"`
 }
 
 var Pivnet PivnetCommand
