@@ -353,7 +353,7 @@ var _ = Describe("pivnet cli", func() {
 							release.ID,
 						),
 					),
-					ghttp.RespondWithJSONEncoded(http.StatusNoContent, releasesResponse),
+					ghttp.RespondWithJSONEncoded(http.StatusNoContent, nil),
 				),
 			)
 
@@ -364,6 +364,63 @@ var _ = Describe("pivnet cli", func() {
 			)
 
 			Eventually(session, executableTimeout).Should(gexec.Exit(0))
+		})
+	})
+
+	Describe("User groups", func() {
+		It("displays user groups for the provided product slug and release version", func() {
+			releasesResponse := pivnet.ReleasesResponse{
+				Releases: releases,
+			}
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf("%s/products/%s/releases", apiPrefix, product.Slug),
+					),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, releasesResponse),
+				),
+			)
+
+			userGroups := []pivnet.UserGroup{
+				{
+					ID:   1234,
+					Name: "Some user group",
+				},
+				{
+					ID:   2345,
+					Name: "Another user group",
+				},
+			}
+
+			userGroupsResponse := pivnet.UserGroups{
+				UserGroups: userGroups,
+			}
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf(
+							"%s/products/%s/releases/%d/user_groups",
+							apiPrefix,
+							product.Slug,
+							release.ID,
+						),
+					),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, userGroupsResponse),
+				),
+			)
+
+			session := runMainWithArgs(
+				"user-groups",
+				"--product-slug", product.Slug,
+				"--release-version", releases[0].Version,
+			)
+
+			Eventually(session, executableTimeout).Should(gexec.Exit(0))
+			Expect(session).Should(gbytes.Say(userGroups[0].Name))
 		})
 	})
 })
