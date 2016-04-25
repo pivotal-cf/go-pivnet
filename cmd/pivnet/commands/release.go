@@ -20,6 +20,11 @@ type ReleaseCommand struct {
 	ReleaseVersion string `long:"release-version" description:"Release version e.g. 0.1.2-rc1" required:"true"`
 }
 
+type DeleteReleaseCommand struct {
+	ProductSlug    string `long:"product-slug" description:"Product slug e.g. p-mysql" required:"true"`
+	ReleaseVersion string `long:"release-version" description:"Release version e.g. 0.1.2-rc1" required:"true"`
+}
+
 func (command *ReleasesCommand) Execute([]string) error {
 	client := NewClient()
 	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
@@ -93,6 +98,21 @@ func (command *ReleaseCommand) Execute([]string) error {
 
 		fmt.Printf("---\n%s\n", string(b))
 		return nil
+	}
+
+	return nil
+}
+
+func (command *DeleteReleaseCommand) Execute([]string) error {
+	client := NewClient()
+	release, err := client.GetRelease(command.ProductSlug, command.ReleaseVersion)
+	if err != nil {
+		return err
+	}
+
+	err = client.DeleteRelease(release, command.ProductSlug)
+	if err != nil {
+		return err
 	}
 
 	return nil

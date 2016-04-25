@@ -30,8 +30,9 @@ type PivnetCommand struct {
 
 	Product ProductCommand `command:"product" description:"Show product"`
 
-	Releases ReleasesCommand `command:"releases" description:"List releases"`
-	Release  ReleaseCommand  `command:"release" description:"Show release"`
+	Releases      ReleasesCommand      `command:"releases" description:"List releases"`
+	Release       ReleaseCommand       `command:"release" description:"Show release"`
+	DeleteRelease DeleteReleaseCommand `command:"delete-release" description:"Delete release"`
 }
 
 var Pivnet PivnetCommand

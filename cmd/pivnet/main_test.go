@@ -326,5 +326,44 @@ var _ = Describe("pivnet cli", func() {
 			Eventually(session, executableTimeout).Should(gexec.Exit(0))
 			Expect(session).Should(gbytes.Say(releases[0].Version))
 		})
+
+		It("displays release for the provided product slug and release version", func() {
+			releasesResponse := pivnet.ReleasesResponse{
+				Releases: releases,
+			}
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf("%s/products/%s/releases", apiPrefix, product.Slug),
+					),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, releasesResponse),
+				),
+			)
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"DELETE",
+						fmt.Sprintf(
+							"%s/products/%s/releases/%d",
+							apiPrefix,
+							product.Slug,
+							release.ID,
+						),
+					),
+					ghttp.RespondWithJSONEncoded(http.StatusNoContent, releasesResponse),
+				),
+			)
+
+			session := runMainWithArgs(
+				"delete-release",
+				"--product-slug", product.Slug,
+				"--release-version", releases[0].Version,
+			)
+
+			Eventually(session, executableTimeout).Should(gexec.Exit(0))
+		})
 	})
 })
