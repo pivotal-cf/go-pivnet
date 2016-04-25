@@ -301,5 +301,30 @@ var _ = Describe("pivnet cli", func() {
 			Expect(session).Should(gbytes.Say(releases[0].Version))
 			Expect(session).Should(gbytes.Say(releases[1].Version))
 		})
+
+		It("displays release for the provided product slug and release version", func() {
+			releasesResponse := pivnet.ReleasesResponse{
+				Releases: releases,
+			}
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf("%s/products/%s/releases", apiPrefix, product.Slug),
+					),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, releasesResponse),
+				),
+			)
+
+			session := runMainWithArgs(
+				"release",
+				"--product-slug", product.Slug,
+				"--release-version", releases[0].Version,
+			)
+
+			Eventually(session, executableTimeout).Should(gexec.Exit(0))
+			Expect(session).Should(gbytes.Say(releases[0].Version))
+		})
 	})
 })
