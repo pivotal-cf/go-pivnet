@@ -6,14 +6,33 @@ import (
 	"strings"
 )
 
-func (c Client) EULAs() ([]EULA, error) {
-	url := fmt.Sprintf(
-		"%s/eulas",
-		c.url,
-	)
+type EULAService struct {
+	client Client
+}
+
+type EULA struct {
+	Slug    string `json:"slug,omitempty"`
+	ID      int    `json:"id,omitempty"`
+	Name    string `json:"name,omitempty"`
+	Content string `json:"content,omitempty"`
+	Links   *Links `json:"_links,omitempty"`
+}
+
+type EULAsResponse struct {
+	EULAs []EULA `json:"eulas,omitempty"`
+	Links *Links `json:"_links,omitempty"`
+}
+
+type EULAAcceptanceResponse struct {
+	AcceptedAt string `json:"accepted_at,omitempty"`
+	Links      *Links `json:"_links,omitempty"`
+}
+
+func (e EULAService) ListAll() ([]EULA, error) {
+	url := "/eulas"
 
 	var response EULAsResponse
-	err := c.makeRequest(
+	err := e.client.makeRequest(
 		"GET",
 		url,
 		http.StatusOK,
@@ -27,16 +46,15 @@ func (c Client) EULAs() ([]EULA, error) {
 	return response.EULAs, nil
 }
 
-func (c Client) AcceptEULA(productSlug string, releaseID int) error {
+func (e EULAService) Accept(productSlug string, releaseID int) error {
 	url := fmt.Sprintf(
-		"%s/products/%s/releases/%d/eula_acceptance",
-		c.url,
+		"/products/%s/releases/%d/eula_acceptance",
 		productSlug,
 		releaseID,
 	)
 
 	var response EULAAcceptanceResponse
-	err := c.makeRequest(
+	err := e.client.makeRequest(
 		"POST",
 		url,
 		http.StatusOK,

@@ -5,14 +5,19 @@ import (
 	"net/http"
 )
 
-func (c Client) ReleaseTypes() ([]string, error) {
-	url := fmt.Sprintf(
-		"%s/releases/release_types",
-		c.url,
-	)
+type ReleaseTypesService struct {
+	client Client
+}
+
+type ReleaseTypesResponse struct {
+	ReleaseTypes []string `json:"release_types"`
+}
+
+func (r ReleaseTypesService) Get() ([]string, error) {
+	url := fmt.Sprintf("/releases/release_types")
 
 	var response ReleaseTypesResponse
-	err := c.makeRequest(
+	err := r.client.makeRequest(
 		"GET",
 		url,
 		http.StatusOK,

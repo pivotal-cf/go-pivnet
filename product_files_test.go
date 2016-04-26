@@ -32,7 +32,7 @@ var _ = Describe("PivnetClient - product files", func() {
 
 		fakeLogger = lager.NewLogger("product files test")
 		newClientConfig = pivnet.ClientConfig{
-			Endpoint:  apiAddress,
+			Host:      apiAddress,
 			Token:     token,
 			UserAgent: userAgent,
 		}
@@ -41,75 +41,6 @@ var _ = Describe("PivnetClient - product files", func() {
 
 	AfterEach(func() {
 		server.Close()
-	})
-
-	Describe("Get Product Files", func() {
-		var (
-			release            pivnet.Release
-			response           pivnet.ProductFiles
-			responseStatusCode int
-		)
-
-		BeforeEach(func() {
-			release = pivnet.Release{
-				Links: &pivnet.Links{
-					ProductFiles: map[string]string{"href": apiAddress + apiPrefix + "/products/banana/releases/666/product_files"},
-				},
-			}
-
-			response = pivnet.ProductFiles{[]pivnet.ProductFile{
-				{ID: 3, AWSObjectKey: "anything", Links: &pivnet.Links{Download: map[string]string{"href": "/products/banana/releases/666/product_files/6/download"}}},
-				{ID: 4, AWSObjectKey: "something", Links: &pivnet.Links{Download: map[string]string{"href": "/products/banana/releases/666/product_files/8/download"}}},
-			}}
-
-			responseStatusCode = http.StatusOK
-		})
-
-		JustBeforeEach(func() {
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", apiPrefix+"/products/banana/releases/666/product_files"),
-					ghttp.RespondWithJSONEncoded(responseStatusCode, response),
-				),
-			)
-		})
-
-		Context("when links are nil", func() {
-			BeforeEach(func() {
-				release.Links = nil
-			})
-
-			It("returns error", func() {
-				_, err := client.GetProductFiles(release)
-				Expect(err).To(HaveOccurred())
-
-				Expect(err).To(MatchError(errors.New("No links found")))
-			})
-		})
-
-		It("returns the product files for the given release", func() {
-			product, err := client.GetProductFiles(release)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(product.ProductFiles).To(HaveLen(2))
-
-			Expect(product.ProductFiles[0].AWSObjectKey).To(Equal("anything"))
-			Expect(product.ProductFiles[1].AWSObjectKey).To(Equal("something"))
-
-			Expect(product.ProductFiles[0].Links.Download["href"]).To(Equal("/products/banana/releases/666/product_files/6/download"))
-			Expect(product.ProductFiles[1].Links.Download["href"]).To(Equal("/products/banana/releases/666/product_files/8/download"))
-		})
-
-		Context("when the server responds with a non-2XX status code", func() {
-			BeforeEach(func() {
-				responseStatusCode = http.StatusTeapot
-			})
-
-			It("returns an error", func() {
-				_, err := client.GetProductFiles(release)
-				Expect(err).To(MatchError(errors.New(
-					"Pivnet returned status code: 418 for the request - expected 200")))
-			})
-		})
 	})
 
 	Describe("Get Product File", func() {
@@ -151,7 +82,7 @@ var _ = Describe("PivnetClient - product files", func() {
 		})
 
 		It("returns the product file without error", func() {
-			product, err := client.GetProductFile(
+			product, err := client.ProductFiles.Get(
 				productSlug,
 				releaseID,
 				productID,
@@ -171,7 +102,7 @@ var _ = Describe("PivnetClient - product files", func() {
 			})
 
 			It("returns an error", func() {
-				_, err := client.GetProductFile(
+				_, err := client.ProductFiles.Get(
 					productSlug,
 					releaseID,
 					productID,
@@ -234,7 +165,7 @@ var _ = Describe("PivnetClient - product files", func() {
 					),
 				)
 
-				productFile, err := client.CreateProductFile(createProductFileConfig)
+				productFile, err := client.ProductFiles.Create(createProductFileConfig)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(productFile.ID).To(Equal(1234))
 			})
@@ -268,7 +199,7 @@ var _ = Describe("PivnetClient - product files", func() {
 
 					createProductFileConfig.Description = description
 
-					productFile, err := client.CreateProductFile(createProductFileConfig)
+					productFile, err := client.ProductFiles.Create(createProductFileConfig)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(productFile.Description).To(Equal(description))
 				})
@@ -284,7 +215,7 @@ var _ = Describe("PivnetClient - product files", func() {
 					),
 				)
 
-				_, err := client.CreateProductFile(createProductFileConfig)
+				_, err := client.ProductFiles.Create(createProductFileConfig)
 				Expect(err).To(MatchError(errors.New(
 					"Pivnet returned status code: 418 for the request - expected 201")))
 			})
@@ -301,7 +232,7 @@ var _ = Describe("PivnetClient - product files", func() {
 			})
 
 			It("returns an error", func() {
-				_, err := client.CreateProductFile(createProductFileConfig)
+				_, err := client.ProductFiles.Create(createProductFileConfig)
 				Expect(err).To(HaveOccurred())
 
 				Expect(err.Error()).To(ContainSubstring("AWS object key"))
@@ -326,7 +257,7 @@ var _ = Describe("PivnetClient - product files", func() {
 				),
 			)
 
-			productFile, err := client.DeleteProductFile(productSlug, id)
+			productFile, err := client.ProductFiles.Delete(productSlug, id)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(productFile.ID).To(Equal(id))
@@ -343,7 +274,7 @@ var _ = Describe("PivnetClient - product files", func() {
 					),
 				)
 
-				_, err := client.DeleteProductFile(productSlug, id)
+				_, err := client.ProductFiles.Delete(productSlug, id)
 				Expect(err).To(MatchError(errors.New(
 					"Pivnet returned status code: 418 for the request - expected 200")))
 			})
@@ -374,7 +305,7 @@ var _ = Describe("PivnetClient - product files", func() {
 					),
 				)
 
-				err := client.AddProductFile(productID, releaseID, productFileID)
+				err := client.ProductFiles.AddToRelease(productID, releaseID, productFileID)
 				Expect(err).NotTo(HaveOccurred())
 			})
 		})
@@ -393,7 +324,7 @@ var _ = Describe("PivnetClient - product files", func() {
 					),
 				)
 
-				err := client.AddProductFile(productID, releaseID, productFileID)
+				err := client.ProductFiles.AddToRelease(productID, releaseID, productFileID)
 				Expect(err).To(MatchError(errors.New(
 					"Pivnet returned status code: 418 for the request - expected 204")))
 			})

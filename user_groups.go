@@ -7,23 +7,33 @@ import (
 	"net/http"
 )
 
+type UserGroupsService struct {
+	client Client
+}
+
 type addUserGroupBody struct {
 	UserGroup UserGroup `json:"user_group"`
 }
 
-func (c Client) UserGroups(
-	productSlug string,
-	releaseID int,
-) ([]UserGroup, error) {
+type UserGroups struct {
+	UserGroups []UserGroup `json:"user_groups,omitempty"`
+}
+
+type UserGroup struct {
+	ID          int    `json:"id,omitempty"`
+	Name        string `json:"name,omitempty"`
+	Description string `json:"description,omitempty"`
+}
+
+func (u UserGroupsService) Get(productSlug string, releaseID int) ([]UserGroup, error) {
 	url := fmt.Sprintf(
-		"%s/products/%s/releases/%d/user_groups",
-		c.url,
+		"/products/%s/releases/%d/user_groups",
 		productSlug,
 		releaseID,
 	)
 
 	var response UserGroups
-	err := c.makeRequest(
+	err := u.client.makeRequest(
 		"GET",
 		url,
 		http.StatusOK,
@@ -37,14 +47,9 @@ func (c Client) UserGroups(
 	return response.UserGroups, nil
 }
 
-func (c Client) AddUserGroup(
-	productSlug string,
-	releaseID int,
-	userGroupID int,
-) error {
+func (u UserGroupsService) Add(productSlug string, releaseID int, userGroupID int) error {
 	url := fmt.Sprintf(
-		"%s/products/%s/releases/%d/add_user_group",
-		c.url,
+		"/products/%s/releases/%d/add_user_group",
 		productSlug,
 		releaseID,
 	)
@@ -60,7 +65,7 @@ func (c Client) AddUserGroup(
 		panic(err)
 	}
 
-	err = c.makeRequest(
+	err = u.client.makeRequest(
 		"PATCH",
 		url,
 		http.StatusNoContent,

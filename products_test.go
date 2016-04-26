@@ -32,7 +32,7 @@ var _ = Describe("PivnetClient - product", func() {
 
 		fakeLogger = lager.NewLogger("products test")
 		newClientConfig = pivnet.ClientConfig{
-			Endpoint:  apiAddress,
+			Host:      apiAddress,
 			Token:     token,
 			UserAgent: userAgent,
 		}
@@ -43,7 +43,7 @@ var _ = Describe("PivnetClient - product", func() {
 		server.Close()
 	})
 
-	Describe("FindProductForSlug", func() {
+	Describe("Get", func() {
 		var (
 			slug = "my-product"
 		)
@@ -61,7 +61,7 @@ var _ = Describe("PivnetClient - product", func() {
 					),
 				)
 
-				product, err := client.FindProductForSlug(slug)
+				product, err := client.Products.Get(slug)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(product.Slug).To(Equal(slug))
 			})
@@ -79,7 +79,7 @@ var _ = Describe("PivnetClient - product", func() {
 					),
 				)
 
-				_, err := client.FindProductForSlug(slug)
+				_, err := client.Products.Get(slug)
 				Expect(err).To(MatchError(errors.New(
 					"Pivnet returned status code: 418 for the request - expected 200")))
 			})

@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"github.com/pivotal-golang/lager"
 )
+
+type ProductFilesService struct {
+	client Client
+}
 
 type CreateProductFileConfig struct {
 	ProductSlug  string
@@ -18,41 +20,30 @@ type CreateProductFileConfig struct {
 	Description  string
 }
 
-func (c Client) GetProductFiles(release Release) (ProductFiles, error) {
-	links := release.Links
-	if links == nil {
-		return ProductFiles{}, fmt.Errorf("No links found")
-	}
-
-	productFiles := ProductFiles{}
-
-	link := links.ProductFiles["href"]
-	c.logger.Debug("link", lager.Data{"needs more info": link})
-
-	err := c.makeRequest(
-		"GET",
-		link,
-		http.StatusOK,
-		nil,
-		&productFiles,
-	)
-	if err != nil {
-		return ProductFiles{}, err
-	}
-
-	return productFiles, nil
+type ProductFileResponse struct {
+	ProductFile ProductFile `json:"product_file,omitempty"`
 }
 
-func (c Client) GetProductFile(productSlug string, releaseID int, productID int) (ProductFile, error) {
-	url := fmt.Sprintf("%s/products/%s/releases/%d/product_files/%d",
-		c.url,
+type ProductFile struct {
+	ID           int    `json:"id,omitempty"`
+	AWSObjectKey string `json:"aws_object_key,omitempty"`
+	Links        *Links `json:"_links,omitempty"`
+	FileType     string `json:"file_type,omitempty"`
+	FileVersion  string `json:"file_version,omitempty"`
+	Name         string `json:"name,omitempty"`
+	MD5          string `json:"md5,omitempty"`
+	Description  string `json:"description,omitempty"`
+}
+
+func (p ProductFilesService) Get(productSlug string, releaseID int, productID int) (ProductFile, error) {
+	url := fmt.Sprintf("/products/%s/releases/%d/product_files/%d",
 		productSlug,
 		releaseID,
 		productID,
 	)
 	response := ProductFileResponse{}
 
-	err := c.makeRequest(
+	err := p.client.makeRequest(
 		"GET",
 		url,
 		http.StatusOK,
@@ -66,12 +57,12 @@ func (c Client) GetProductFile(productSlug string, releaseID int, productID int)
 	return response.ProductFile, nil
 }
 
-func (c Client) CreateProductFile(config CreateProductFileConfig) (ProductFile, error) {
+func (p ProductFilesService) Create(config CreateProductFileConfig) (ProductFile, error) {
 	if config.AWSObjectKey == "" {
 		return ProductFile{}, fmt.Errorf("AWS object key must not be empty")
 	}
 
-	url := c.url + "/products/" + config.ProductSlug + "/product_files"
+	url := "/products/" + config.ProductSlug + "/product_files"
 
 	body := createProductFileBody{
 		ProductFile: ProductFile{
@@ -90,7 +81,7 @@ func (c Client) CreateProductFile(config CreateProductFileConfig) (ProductFile, 
 	}
 
 	var response ProductFileResponse
-	err = c.makeRequest(
+	err = p.client.makeRequest(
 		"POST",
 		url,
 		http.StatusCreated,
@@ -108,16 +99,15 @@ type createProductFileBody struct {
 	ProductFile ProductFile `json:"product_file"`
 }
 
-func (c Client) DeleteProductFile(productSlug string, id int) (ProductFile, error) {
+func (p ProductFilesService) Delete(productSlug string, id int) (ProductFile, error) {
 	url := fmt.Sprintf(
-		"%s/products/%s/product_files/%d",
-		c.url,
+		"/products/%s/product_files/%d",
 		productSlug,
 		id,
 	)
 
 	var response ProductFileResponse
-	err := c.makeRequest(
+	err := p.client.makeRequest(
 		"DELETE",
 		url,
 		http.StatusOK,
@@ -131,14 +121,13 @@ func (c Client) DeleteProductFile(productSlug string, id int) (ProductFile, erro
 	return response.ProductFile, nil
 }
 
-func (c Client) AddProductFile(
+func (p ProductFilesService) AddToRelease(
 	productID int,
 	releaseID int,
 	productFileID int,
 ) error {
 	url := fmt.Sprintf(
-		"%s/products/%d/releases/%d/add_product_file",
-		c.url,
+		"/products/%d/releases/%d/add_product_file",
 		productID,
 		releaseID,
 	)
@@ -154,7 +143,7 @@ func (c Client) AddProductFile(
 		panic(err)
 	}
 
-	err = c.makeRequest(
+	err = p.client.makeRequest(
 		"PATCH",
 		url,
 		http.StatusNoContent,

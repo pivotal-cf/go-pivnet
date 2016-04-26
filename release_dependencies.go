@@ -5,16 +5,33 @@ import (
 	"net/http"
 )
 
-func (c Client) ReleaseDependencies(productID int, releaseID int) ([]ReleaseDependency, error) {
+type ReleaseDependenciesService struct {
+	client Client
+}
+
+type ReleaseDependenciesResponse struct {
+	ReleaseDependencies []ReleaseDependency `json:"dependencies,omitempty"`
+}
+
+type ReleaseDependency struct {
+	Release DependentRelease `json:"release,omitempty"`
+}
+
+type DependentRelease struct {
+	ID      int     `json:"id,omitempty"`
+	Version string  `json:"version,omitempty"`
+	Product Product `json:"product,omitempty"`
+}
+
+func (r ReleaseDependenciesService) Get(productID int, releaseID int) ([]ReleaseDependency, error) {
 	url := fmt.Sprintf(
-		"%s/products/%d/releases/%d/dependencies",
-		c.url,
+		"/products/%d/releases/%d/dependencies",
 		productID,
 		releaseID,
 	)
 
 	var response ReleaseDependenciesResponse
-	err := c.makeRequest(
+	err := r.client.makeRequest(
 		"GET",
 		url,
 		http.StatusOK,

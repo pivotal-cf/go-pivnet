@@ -33,7 +33,7 @@ var _ = Describe("PivnetClient - product files", func() {
 
 		fakeLogger = lager.NewLogger("producrt files")
 		newClientConfig = pivnet.ClientConfig{
-			Endpoint:  apiAddress,
+			Host:      apiAddress,
 			Token:     token,
 			UserAgent: userAgent,
 		}
@@ -44,7 +44,7 @@ var _ = Describe("PivnetClient - product files", func() {
 		server.Close()
 	})
 
-	Describe("ReleasesForProductSlug", func() {
+	Describe("Get", func() {
 		It("returns the releases for the product slug", func() {
 			response := `{"releases": [{"id":2,"version":"1.2.3"},{"id": 3, "version": "3.2.1", "_links": {"product_files": {"href":"https://banana.org/cookies/download"}}}]}`
 
@@ -55,7 +55,7 @@ var _ = Describe("PivnetClient - product files", func() {
 				),
 			)
 
-			releases, err := client.ReleasesForProductSlug("banana")
+			releases, err := client.Releases.GetByProductSlug("banana")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(releases).To(HaveLen(2))
 			Expect(releases[0].ID).To(Equal(2))
@@ -71,62 +71,14 @@ var _ = Describe("PivnetClient - product files", func() {
 					),
 				)
 
-				_, err := client.ReleasesForProductSlug("banana")
+				_, err := client.Releases.GetByProductSlug("banana")
 				Expect(err).To(MatchError(errors.New(
 					"Pivnet returned status code: 418 for the request - expected 200")))
 			})
 		})
 	})
 
-	Describe("GetRelease", func() {
-		It("returns the release based on the name and version", func() {
-			response := `{"releases": [{"id": 3, "version": "3.2.1", "_links": {"product_files": {"href":"https://banana.org/cookies/download"}}}]}`
-
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", apiPrefix+"/products/banana/releases"),
-					ghttp.RespondWith(http.StatusOK, response),
-				),
-			)
-
-			release, err := client.GetRelease("banana", "3.2.1")
-			Expect(err).NotTo(HaveOccurred())
-			Expect(release.Links.ProductFiles["href"]).To(Equal("https://banana.org/cookies/download"))
-		})
-
-		Context("when the requested version is not available but the request is successful", func() {
-			It("returns an error", func() {
-				response := `{"releases": [{"id": 3, "version": "3.2.1"}]}`
-
-				server.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest("GET", apiPrefix+"/products/banana/releases"),
-						ghttp.RespondWith(http.StatusOK, response),
-					),
-				)
-
-				_, err := client.GetRelease("banana", "1.0.0")
-				Expect(err).To(MatchError(errors.New("The requested version: 1.0.0 - could not be found")))
-			})
-		})
-
-		Context("when the server responds with a non-2XX status code", func() {
-			It("returns an error", func() {
-				server.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest("GET", apiPrefix+"/products/banana/releases"),
-						ghttp.RespondWith(http.StatusTeapot, nil),
-					),
-				)
-
-				_, err := client.GetRelease("banana", "1.0.0")
-				Expect(err).To(MatchError(errors.New(
-					"Pivnet returned status code: 418 for the request - expected 200")))
-			})
-		})
-	})
-
-	Describe("Create Release", func() {
+	Describe("Create", func() {
 		var (
 			productVersion      string
 			createReleaseConfig pivnet.CreateReleaseConfig
@@ -183,7 +135,7 @@ var _ = Describe("PivnetClient - product files", func() {
 					),
 				)
 
-				release, err := client.CreateRelease(createReleaseConfig)
+				release, err := client.Releases.Create(createReleaseConfig)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(release.Version).To(Equal(productVersion))
 			})
@@ -209,7 +161,7 @@ var _ = Describe("PivnetClient - product files", func() {
 						),
 					)
 
-					release, err := client.CreateRelease(createReleaseConfig)
+					release, err := client.Releases.Create(createReleaseConfig)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(release.Version).To(Equal(productVersion))
 				})
@@ -237,7 +189,7 @@ var _ = Describe("PivnetClient - product files", func() {
 							),
 						)
 
-						release, err := client.CreateRelease(createReleaseConfig)
+						release, err := client.Releases.Create(createReleaseConfig)
 						Expect(err).NotTo(HaveOccurred())
 						Expect(release.Version).To(Equal(productVersion))
 					})
@@ -260,7 +212,7 @@ var _ = Describe("PivnetClient - product files", func() {
 							),
 						)
 
-						release, err := client.CreateRelease(createReleaseConfig)
+						release, err := client.Releases.Create(createReleaseConfig)
 						Expect(err).NotTo(HaveOccurred())
 						Expect(release.Version).To(Equal(productVersion))
 					})
@@ -289,7 +241,7 @@ var _ = Describe("PivnetClient - product files", func() {
 							),
 						)
 
-						release, err := client.CreateRelease(createReleaseConfig)
+						release, err := client.Releases.Create(createReleaseConfig)
 						Expect(err).NotTo(HaveOccurred())
 						Expect(release.Version).To(Equal(productVersion))
 					})
@@ -312,7 +264,7 @@ var _ = Describe("PivnetClient - product files", func() {
 							),
 						)
 
-						release, err := client.CreateRelease(createReleaseConfig)
+						release, err := client.Releases.Create(createReleaseConfig)
 						Expect(err).NotTo(HaveOccurred())
 						Expect(release.Version).To(Equal(productVersion))
 					})
@@ -329,14 +281,14 @@ var _ = Describe("PivnetClient - product files", func() {
 					),
 				)
 
-				_, err := client.CreateRelease(createReleaseConfig)
+				_, err := client.Releases.Create(createReleaseConfig)
 				Expect(err).To(MatchError(errors.New(
 					"Pivnet returned status code: 418 for the request - expected 201")))
 			})
 		})
 	})
 
-	Describe("UpdateRelease", func() {
+	Describe("Update", func() {
 		It("submits the updated values for a release with OSS compliance", func() {
 			release := pivnet.Release{
 				ID:      42,
@@ -358,7 +310,7 @@ var _ = Describe("PivnetClient - product files", func() {
 				),
 			)
 
-			release, err := client.UpdateRelease("banana-slug", release)
+			release, err := client.Releases.Update("banana-slug", release)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(release.Version).To(Equal("1.2.3.4"))
 		})
@@ -375,14 +327,14 @@ var _ = Describe("PivnetClient - product files", func() {
 					),
 				)
 
-				_, err := client.UpdateRelease("banana-slug", release)
+				_, err := client.Releases.Update("banana-slug", release)
 				Expect(err).To(MatchError(errors.New(
 					"Pivnet returned status code: 418 for the request - expected 200")))
 			})
 		})
 	})
 
-	Describe("DeleteRelease", func() {
+	Describe("Delete", func() {
 		var (
 			release pivnet.Release
 		)
@@ -401,7 +353,7 @@ var _ = Describe("PivnetClient - product files", func() {
 				),
 			)
 
-			err := client.DeleteRelease(release, "banana")
+			err := client.Releases.Delete(release, "banana")
 			Expect(err).NotTo(HaveOccurred())
 		})
 
@@ -414,83 +366,9 @@ var _ = Describe("PivnetClient - product files", func() {
 					),
 				)
 
-				err := client.DeleteRelease(release, "banana")
+				err := client.Releases.Delete(release, "banana")
 				Expect(err).To(MatchError(errors.New(
 					"Pivnet returned status code: 418 for the request - expected 204")))
-			})
-		})
-	})
-
-	Describe("ReleaseETag", func() {
-		var (
-			release pivnet.Release
-		)
-
-		BeforeEach(func() {
-			release = pivnet.Release{
-				ID: 1234,
-			}
-		})
-
-		It("returns the ETag for the specified release", func() {
-			etagHeader := http.Header{"ETag": []string{`"etag-0"`}}
-
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/banana/releases/%d", apiPrefix, release.ID)),
-					ghttp.RespondWith(http.StatusOK, nil, etagHeader),
-				),
-			)
-
-			etag, err := client.ReleaseETag("banana", release)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(etag).To(Equal("etag-0"))
-		})
-
-		Context("when the server responds with a non-2XX status code", func() {
-			It("returns an error", func() {
-				server.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/banana/releases/%d", apiPrefix, release.ID)),
-						ghttp.RespondWith(http.StatusTeapot, nil),
-					),
-				)
-
-				_, err := client.ReleaseETag("banana", release)
-				Expect(err).To(MatchError(errors.New(
-					"Pivnet returned status code: 418 for the request - expected 200")))
-			})
-		})
-
-		Context("when the etag is missing", func() {
-			It("returns an error", func() {
-				server.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/banana/releases/%d", apiPrefix, release.ID)),
-						ghttp.RespondWith(http.StatusOK, nil),
-					),
-				)
-
-				_, err := client.ReleaseETag("banana", release)
-				Expect(err).To(MatchError(errors.New(
-					"ETag header not present")))
-			})
-		})
-
-		Context("when the etag is malformed", func() {
-			It("returns an error", func() {
-				malformedETag := "malformed-etag-without-double-quotes"
-				etagHeader := http.Header{"ETag": []string{malformedETag}}
-
-				server.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/banana/releases/%d", apiPrefix, release.ID)),
-						ghttp.RespondWith(http.StatusOK, nil, etagHeader),
-					),
-				)
-
-				_, err := client.ReleaseETag("banana", release)
-				Expect(err).To(MatchError(fmt.Errorf("ETag header malformed: %s", malformedETag)))
 			})
 		})
 	})

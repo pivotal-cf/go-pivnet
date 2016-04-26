@@ -5,14 +5,44 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/pivotal-golang/lager"
 )
 
+type ReleasesService struct {
+	client Client
+}
+
 type createReleaseBody struct {
 	Release Release `json:"release"`
+}
+
+type ReleasesResponse struct {
+	Releases []Release `json:"releases,omitempty"`
+}
+
+type CreateReleaseResponse struct {
+	Release Release `json:"release,omitempty"`
+}
+
+type Release struct {
+	ID                    int    `json:"id,omitempty"`
+	Availability          string `json:"availability,omitempty"`
+	EULA                  *EULA  `json:"eula,omitempty"`
+	OSSCompliant          string `json:"oss_compliant,omitempty"`
+	ReleaseDate           string `json:"release_date,omitempty"`
+	ReleaseType           string `json:"release_type,omitempty"`
+	Version               string `json:"version,omitempty"`
+	Links                 *Links `json:"_links,omitempty"`
+	Description           string `json:"description,omitempty"`
+	ReleaseNotesURL       string `json:"release_notes_url,omitempty"`
+	Controlled            bool   `json:"controlled,omitempty"`
+	ECCN                  string `json:"eccn,omitempty"`
+	LicenseException      string `json:"license_exception,omitempty"`
+	EndOfSupportDate      string `json:"end_of_support_date,omitempty"`
+	EndOfGuidanceDate     string `json:"end_of_guidance_date,omitempty"`
+	EndOfAvailabilityDate string `json:"end_of_availability_date,omitempty"`
 }
 
 type CreateReleaseConfig struct {
@@ -31,48 +61,20 @@ type CreateReleaseConfig struct {
 	EndOfAvailabilityDate string
 }
 
-func (c Client) ReleasesForProductSlug(productSlug string) ([]Release, error) {
-	url := fmt.Sprintf(
-		"%s/products/%s/releases",
-		c.url,
-		productSlug,
-	)
+func (r ReleasesService) GetByProductSlug(productSlug string) ([]Release, error) {
+	url := fmt.Sprintf("/products/%s/releases", productSlug)
 
 	var response ReleasesResponse
-	err := c.makeRequest("GET", url, http.StatusOK, nil, &response)
+	err := r.client.makeRequest("GET", url, http.StatusOK, nil, &response)
 	if err != nil {
 		return nil, err
 	}
+
 	return response.Releases, nil
 }
 
-func (c Client) GetRelease(productSlug, version string) (Release, error) {
-	url := fmt.Sprintf("%s/products/%s/releases", c.url, productSlug)
-
-	var response ReleasesResponse
-	err := c.makeRequest("GET", url, http.StatusOK, nil, &response)
-	if err != nil {
-		return Release{}, err
-	}
-
-	var matchingRelease Release
-	for i, r := range response.Releases {
-		if r.Version == version {
-			matchingRelease = r
-			break
-		}
-
-		if i == len(response.Releases)-1 {
-			return Release{}, fmt.Errorf(
-				"The requested version: %s - could not be found", version)
-		}
-	}
-
-	return matchingRelease, nil
-}
-
-func (c Client) CreateRelease(config CreateReleaseConfig) (Release, error) {
-	url := fmt.Sprintf("%s/products/%s/releases", c.url, config.ProductSlug)
+func (r ReleasesService) Create(config CreateReleaseConfig) (Release, error) {
+	url := fmt.Sprintf("/products/%s/releases", config.ProductSlug)
 
 	body := createReleaseBody{
 		Release: Release{
@@ -97,7 +99,7 @@ func (c Client) CreateRelease(config CreateReleaseConfig) (Release, error) {
 
 	if config.ReleaseDate == "" {
 		body.Release.ReleaseDate = time.Now().Format("2006-01-02")
-		c.logger.Debug("No release date found - defaulting to", lager.Data{"release date": body.Release.ReleaseDate})
+		r.client.logger.Debug("No release date found - defaulting to", lager.Data{"release date": body.Release.ReleaseDate})
 	}
 
 	b, err := json.Marshal(body)
@@ -106,7 +108,7 @@ func (c Client) CreateRelease(config CreateReleaseConfig) (Release, error) {
 	}
 
 	var response CreateReleaseResponse
-	err = c.makeRequest("POST", url, http.StatusCreated, bytes.NewReader(b), &response)
+	err = r.client.makeRequest("POST", url, http.StatusCreated, bytes.NewReader(b), &response)
 	if err != nil {
 		return Release{}, err
 	}
@@ -114,8 +116,8 @@ func (c Client) CreateRelease(config CreateReleaseConfig) (Release, error) {
 	return response.Release, nil
 }
 
-func (c Client) UpdateRelease(productSlug string, release Release) (Release, error) {
-	url := fmt.Sprintf("%s/products/%s/releases/%d", c.url, productSlug, release.ID)
+func (r ReleasesService) Update(productSlug string, release Release) (Release, error) {
+	url := fmt.Sprintf("/products/%s/releases/%d", productSlug, release.ID)
 
 	release.OSSCompliant = "confirm"
 
@@ -129,7 +131,7 @@ func (c Client) UpdateRelease(productSlug string, release Release) (Release, err
 	}
 
 	var response CreateReleaseResponse
-	err = c.makeRequest("PATCH", url, http.StatusOK, bytes.NewReader(body), &response)
+	err = r.client.makeRequest("PATCH", url, http.StatusOK, bytes.NewReader(body), &response)
 	if err != nil {
 		return Release{}, err
 	}
@@ -137,45 +139,10 @@ func (c Client) UpdateRelease(productSlug string, release Release) (Release, err
 	return response.Release, nil
 }
 
-func (c Client) ReleaseETag(productSlug string, release Release) (string, error) {
-	url := fmt.Sprintf("%s/products/%s/releases/%d", c.url, productSlug, release.ID)
+func (r ReleasesService) Delete(release Release, productSlug string) error {
+	url := fmt.Sprintf("/products/%s/releases/%d", productSlug, release.ID)
 
-	var response Release
-	resp, err := c.makeRequestWithHTTPResponse("GET", url, http.StatusOK, nil, &response)
-	if err != nil {
-		return "", err
-	}
-
-	rawEtag := resp.Header.Get("ETag")
-
-	if rawEtag == "" {
-		c.logger.Debug("Missing ETag")
-		return "", fmt.Errorf("ETag header not present")
-	}
-
-	c.logger.Debug("Received ETag", lager.Data{"etag": rawEtag})
-
-	// Weak ETag looks like: W/"my-etag"; strong ETag looks like: "my-etag"
-	splitRawEtag := strings.SplitN(rawEtag, `"`, -1)
-
-	if len(splitRawEtag) < 2 {
-		c.logger.Debug("Malformed ETag", lager.Data{"etag": rawEtag})
-		return "", fmt.Errorf("ETag header malformed: %s", rawEtag)
-	}
-
-	etag := splitRawEtag[1]
-	return etag, nil
-}
-
-func (c Client) DeleteRelease(release Release, productSlug string) error {
-	url := fmt.Sprintf(
-		"%s/products/%s/releases/%d",
-		c.url,
-		productSlug,
-		release.ID,
-	)
-
-	err := c.makeRequest(
+	err := r.client.makeRequest(
 		"DELETE",
 		url,
 		http.StatusNoContent,

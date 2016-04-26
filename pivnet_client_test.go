@@ -48,7 +48,7 @@ var _ = Describe("PivnetClient", func() {
 
 		fakeLogger = lager.NewLogger("pivnet client")
 		newClientConfig = pivnet.ClientConfig{
-			Endpoint:  server.URL(),
+			Host:      server.URL(),
 			Token:     token,
 			UserAgent: userAgent,
 		}
@@ -84,7 +84,7 @@ var _ = Describe("PivnetClient", func() {
 			)
 		}
 
-		_, err := client.ReleasesForProductSlug(productSlug)
+		_, err := client.Releases.GetByProductSlug(productSlug)
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -115,16 +115,16 @@ var _ = Describe("PivnetClient", func() {
 			)
 		}
 
-		_, err := client.ReleasesForProductSlug(productSlug)
+		_, err := client.Releases.GetByProductSlug(productSlug)
 		Expect(err).NotTo(HaveOccurred())
 	})
 
 	Context("when parsing the url fails with error", func() {
 		It("forwards the error", func() {
-			newClientConfig.Endpoint = "%%%"
+			newClientConfig.Host = "%%%"
 			client = pivnet.NewClient(newClientConfig, fakeLogger)
 
-			_, err := client.ReleasesForProductSlug("some product")
+			_, err := client.Releases.GetByProductSlug("some product")
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("%%%"))
 		})
@@ -132,10 +132,10 @@ var _ = Describe("PivnetClient", func() {
 
 	Context("when making the request fails with error", func() {
 		It("forwards the error", func() {
-			newClientConfig.Endpoint = "https://not-a-real-url.com"
+			newClientConfig.Host = "https://not-a-real-url.com"
 			client = pivnet.NewClient(newClientConfig, fakeLogger)
 
-			_, err := client.ReleasesForProductSlug("some-product")
+			_, err := client.Releases.GetByProductSlug("some-product")
 			Expect(err).To(HaveOccurred())
 		})
 	})
@@ -149,7 +149,7 @@ var _ = Describe("PivnetClient", func() {
 				),
 			)
 
-			_, err := client.ReleasesForProductSlug("my-product-id")
+			_, err := client.Releases.GetByProductSlug("my-product-id")
 			Expect(err).To(HaveOccurred())
 			Expect(err).To(MatchError(
 				"Pivnet returned status code: 404 for the request - expected 200"))
@@ -165,7 +165,7 @@ var _ = Describe("PivnetClient", func() {
 				),
 			)
 
-			_, err := client.ReleasesForProductSlug("my-product-id")
+			_, err := client.Releases.GetByProductSlug("my-product-id")
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("invalid character"))
 		})

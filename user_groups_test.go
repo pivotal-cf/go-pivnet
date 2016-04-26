@@ -32,7 +32,7 @@ var _ = Describe("PivnetClient - user groups", func() {
 
 		fakeLogger = lager.NewLogger("user groups")
 		newClientConfig = pivnet.ClientConfig{
-			Endpoint:  apiAddress,
+			Host:      apiAddress,
 			Token:     token,
 			UserAgent: userAgent,
 		}
@@ -43,7 +43,7 @@ var _ = Describe("PivnetClient - user groups", func() {
 		server.Close()
 	})
 
-	Describe("UserGroups", func() {
+	Describe("Get", func() {
 		var (
 			releaseID int
 		)
@@ -62,7 +62,7 @@ var _ = Describe("PivnetClient - user groups", func() {
 				),
 			)
 
-			userGroups, err := client.UserGroups("banana", releaseID)
+			userGroups, err := client.UserGroups.Get("banana", releaseID)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(userGroups).To(HaveLen(2))
@@ -79,14 +79,14 @@ var _ = Describe("PivnetClient - user groups", func() {
 					),
 				)
 
-				_, err := client.UserGroups("banana", releaseID)
+				_, err := client.UserGroups.Get("banana", releaseID)
 				Expect(err).To(MatchError(errors.New(
 					"Pivnet returned status code: 418 for the request - expected 200")))
 			})
 		})
 	})
 
-	Describe("Add User Group", func() {
+	Describe("Add", func() {
 		var (
 			productSlug = "banana-slug"
 			releaseID   = 2345
@@ -110,7 +110,7 @@ var _ = Describe("PivnetClient - user groups", func() {
 					),
 				)
 
-				err := client.AddUserGroup(productSlug, releaseID, userGroupID)
+				err := client.UserGroups.Add(productSlug, releaseID, userGroupID)
 				Expect(err).NotTo(HaveOccurred())
 			})
 		})
@@ -129,7 +129,7 @@ var _ = Describe("PivnetClient - user groups", func() {
 					),
 				)
 
-				err := client.AddUserGroup(productSlug, releaseID, userGroupID)
+				err := client.UserGroups.Add(productSlug, releaseID, userGroupID)
 				Expect(err).To(MatchError(errors.New(
 					"Pivnet returned status code: 418 for the request - expected 204")))
 			})

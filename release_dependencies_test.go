@@ -38,7 +38,7 @@ var _ = Describe("PivnetClient - release dependencies", func() {
 
 		fakeLogger = lager.NewLogger("release dependencies")
 		newClientConfig = pivnet.ClientConfig{
-			Endpoint:  apiAddress,
+			Host:      apiAddress,
 			Token:     token,
 			UserAgent: userAgent,
 		}
@@ -49,7 +49,7 @@ var _ = Describe("PivnetClient - release dependencies", func() {
 		server.Close()
 	})
 
-	Describe("ReleaseDependencies", func() {
+	Describe("Get", func() {
 		It("returns the release dependencies", func() {
 
 			response := pivnet.ReleaseDependenciesResponse{
@@ -89,7 +89,7 @@ var _ = Describe("PivnetClient - release dependencies", func() {
 				),
 			)
 
-			releaseDependencies, err := client.ReleaseDependencies(productID, releaseID)
+			releaseDependencies, err := client.ReleaseDependencies.Get(productID, releaseID)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(releaseDependencies).To(HaveLen(2))
@@ -113,7 +113,7 @@ var _ = Describe("PivnetClient - release dependencies", func() {
 			})
 
 			It("returns an error", func() {
-				_, err := client.ReleaseDependencies(productID, releaseID)
+				_, err := client.ReleaseDependencies.Get(productID, releaseID)
 				Expect(err).To(MatchError(errors.New(
 					"Pivnet returned status code: 418 for the request - expected 200")))
 			})

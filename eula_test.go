@@ -32,7 +32,7 @@ var _ = Describe("PivnetClient - EULA", func() {
 
 		fakeLogger = lager.NewLogger("eula test")
 		newClientConfig = pivnet.ClientConfig{
-			Endpoint:  apiAddress,
+			Host:      apiAddress,
 			Token:     token,
 			UserAgent: userAgent,
 		}
@@ -43,7 +43,7 @@ var _ = Describe("PivnetClient - EULA", func() {
 		server.Close()
 	})
 
-	Describe("EULAs", func() {
+	Describe("ListAll", func() {
 		It("returns the EULAs", func() {
 			response := `{"eulas": [{"id":1,"name":"eula1"},{"id": 2,"name":"eula2"}]}`
 
@@ -54,7 +54,7 @@ var _ = Describe("PivnetClient - EULA", func() {
 				),
 			)
 
-			eulas, err := client.EULAs()
+			eulas, err := client.EULA.ListAll()
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(eulas).To(HaveLen(2))
@@ -74,14 +74,14 @@ var _ = Describe("PivnetClient - EULA", func() {
 					),
 				)
 
-				_, err := client.EULAs()
+				_, err := client.EULA.ListAll()
 				Expect(err).To(MatchError(errors.New(
 					"Pivnet returned status code: 418 for the request - expected 200")))
 			})
 		})
 	})
 
-	Describe("AcceptEULA", func() {
+	Describe("Accept", func() {
 		var (
 			releaseID         int
 			productSlug       string
@@ -106,7 +106,7 @@ var _ = Describe("PivnetClient - EULA", func() {
 				),
 			)
 
-			Expect(client.AcceptEULA(productSlug, releaseID)).To(Succeed())
+			Expect(client.EULA.Accept(productSlug, releaseID)).To(Succeed())
 		})
 
 		Context("when any other non-200 status code comes back", func() {
@@ -120,7 +120,7 @@ var _ = Describe("PivnetClient - EULA", func() {
 					),
 				)
 
-				Expect(client.AcceptEULA(productSlug, releaseID)).To(MatchError("Pivnet returned status code: 418 for the request - expected 200"))
+				Expect(client.EULA.Accept(productSlug, releaseID)).To(MatchError("Pivnet returned status code: 418 for the request - expected 200"))
 			})
 		})
 	})
