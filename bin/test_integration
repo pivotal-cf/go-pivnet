@@ -6,7 +6,7 @@ set +x
 API_TOKEN="${API_TOKEN:?"API_TOKEN must be provided"}"
 set -x
 
-ENDPOINT="${ENDPOINT:?"ENDPOINT must be provided"}"
+HOST="${HOST:?"HOST must be provided"}"
 
 my_dir="$( cd "$( dirname "${0}" )" && pwd )"
 

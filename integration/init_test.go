@@ -23,18 +23,18 @@ func TestIntegration(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 	APIToken := os.Getenv("API_TOKEN")
-	Endpoint := os.Getenv("ENDPOINT")
+	Host := os.Getenv("HOST")
 
 	if APIToken == "" {
 		Fail("API_TOKEN must be set for integration tests to run")
 	}
 
-	if Endpoint == "" {
-		Fail("Endpoint must be set for integration tests to run")
+	if Host == "" {
+		Fail("Host must be set for integration tests to run")
 	}
 
 	config := pivnet.ClientConfig{
-		Endpoint:  Endpoint,
+		Host:      Host,
 		Token:     APIToken,
 		UserAgent: "go-pivnet/integration-test",
 	}
