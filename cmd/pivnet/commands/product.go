@@ -17,7 +17,7 @@ type ProductCommand struct {
 
 func (command *ProductCommand) Execute([]string) error {
 	client := NewClient()
-	product, err := client.FindProductForSlug(command.Slug)
+	product, err := client.Products.Get(command.Slug)
 	if err != nil {
 		return err
 	}
