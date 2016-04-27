@@ -85,4 +85,48 @@ var _ = Describe("PivnetClient - product", func() {
 			})
 		})
 	})
+
+	Describe("List", func() {
+		var (
+			slug = "my-product"
+		)
+
+		Context("when the products can be found", func() {
+			It("returns the products", func() {
+				response := fmt.Sprintf(`{"products":[{"id": 3, "slug": "%s"},{"id": 4, "slug": "bar"}]}`, slug)
+
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", fmt.Sprintf(
+							"%s/products",
+							apiPrefix)),
+						ghttp.RespondWith(http.StatusOK, response),
+					),
+				)
+
+				products, err := client.Products.List()
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(products).To(HaveLen(2))
+				Expect(products[0].Slug).To(Equal(slug))
+			})
+		})
+
+		Context("when the server responds with a non-2XX status code", func() {
+			It("returns an error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", fmt.Sprintf(
+							"%s/products",
+							apiPrefix)),
+						ghttp.RespondWith(http.StatusTeapot, nil),
+					),
+				)
+
+				_, err := client.Products.List()
+				Expect(err).To(MatchError(errors.New(
+					"Pivnet returned status code: 418 for the request - expected 200")))
+			})
+		})
+	})
 })

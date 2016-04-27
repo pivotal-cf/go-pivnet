@@ -28,7 +28,8 @@ var _ = Describe("pivnet cli", func() {
 		server *ghttp.Server
 		host   string
 
-		product pivnet.Product
+		product  pivnet.Product
+		products []pivnet.Product
 
 		eulas []pivnet.EULA
 
@@ -44,6 +45,15 @@ var _ = Describe("pivnet cli", func() {
 			ID:   1234,
 			Slug: "some-product-slug",
 			Name: "some-product-name",
+		}
+
+		products = []pivnet.Product{
+			product,
+			{
+				ID:   2345,
+				Slug: "another-product-slug",
+				Name: "another-product-name",
+			},
 		}
 
 		eulas = []pivnet.EULA{
@@ -191,6 +201,31 @@ var _ = Describe("pivnet cli", func() {
 
 		It("displays product for the provided slug", func() {
 			session := runMainWithArgs("product", "-s", product.Slug)
+
+			Eventually(session, executableTimeout).Should(gexec.Exit(0))
+			Expect(session).Should(gbytes.Say(product.Slug))
+		})
+	})
+
+	Describe("products", func() {
+		BeforeEach(func() {
+			response := pivnet.ProductsResponse{
+				Products: products,
+			}
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf("%s/products", apiPrefix),
+					),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, response),
+				),
+			)
+		})
+
+		It("displays products", func() {
+			session := runMainWithArgs("products")
 
 			Eventually(session, executableTimeout).Should(gexec.Exit(0))
 			Expect(session).Should(gbytes.Say(product.Slug))
