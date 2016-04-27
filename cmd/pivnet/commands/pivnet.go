@@ -21,7 +21,7 @@ type PivnetCommand struct {
 	Format string `long:"format" description:"Format to print as" default:"table" choice:"table" choice:"json" choice:"yaml"`
 
 	APIToken string `long:"api-token" description:"Pivnet API token"`
-	Endpoint string `long:"endpoint" description:"Pivnet API Endpoint"`
+	Host     string `long:"host" description:"Pivnet API Host"`
 
 	ReleaseTypes ReleaseTypesCommand `command:"release-types" description:"List release types"`
 
@@ -47,8 +47,8 @@ func init() {
 		os.Exit(0)
 	}
 
-	if Pivnet.Endpoint == "" {
-		Pivnet.Endpoint = pivnet.Endpoint
+	if Pivnet.Host == "" {
+		Pivnet.Host = pivnet.Host
 	}
 }
 
@@ -61,7 +61,7 @@ func NewClient() pivnet.Client {
 	pivnetClient := pivnet.NewClient(
 		pivnet.ClientConfig{
 			Token:     Pivnet.APIToken,
-			Endpoint:  Pivnet.Endpoint,
+			Host:      Pivnet.Host,
 			UserAgent: useragent,
 		},
 		lager.NewLogger("pivnet CLI"),
