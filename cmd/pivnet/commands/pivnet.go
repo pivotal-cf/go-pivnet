@@ -13,6 +13,8 @@ const (
 	printAsTable = "table"
 	printAsJSON  = "json"
 	printAsYAML  = "yaml"
+
+	host = "https://network.pivotal.io"
 )
 
 type PivnetCommand struct {
@@ -48,7 +50,7 @@ func init() {
 	}
 
 	if Pivnet.Host == "" {
-		Pivnet.Host = pivnet.Host
+		Pivnet.Host = host
 	}
 }
 
