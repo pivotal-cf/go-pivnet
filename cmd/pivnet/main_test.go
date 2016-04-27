@@ -25,8 +25,8 @@ const (
 
 var _ = Describe("pivnet cli", func() {
 	var (
-		server   *ghttp.Server
-		endpoint string
+		server *ghttp.Server
+		host   string
 
 		product pivnet.Product
 
@@ -38,7 +38,7 @@ var _ = Describe("pivnet cli", func() {
 
 	BeforeEach(func() {
 		server = ghttp.NewServer()
-		endpoint = server.URL()
+		host = server.URL()
 
 		product = pivnet.Product{
 			ID:   1234,
@@ -80,7 +80,7 @@ var _ = Describe("pivnet cli", func() {
 		args = append(
 			args,
 			fmt.Sprintf("--api-token=%s", apiToken),
-			fmt.Sprintf("--endpoint=%s", endpoint),
+			fmt.Sprintf("--host=%s", host),
 		)
 
 		_, err := fmt.Fprintf(GinkgoWriter, "Running command: %v\n", args)

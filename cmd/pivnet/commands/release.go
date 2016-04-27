@@ -9,6 +9,7 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/pivotal-cf-experimental/go-pivnet"
 )
 
 type ReleasesCommand struct {
@@ -67,9 +68,21 @@ func (command *ReleasesCommand) Execute([]string) error {
 
 func (command *ReleaseCommand) Execute([]string) error {
 	client := NewClient()
-	release, err := client.GetRelease(command.ProductSlug, command.ReleaseVersion)
+	releases, err := client.Releases.GetByProductSlug(command.ProductSlug)
 	if err != nil {
 		return err
+	}
+
+	var release pivnet.Release
+	for _, r := range releases {
+		if r.Version == command.ReleaseVersion {
+			release = r
+			break
+		}
+	}
+
+	if release.Version != command.ReleaseVersion {
+		return fmt.Errorf("release not found")
 	}
 
 	switch Pivnet.Format {
@@ -105,12 +118,24 @@ func (command *ReleaseCommand) Execute([]string) error {
 
 func (command *DeleteReleaseCommand) Execute([]string) error {
 	client := NewClient()
-	release, err := client.GetRelease(command.ProductSlug, command.ReleaseVersion)
+	releases, err := client.Releases.GetByProductSlug(command.ProductSlug)
 	if err != nil {
 		return err
 	}
 
-	err = client.DeleteRelease(release, command.ProductSlug)
+	var release pivnet.Release
+	for _, r := range releases {
+		if r.Version == command.ReleaseVersion {
+			release = r
+			break
+		}
+	}
+
+	if release.Version != command.ReleaseVersion {
+		return fmt.Errorf("release not found")
+	}
+
+	err = client.Releases.Delete(release, command.ProductSlug)
 	if err != nil {
 		return err
 	}

@@ -30,7 +30,7 @@ var _ = BeforeSuite(func() {
 	}
 
 	if Host == "" {
-		Fail("Host must be set for integration tests to run")
+		Fail("HOST must be set for integration tests to run")
 	}
 
 	config := pivnet.ClientConfig{
@@ -40,7 +40,10 @@ var _ = BeforeSuite(func() {
 	}
 
 	logger := lager.NewLogger("integration tests")
-	logger.RegisterSink(lager.NewWriterSink(GinkgoWriter, lager.INFO))
+	logger.RegisterSink(lager.NewWriterSink(GinkgoWriter, lager.DEBUG))
 
 	client = pivnet.NewClient(config, logger)
+
+	err := client.Auth.Check()
+	Expect(err).NotTo(HaveOccurred())
 })

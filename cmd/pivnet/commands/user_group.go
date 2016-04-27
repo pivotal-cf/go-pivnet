@@ -9,6 +9,7 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/pivotal-cf-experimental/go-pivnet"
 )
 
 type UserGroupsCommand struct {
@@ -18,12 +19,24 @@ type UserGroupsCommand struct {
 
 func (command *UserGroupsCommand) Execute([]string) error {
 	client := NewClient()
-	release, err := client.GetRelease(command.ProductSlug, command.ReleaseVersion)
+	releases, err := client.Releases.GetByProductSlug(command.ProductSlug)
 	if err != nil {
 		return err
 	}
 
-	userGroups, err := client.UserGroups(command.ProductSlug, release.ID)
+	var release pivnet.Release
+	for _, r := range releases {
+		if r.Version == command.ReleaseVersion {
+			release = r
+			break
+		}
+	}
+
+	if release.Version != command.ReleaseVersion {
+		return fmt.Errorf("release not found")
+	}
+
+	userGroups, err := client.UserGroups.Get(command.ProductSlug, release.ID)
 	if err != nil {
 		return err
 	}

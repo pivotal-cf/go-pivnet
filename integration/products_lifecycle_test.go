@@ -9,7 +9,7 @@ import (
 var _ = Describe("Proudcts Lifecycle", func() {
 	Describe("finding a product by slug", func() {
 		It("returns the corresponding product", func() {
-			product, err := client.FindProductForSlug(testProductSlug)
+			product, err := client.Products.Get(testProductSlug)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(product).To(Equal(pivnet.Product{

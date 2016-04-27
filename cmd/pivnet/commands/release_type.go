@@ -15,7 +15,7 @@ type ReleaseTypesCommand struct {
 
 func (command *ReleaseTypesCommand) Execute([]string) error {
 	client := NewClient()
-	releaseTypes, err := client.ReleaseTypes()
+	releaseTypes, err := client.ReleaseTypes.Get()
 	if err != nil {
 		return err
 	}

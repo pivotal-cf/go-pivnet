@@ -9,6 +9,7 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/pivotal-cf-experimental/go-pivnet"
 )
 
 type ReleaseDependenciesCommand struct {
@@ -19,17 +20,29 @@ type ReleaseDependenciesCommand struct {
 func (command *ReleaseDependenciesCommand) Execute([]string) error {
 	client := NewClient()
 
-	product, err := client.FindProductForSlug(command.ProductSlug)
+	product, err := client.Products.Get(command.ProductSlug)
 	if err != nil {
 		return err
 	}
 
-	release, err := client.GetRelease(command.ProductSlug, command.ReleaseVersion)
+	releases, err := client.Releases.GetByProductSlug(command.ProductSlug)
 	if err != nil {
 		return err
 	}
 
-	releaseDependencies, err := client.ReleaseDependencies(product.ID, release.ID)
+	var release pivnet.Release
+	for _, r := range releases {
+		if r.Version == command.ReleaseVersion {
+			release = r
+			break
+		}
+	}
+
+	if release.Version != command.ReleaseVersion {
+		return fmt.Errorf("release not found")
+	}
+
+	releaseDependencies, err := client.ReleaseDependencies.Get(product.ID, release.ID)
 	if err != nil {
 		return err
 	}
