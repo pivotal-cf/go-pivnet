@@ -71,48 +71,4 @@ var _ = Describe("PivnetClient - Auth", func() {
 			})
 		})
 	})
-
-	Describe("Accept", func() {
-		var (
-			releaseID         int
-			productSlug       string
-			EULAAcceptanceURL string
-		)
-
-		BeforeEach(func() {
-			productSlug = "banana-slug"
-			releaseID = 42
-			EULAAcceptanceURL = fmt.Sprintf(apiPrefix+"/products/%s/releases/%d/eula_acceptance", productSlug, releaseID)
-		})
-
-		It("accepts the EULA for a given release and product ID", func() {
-			response := fmt.Sprintf(`{"accepted_at": "2016-01-11","_links":{}}`)
-
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("POST", EULAAcceptanceURL),
-					ghttp.VerifyHeaderKV("Authorization", fmt.Sprintf("Token %s", token)),
-					ghttp.VerifyJSON(`{}`),
-					ghttp.RespondWith(http.StatusOK, response),
-				),
-			)
-
-			Expect(client.EULA.Accept(productSlug, releaseID)).To(Succeed())
-		})
-
-		Context("when any other non-200 status code comes back", func() {
-			It("returns an error", func() {
-				server.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest("POST", EULAAcceptanceURL),
-						ghttp.VerifyHeaderKV("Authorization", fmt.Sprintf("Token %s", token)),
-						ghttp.VerifyJSON(`{}`),
-						ghttp.RespondWith(http.StatusTeapot, nil),
-					),
-				)
-
-				Expect(client.EULA.Accept(productSlug, releaseID)).To(MatchError("Pivnet returned status code: 418 for the request - expected 200"))
-			})
-		})
-	})
 })
