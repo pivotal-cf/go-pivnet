@@ -30,8 +30,9 @@ type PivnetCommand struct {
 	EULAs      EULAsCommand      `command:"eulas" description:"List EULAs"`
 	AcceptEULA AcceptEULACommand `command:"accept-eula" description:"Accept EULA"`
 
-	Products ProductsCommand `command:"products" description:"List products"`
-	Product  ProductCommand  `command:"product" description:"Show product"`
+	Products    ProductsCommand    `command:"products" description:"List products"`
+	Product     ProductCommand     `command:"product" description:"Show product"`
+	ProductFile ProductFileCommand `command:"product-file" description:"Show product file"`
 
 	Releases      ReleasesCommand      `command:"releases" description:"List releases"`
 	Release       ReleaseCommand       `command:"release" description:"Show release"`

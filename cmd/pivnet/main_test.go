@@ -529,4 +529,44 @@ var _ = Describe("pivnet cli", func() {
 			Expect(session).Should(gbytes.Say(releaseDependencies[0].Release.Version))
 		})
 	})
+
+	Describe("product-file", func() {
+		var (
+			productFile pivnet.ProductFile
+		)
+
+		BeforeEach(func() {
+			productFile = pivnet.ProductFile{
+				ID:   1234,
+				Name: "some-product-file",
+			}
+
+			response := pivnet.ProductFileResponse{
+				ProductFile: productFile,
+			}
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf("%s/products/%s/releases/%d/product_files/%d",
+							apiPrefix, product.Slug, release.ID, productFile.ID),
+					),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, response),
+				),
+			)
+		})
+
+		It("displays product file", func() {
+			session := runMainWithArgs(
+				"product-file",
+				"--product-slug", product.Slug,
+				"--release-id", strconv.Itoa(release.ID),
+				"--product-file-id", strconv.Itoa(productFile.ID),
+			)
+
+			Eventually(session, executableTimeout).Should(gexec.Exit(0))
+			Expect(session).Should(gbytes.Say(productFile.Name))
+		})
+	})
 })
