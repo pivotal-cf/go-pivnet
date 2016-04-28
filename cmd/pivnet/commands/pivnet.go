@@ -14,7 +14,7 @@ const (
 	printAsJSON  = "json"
 	printAsYAML  = "yaml"
 
-	host = "https://network.pivotal.io"
+	defaultHost = "https://network.pivotal.io"
 )
 
 type PivnetCommand struct {
@@ -51,7 +51,7 @@ func init() {
 	}
 
 	if Pivnet.Host == "" {
-		Pivnet.Host = host
+		Pivnet.Host = defaultHost
 	}
 }
 

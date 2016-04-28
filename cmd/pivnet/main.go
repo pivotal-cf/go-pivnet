@@ -8,9 +8,16 @@ import (
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/version"
 )
 
+var (
+	// buildVersion is deliberately left uninitialized so it can be set at compile-time
+	buildVersion string
+)
+
 func main() {
-	if version.Version == "" {
+	if buildVersion == "" {
 		version.Version = "dev"
+	} else {
+		version.Version = buildVersion
 	}
 
 	parser := flags.NewParser(&commands.Pivnet, flags.HelpFlag)
