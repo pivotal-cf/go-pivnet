@@ -35,11 +35,11 @@ type ProductFile struct {
 	Description  string `json:"description,omitempty"`
 }
 
-func (p ProductFilesService) Get(productSlug string, releaseID int, productID int) (ProductFile, error) {
+func (p ProductFilesService) Get(productSlug string, releaseID int, productFileID int) (ProductFile, error) {
 	url := fmt.Sprintf("/products/%s/releases/%d/product_files/%d",
 		productSlug,
 		releaseID,
-		productID,
+		productFileID,
 	)
 	response := ProductFileResponse{}
 
