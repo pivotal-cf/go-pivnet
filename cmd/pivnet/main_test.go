@@ -253,6 +253,20 @@ var _ = Describe("pivnet cli", func() {
 		})
 
 		It("accepts EULAs", func() {
+			releasesResponse := pivnet.ReleasesResponse{
+				Releases: releases,
+			}
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf("%s/products/%s/releases", apiPrefix, product.Slug),
+					),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, releasesResponse),
+				),
+			)
+
 			eulaAcceptanceResponse := pivnet.EULAAcceptanceResponse{
 				AcceptedAt: "now",
 			}
@@ -275,7 +289,7 @@ var _ = Describe("pivnet cli", func() {
 			session := runMainWithArgs(
 				"accept-eula",
 				"--product-slug", product.Slug,
-				"--release-id", strconv.Itoa(release.ID),
+				"--release-version", release.Version,
 			)
 
 			Eventually(session, executableTimeout).Should(gexec.Exit(0))
@@ -526,6 +540,20 @@ var _ = Describe("pivnet cli", func() {
 		)
 
 		BeforeEach(func() {
+			releasesResponse := pivnet.ReleasesResponse{
+				Releases: releases,
+			}
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf("%s/products/%s/releases", apiPrefix, product.Slug),
+					),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, releasesResponse),
+				),
+			)
+
 			productFile = pivnet.ProductFile{
 				ID:   1234,
 				Name: "some-product-file",
@@ -551,7 +579,7 @@ var _ = Describe("pivnet cli", func() {
 			session := runMainWithArgs(
 				"product-file",
 				"--product-slug", product.Slug,
-				"--release-id", strconv.Itoa(release.ID),
+				"--release-version", release.Version,
 				"--product-file-id", strconv.Itoa(productFile.ID),
 			)
 

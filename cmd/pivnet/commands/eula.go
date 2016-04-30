@@ -9,14 +9,15 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/pivotal-cf-experimental/go-pivnet"
 )
 
 type EULAsCommand struct {
 }
 
 type AcceptEULACommand struct {
-	ProductSlug string `long:"product-slug" description:"Product slug e.g. p-mysql" required:"true"`
-	ReleaseID   int    `long:"release-id" description:"Release ID e.g. 1234" required:"true"`
+	ProductSlug    string `long:"product-slug" description:"Product slug e.g. p-mysql" required:"true"`
+	ReleaseVersion string `long:"release-version" description:"Release version e.g. 0.1.2-rc1" required:"true"`
 }
 
 func (command *EULAsCommand) Execute([]string) error {
@@ -62,7 +63,25 @@ func (command *EULAsCommand) Execute([]string) error {
 
 func (command *AcceptEULACommand) Execute([]string) error {
 	client := NewClient()
-	err := client.EULA.Accept(command.ProductSlug, command.ReleaseID)
+
+	releases, err := client.Releases.GetByProductSlug(command.ProductSlug)
+	if err != nil {
+		return err
+	}
+
+	var release pivnet.Release
+	for _, r := range releases {
+		if r.Version == command.ReleaseVersion {
+			release = r
+			break
+		}
+	}
+
+	if release.Version != command.ReleaseVersion {
+		return fmt.Errorf("release not found")
+	}
+
+	err = client.EULA.Accept(command.ProductSlug, release.ID)
 	if err != nil {
 		return err
 	}

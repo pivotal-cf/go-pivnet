@@ -13,9 +13,9 @@ import (
 )
 
 type ProductFileCommand struct {
-	ProductSlug   string `long:"product-slug" description:"Product slug e.g. p-mysql" required:"true"`
-	ReleaseID     int    `long:"release-id" description:"Release ID e.g. 1234" required:"true"`
-	ProductFileID int    `long:"product-file-id" description:"Product file ID e.g. 1234" required:"true"`
+	ProductSlug    string `long:"product-slug" description:"Product slug e.g. p-mysql" required:"true"`
+	ReleaseVersion string `long:"release-version" description:"Release version e.g. 0.1.2-rc1" required:"true"`
+	ProductFileID  int    `long:"product-file-id" description:"Product file ID e.g. 1234" required:"true"`
 }
 
 type AddProductFileCommand struct {
@@ -27,9 +27,26 @@ type AddProductFileCommand struct {
 func (command *ProductFileCommand) Execute([]string) error {
 	client := NewClient()
 
+	releases, err := client.Releases.GetByProductSlug(command.ProductSlug)
+	if err != nil {
+		return err
+	}
+
+	var release pivnet.Release
+	for _, r := range releases {
+		if r.Version == command.ReleaseVersion {
+			release = r
+			break
+		}
+	}
+
+	if release.Version != command.ReleaseVersion {
+		return fmt.Errorf("release not found")
+	}
+
 	productFile, err := client.ProductFiles.Get(
 		command.ProductSlug,
-		command.ReleaseID,
+		release.ID,
 		command.ProductFileID,
 	)
 	if err != nil {
