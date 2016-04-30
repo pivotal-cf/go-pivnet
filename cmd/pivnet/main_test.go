@@ -534,6 +534,69 @@ var _ = Describe("pivnet cli", func() {
 		})
 	})
 
+	Describe("product-files", func() {
+		var (
+			productFiles []pivnet.ProductFile
+		)
+
+		BeforeEach(func() {
+			releasesResponse := pivnet.ReleasesResponse{
+				Releases: releases,
+			}
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf("%s/products/%s/releases", apiPrefix, product.Slug),
+					),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, releasesResponse),
+				),
+			)
+
+			productFiles = []pivnet.ProductFile{
+				pivnet.ProductFile{
+					ID:   1234,
+					Name: "some-product-file",
+				},
+				pivnet.ProductFile{
+					ID:   2345,
+					Name: "some-other-product-file",
+				},
+			}
+
+			response := pivnet.ProductFilesResponse{
+				ProductFiles: productFiles,
+			}
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf("%s/products/%s/releases/%d/product_files",
+							apiPrefix,
+							product.Slug,
+							release.ID,
+						),
+					),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, response),
+				),
+			)
+		})
+
+		It("displays product files", func() {
+			session := runMainWithArgs(
+				"product-files",
+				"--product-slug", product.Slug,
+				"--release-version", release.Version,
+			)
+
+			Eventually(session, executableTimeout).Should(gexec.Exit(0))
+			Expect(session).Should(gbytes.Say(productFiles[0].Name))
+			Expect(session).Should(gbytes.Say(productFiles[1].Name))
+		})
+	})
+
 	Describe("product-file", func() {
 		var (
 			productFile pivnet.ProductFile
@@ -568,7 +631,11 @@ var _ = Describe("pivnet cli", func() {
 					ghttp.VerifyRequest(
 						"GET",
 						fmt.Sprintf("%s/products/%s/releases/%d/product_files/%d",
-							apiPrefix, product.Slug, release.ID, productFile.ID),
+							apiPrefix,
+							product.Slug,
+							release.ID,
+							productFile.ID,
+						),
 					),
 					ghttp.RespondWithJSONEncoded(http.StatusOK, response),
 				),

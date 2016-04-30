@@ -43,6 +43,87 @@ var _ = Describe("PivnetClient - product files", func() {
 		server.Close()
 	})
 
+	Describe("List Product Files", func() {
+		var (
+			productSlug string
+			releaseID   int
+
+			response           pivnet.ProductFilesResponse
+			responseStatusCode int
+		)
+
+		BeforeEach(func() {
+			productSlug = "banana"
+			releaseID = 12
+
+			response = pivnet.ProductFilesResponse{[]pivnet.ProductFile{
+				{
+					ID:           1234,
+					AWSObjectKey: "something",
+					Links: &pivnet.Links{Download: map[string]string{
+						"href": fmt.Sprintf(
+							"/products/%s/releases/%d/product_files/%d/download",
+							productSlug,
+							releaseID,
+							1234,
+						)},
+					},
+				},
+				{
+					ID:           2345,
+					AWSObjectKey: "something-else",
+				},
+			}}
+
+			responseStatusCode = http.StatusOK
+		})
+
+		JustBeforeEach(func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf(
+							"%s/products/%s/releases/%d/product_files",
+							apiPrefix,
+							productSlug,
+							releaseID,
+						),
+					),
+					ghttp.RespondWithJSONEncoded(responseStatusCode, response),
+				),
+			)
+		})
+
+		It("returns the product file without error", func() {
+			productFiles, err := client.ProductFiles.List(
+				productSlug,
+				releaseID,
+			)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(productFiles).To(HaveLen(2))
+			Expect(productFiles[0].ID).To(Equal(1234))
+		})
+
+		Context("when the server responds with a non-2XX status code", func() {
+			BeforeEach(func() {
+				responseStatusCode = http.StatusTeapot
+			})
+
+			It("returns an error", func() {
+				_, err := client.ProductFiles.List(
+					productSlug,
+					releaseID,
+				)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err).To(MatchError(errors.New(
+					"Pivnet returned status code: 418 for the request - expected 200")))
+			})
+		})
+	})
+
 	Describe("Get Product File", func() {
 		var (
 			productSlug   string

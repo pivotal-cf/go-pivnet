@@ -20,6 +20,10 @@ type CreateProductFileConfig struct {
 	Description  string
 }
 
+type ProductFilesResponse struct {
+	ProductFiles []ProductFile `json:"product_files,omitempty"`
+}
+
 type ProductFileResponse struct {
 	ProductFile ProductFile `json:"product_file,omitempty"`
 }
@@ -33,6 +37,27 @@ type ProductFile struct {
 	Name         string `json:"name,omitempty"`
 	MD5          string `json:"md5,omitempty"`
 	Description  string `json:"description,omitempty"`
+}
+
+func (p ProductFilesService) List(productSlug string, releaseID int) ([]ProductFile, error) {
+	url := fmt.Sprintf("/products/%s/releases/%d/product_files",
+		productSlug,
+		releaseID,
+	)
+	response := ProductFilesResponse{}
+
+	err := p.client.makeRequest(
+		"GET",
+		url,
+		http.StatusOK,
+		nil,
+		&response,
+	)
+	if err != nil {
+		return []ProductFile{}, err
+	}
+
+	return response.ProductFiles, nil
 }
 
 func (p ProductFilesService) Get(productSlug string, releaseID int, productFileID int) (ProductFile, error) {
