@@ -461,16 +461,6 @@ var _ = Describe("pivnet cli", func() {
 
 	Describe("Release dependencies", func() {
 		It("displays release dependencies for the provided product slug and release version", func() {
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(
-						"GET",
-						fmt.Sprintf("%s/products/%s", apiPrefix, product.Slug),
-					),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, product),
-				),
-			)
-
 			releasesResponse := pivnet.ReleasesResponse{
 				Releases: releases,
 			}
@@ -509,9 +499,9 @@ var _ = Describe("pivnet cli", func() {
 					ghttp.VerifyRequest(
 						"GET",
 						fmt.Sprintf(
-							"%s/products/%d/releases/%d/dependencies",
+							"%s/products/%s/releases/%d/dependencies",
 							apiPrefix,
-							product.ID,
+							product.Slug,
 							release.ID,
 						),
 					),

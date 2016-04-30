@@ -23,7 +23,6 @@ var _ = Describe("PivnetClient - release upgrade paths", func() {
 		newClientConfig pivnet.ClientConfig
 		fakeLogger      lager.Logger
 
-		productID int
 		releaseID int
 	)
 
@@ -33,7 +32,6 @@ var _ = Describe("PivnetClient - release upgrade paths", func() {
 		token = "my-auth-token"
 		userAgent = "pivnet-resource/0.1.0 (some-url)"
 
-		productID = 1234
 		releaseID = 2345
 
 		fakeLogger = lager.NewLogger("release upgrade paths")

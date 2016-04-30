@@ -23,10 +23,10 @@ type DependentRelease struct {
 	Product Product `json:"product,omitempty"`
 }
 
-func (r ReleaseDependenciesService) Get(productID int, releaseID int) ([]ReleaseDependency, error) {
+func (r ReleaseDependenciesService) Get(productSlug string, releaseID int) ([]ReleaseDependency, error) {
 	url := fmt.Sprintf(
-		"/products/%d/releases/%d/dependencies",
-		productID,
+		"/products/%s/releases/%d/dependencies",
+		productSlug,
 		releaseID,
 	)
 
