@@ -45,9 +45,9 @@ var _ = Describe("PivnetClient - product files", func() {
 
 	Describe("Get Product File", func() {
 		var (
-			productSlug string
-			productID   int
-			releaseID   int
+			productSlug   string
+			releaseID     int
+			productFileID int
 
 			response           pivnet.ProductFileResponse
 			responseStatusCode int
@@ -55,14 +55,19 @@ var _ = Describe("PivnetClient - product files", func() {
 
 		BeforeEach(func() {
 			productSlug = "banana"
-			productID = 8
 			releaseID = 12
+			productFileID = 1234
 
 			response = pivnet.ProductFileResponse{pivnet.ProductFile{
-				ID:           productID,
+				ID:           productFileID,
 				AWSObjectKey: "something",
 				Links: &pivnet.Links{Download: map[string]string{
-					"href": "/products/banana/releases/666/product_files/8/download"},
+					"href": fmt.Sprintf(
+						"/products/%s/releases/%d/product_files/%d/download",
+						productSlug,
+						releaseID,
+						productFileID,
+					)},
 				},
 			}}
 
@@ -74,7 +79,13 @@ var _ = Describe("PivnetClient - product files", func() {
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest(
 						"GET",
-						apiPrefix+"/products/banana/releases/12/product_files/8",
+						fmt.Sprintf(
+							"%s/products/%s/releases/%d/product_files/%d",
+							apiPrefix,
+							productSlug,
+							releaseID,
+							productFileID,
+						),
 					),
 					ghttp.RespondWithJSONEncoded(responseStatusCode, response),
 				),
@@ -82,18 +93,23 @@ var _ = Describe("PivnetClient - product files", func() {
 		})
 
 		It("returns the product file without error", func() {
-			product, err := client.ProductFiles.Get(
+			productFile, err := client.ProductFiles.Get(
 				productSlug,
 				releaseID,
-				productID,
+				productFileID,
 			)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(product.ID).To(Equal(productID))
-			Expect(product.AWSObjectKey).To(Equal("something"))
+			Expect(productFile.ID).To(Equal(productFileID))
+			Expect(productFile.AWSObjectKey).To(Equal("something"))
 
-			Expect(product.Links.Download["href"]).
-				To(Equal("/products/banana/releases/666/product_files/8/download"))
+			Expect(productFile.Links.Download["href"]).
+				To(Equal(fmt.Sprintf(
+					"/products/%s/releases/%d/product_files/%d/download",
+					productSlug,
+					releaseID,
+					productFileID,
+				)))
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
@@ -105,7 +121,7 @@ var _ = Describe("PivnetClient - product files", func() {
 				_, err := client.ProductFiles.Get(
 					productSlug,
 					releaseID,
-					productID,
+					productFileID,
 				)
 				Expect(err).To(HaveOccurred())
 
@@ -283,7 +299,7 @@ var _ = Describe("PivnetClient - product files", func() {
 
 	Describe("Add Product File", func() {
 		var (
-			productID     = 1234
+			productSlug   = "some-product"
 			releaseID     = 2345
 			productFileID = 3456
 
@@ -295,9 +311,9 @@ var _ = Describe("PivnetClient - product files", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
-							"%s/products/%d/releases/%d/add_product_file",
+							"%s/products/%s/releases/%d/add_product_file",
 							apiPrefix,
-							productID,
+							productSlug,
 							releaseID,
 						)),
 						ghttp.VerifyJSON(expectedRequestBody),
@@ -305,7 +321,7 @@ var _ = Describe("PivnetClient - product files", func() {
 					),
 				)
 
-				err := client.ProductFiles.AddToRelease(productID, releaseID, productFileID)
+				err := client.ProductFiles.AddToRelease(productSlug, releaseID, productFileID)
 				Expect(err).NotTo(HaveOccurred())
 			})
 		})
@@ -315,16 +331,16 @@ var _ = Describe("PivnetClient - product files", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
-							"%s/products/%d/releases/%d/add_product_file",
+							"%s/products/%s/releases/%d/add_product_file",
 							apiPrefix,
-							productID,
+							productSlug,
 							releaseID,
 						)),
 						ghttp.RespondWith(http.StatusTeapot, nil),
 					),
 				)
 
-				err := client.ProductFiles.AddToRelease(productID, releaseID, productFileID)
+				err := client.ProductFiles.AddToRelease(productSlug, releaseID, productFileID)
 				Expect(err).To(MatchError(errors.New(
 					"Pivnet returned status code: 418 for the request - expected 204")))
 			})

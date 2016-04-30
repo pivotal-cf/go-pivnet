@@ -122,13 +122,13 @@ func (p ProductFilesService) Delete(productSlug string, id int) (ProductFile, er
 }
 
 func (p ProductFilesService) AddToRelease(
-	productID int,
+	productSlug string,
 	releaseID int,
 	productFileID int,
 ) error {
 	url := fmt.Sprintf(
-		"/products/%d/releases/%d/add_product_file",
-		productID,
+		"/products/%s/releases/%d/add_product_file",
+		productSlug,
 		releaseID,
 	)
 
