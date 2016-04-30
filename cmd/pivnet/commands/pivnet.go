@@ -41,6 +41,8 @@ type PivnetCommand struct {
 	UserGroups UserGroupsCommand `command:"user-groups" description:"List user groups"`
 
 	ReleaseDependencies ReleaseDependenciesCommand `command:"release-dependencies" description:"List user groups"`
+
+	ReleaseUpgradePaths ReleaseUpgradePathsCommand `command:"release-upgrade-paths" description:"List release upgrade paths"`
 }
 
 var Pivnet PivnetCommand

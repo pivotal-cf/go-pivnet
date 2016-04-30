@@ -30,6 +30,7 @@ type Client struct {
 	UserGroups          *UserGroupsService
 	ReleaseDependencies *ReleaseDependenciesService
 	ReleaseTypes        *ReleaseTypesService
+	ReleaseUpgradePaths *ReleaseUpgradePathsService
 }
 
 type ClientConfig struct {
@@ -56,6 +57,7 @@ func NewClient(config ClientConfig, logger lager.Logger) Client {
 	client.UserGroups = &UserGroupsService{client: client}
 	client.ReleaseDependencies = &ReleaseDependenciesService{client: client}
 	client.ReleaseTypes = &ReleaseTypesService{client: client}
+	client.ReleaseUpgradePaths = &ReleaseUpgradePathsService{client: client}
 
 	return client
 }
