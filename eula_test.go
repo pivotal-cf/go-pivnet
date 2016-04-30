@@ -54,7 +54,7 @@ var _ = Describe("PivnetClient - EULA", func() {
 				),
 			)
 
-			eulas, err := client.EULA.ListAll()
+			eulas, err := client.EULA.List()
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(eulas).To(HaveLen(2))
@@ -74,7 +74,7 @@ var _ = Describe("PivnetClient - EULA", func() {
 					),
 				)
 
-				_, err := client.EULA.ListAll()
+				_, err := client.EULA.List()
 				Expect(err).To(MatchError(errors.New(
 					"Pivnet returned status code: 418 for the request - expected 200")))
 			})

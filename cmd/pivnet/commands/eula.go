@@ -21,7 +21,7 @@ type AcceptEULACommand struct {
 
 func (command *EULAsCommand) Execute([]string) error {
 	client := NewClient()
-	eulas, err := client.EULA.ListAll()
+	eulas, err := client.EULA.List()
 	if err != nil {
 		return err
 	}

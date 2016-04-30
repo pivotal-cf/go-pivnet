@@ -28,7 +28,7 @@ type EULAAcceptanceResponse struct {
 	Links      *Links `json:"_links,omitempty"`
 }
 
-func (e EULAService) ListAll() ([]EULA, error) {
+func (e EULAService) List() ([]EULA, error) {
 	url := "/eulas"
 
 	var response EULAsResponse
