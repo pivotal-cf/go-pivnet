@@ -23,7 +23,7 @@ type Client struct {
 	logger    lager.Logger
 
 	Auth                *AuthService
-	EULA                *EULAService
+	EULA                *EULAsService
 	ProductFiles        *ProductFilesService
 	Releases            *ReleasesService
 	Products            *ProductsService
@@ -49,7 +49,7 @@ func NewClient(config ClientConfig, logger lager.Logger) Client {
 	}
 
 	client.Auth = &AuthService{client: client}
-	client.EULA = &EULAService{client: client}
+	client.EULA = &EULAsService{client: client}
 	client.ProductFiles = &ProductFilesService{client: client}
 	client.Releases = &ReleasesService{client: client}
 	client.Products = &ProductsService{client: client}

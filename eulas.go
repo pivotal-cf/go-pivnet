@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-type EULAService struct {
+type EULAsService struct {
 	client Client
 }
 
@@ -28,7 +28,7 @@ type EULAAcceptanceResponse struct {
 	Links      *Links `json:"_links,omitempty"`
 }
 
-func (e EULAService) List() ([]EULA, error) {
+func (e EULAsService) List() ([]EULA, error) {
 	url := "/eulas"
 
 	var response EULAsResponse
@@ -46,7 +46,7 @@ func (e EULAService) List() ([]EULA, error) {
 	return response.EULAs, nil
 }
 
-func (e EULAService) Accept(productSlug string, releaseID int) error {
+func (e EULAsService) Accept(productSlug string, releaseID int) error {
 	url := fmt.Sprintf(
 		"/products/%s/releases/%d/eula_acceptance",
 		productSlug,
