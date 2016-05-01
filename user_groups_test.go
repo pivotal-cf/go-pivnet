@@ -62,7 +62,7 @@ var _ = Describe("PivnetClient - user groups", func() {
 				),
 			)
 
-			userGroups, err := client.UserGroups.Get("banana", releaseID)
+			userGroups, err := client.UserGroups.List("banana", releaseID)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(userGroups).To(HaveLen(2))
@@ -79,7 +79,7 @@ var _ = Describe("PivnetClient - user groups", func() {
 					),
 				)
 
-				_, err := client.UserGroups.Get("banana", releaseID)
+				_, err := client.UserGroups.List("banana", releaseID)
 				Expect(err).To(MatchError(errors.New(
 					"Pivnet returned status code: 418 for the request - expected 200")))
 			})

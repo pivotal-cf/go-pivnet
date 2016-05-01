@@ -36,7 +36,7 @@ func (command *UserGroupsCommand) Execute([]string) error {
 		return fmt.Errorf("release not found")
 	}
 
-	userGroups, err := client.UserGroups.Get(command.ProductSlug, release.ID)
+	userGroups, err := client.UserGroups.List(command.ProductSlug, release.ID)
 	if err != nil {
 		return err
 	}

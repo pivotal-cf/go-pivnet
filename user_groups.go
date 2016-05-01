@@ -25,7 +25,7 @@ type UserGroup struct {
 	Description string `json:"description,omitempty"`
 }
 
-func (u UserGroupsService) Get(productSlug string, releaseID int) ([]UserGroup, error) {
+func (u UserGroupsService) List(productSlug string, releaseID int) ([]UserGroup, error) {
 	url := fmt.Sprintf(
 		"/products/%s/releases/%d/user_groups",
 		productSlug,
