@@ -73,16 +73,21 @@ func (command *ReleaseCommand) Execute([]string) error {
 		return err
 	}
 
-	var release pivnet.Release
+	var foundRelease pivnet.Release
 	for _, r := range releases {
 		if r.Version == command.ReleaseVersion {
-			release = r
+			foundRelease = r
 			break
 		}
 	}
 
-	if release.Version != command.ReleaseVersion {
+	if foundRelease.Version != command.ReleaseVersion {
 		return fmt.Errorf("release not found")
+	}
+
+	release, err := client.Releases.Get(command.ProductSlug, foundRelease.ID)
+	if err != nil {
+		return err
 	}
 
 	switch Pivnet.Format {

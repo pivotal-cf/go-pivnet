@@ -73,6 +73,18 @@ func (r ReleasesService) List(productSlug string) ([]Release, error) {
 	return response.Releases, nil
 }
 
+func (r ReleasesService) Get(productSlug string, releaseID int) (Release, error) {
+	url := fmt.Sprintf("/products/%s/releases/%d", productSlug, releaseID)
+
+	var response Release
+	err := r.client.makeRequest("GET", url, http.StatusOK, nil, &response)
+	if err != nil {
+		return Release{}, err
+	}
+
+	return response, nil
+}
+
 func (r ReleasesService) Create(config CreateReleaseConfig) (Release, error) {
 	url := fmt.Sprintf("/products/%s/releases", config.ProductSlug)
 

@@ -366,6 +366,16 @@ var _ = Describe("pivnet cli", func() {
 				),
 			)
 
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf("%s/products/%s/releases/%d", apiPrefix, product.Slug, release.ID),
+					),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, release),
+				),
+			)
+
 			session := runMainWithArgs(
 				"release",
 				"--product-slug", product.Slug,

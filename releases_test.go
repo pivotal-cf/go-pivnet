@@ -78,6 +78,38 @@ var _ = Describe("PivnetClient - product files", func() {
 		})
 	})
 
+	Describe("Get", func() {
+		It("returns the release for the product slug and releaseID", func() {
+			response := `{"id": 3, "version": "3.2.1", "_links": {"product_files": {"href":"https://banana.org/cookies/download"}}}`
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", apiPrefix+"/products/banana/releases/3"),
+					ghttp.RespondWith(http.StatusOK, response),
+				),
+			)
+
+			release, err := client.Releases.Get("banana", 3)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(release.ID).To(Equal(3))
+		})
+
+		Context("when the server responds with a non-2XX status code", func() {
+			It("returns an error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", apiPrefix+"/products/banana/releases/3"),
+						ghttp.RespondWith(http.StatusTeapot, nil),
+					),
+				)
+
+				_, err := client.Releases.Get("banana", 3)
+				Expect(err).To(MatchError(errors.New(
+					"Pivnet returned status code: 418 for the request - expected 200")))
+			})
+		})
+	})
+
 	Describe("Create", func() {
 		var (
 			productVersion      string
