@@ -28,6 +28,7 @@ type PivnetCommand struct {
 	ReleaseTypes ReleaseTypesCommand `command:"release-types" description:"List release types"`
 
 	EULAs      EULAsCommand      `command:"eulas" description:"List EULAs"`
+	EULA       EULACommand       `command:"eula" description:"Show EULA"`
 	AcceptEULA AcceptEULACommand `command:"accept-eula" description:"Accept EULA"`
 
 	Products ProductsCommand `command:"products" description:"List products"`

@@ -46,6 +46,24 @@ func (e EULAsService) List() ([]EULA, error) {
 	return response.EULAs, nil
 }
 
+func (e EULAsService) Get(eulaSlug string) (EULA, error) {
+	url := fmt.Sprintf("/eulas/%s", eulaSlug)
+
+	var response EULA
+	err := e.client.makeRequest(
+		"GET",
+		url,
+		http.StatusOK,
+		nil,
+		&response,
+	)
+	if err != nil {
+		return EULA{}, err
+	}
+
+	return response, nil
+}
+
 func (e EULAsService) Accept(productSlug string, releaseID int) error {
 	url := fmt.Sprintf(
 		"/products/%s/releases/%d/eula_acceptance",

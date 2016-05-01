@@ -43,8 +43,8 @@ var _ = Describe("PivnetClient - EULA", func() {
 		server.Close()
 	})
 
-	Describe("ListAll", func() {
-		It("returns the EULAs", func() {
+	Describe("List", func() {
+		It("returns all EULAs", func() {
 			response := `{"eulas": [{"id":1,"name":"eula1"},{"id": 2,"name":"eula2"}]}`
 
 			server.AppendHandlers(
@@ -75,6 +75,49 @@ var _ = Describe("PivnetClient - EULA", func() {
 				)
 
 				_, err := client.EULA.List()
+				Expect(err).To(MatchError(errors.New(
+					"Pivnet returned status code: 418 for the request - expected 200")))
+			})
+		})
+	})
+
+	Describe("Get", func() {
+		var (
+			eulaSlug string
+		)
+
+		BeforeEach(func() {
+			eulaSlug = "eula_1"
+		})
+
+		It("returns the EULA for the provided eula slug", func() {
+			response := `{"id":1,"name":"eula1","slug":"eula_1"}`
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/eulas/%s", apiPrefix, eulaSlug)),
+					ghttp.RespondWith(http.StatusOK, response),
+				),
+			)
+
+			eula, err := client.EULA.Get(eulaSlug)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(eula.ID).To(Equal(1))
+			Expect(eula.Name).To(Equal("eula1"))
+			Expect(eula.Slug).To(Equal(eulaSlug))
+		})
+
+		Context("when the server responds with a non-2XX status code", func() {
+			It("returns an error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", fmt.Sprintf("%s/eulas/%s", apiPrefix, eulaSlug)),
+						ghttp.RespondWith(http.StatusTeapot, nil),
+					),
+				)
+
+				_, err := client.EULA.Get(eulaSlug)
 				Expect(err).To(MatchError(errors.New(
 					"Pivnet returned status code: 418 for the request - expected 200")))
 			})

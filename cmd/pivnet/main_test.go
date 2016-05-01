@@ -252,6 +252,25 @@ var _ = Describe("pivnet cli", func() {
 			Expect(session).Should(gbytes.Say(eulas[1].Name))
 		})
 
+		It("shows specific EULA", func() {
+			eulaResponse := eulas[0]
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/eulas/%s", apiPrefix, eulas[0].Slug)),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, eulaResponse),
+				),
+			)
+
+			session := runMainWithArgs(
+				"eula",
+				"--eula-slug", eulas[0].Slug,
+			)
+
+			Eventually(session, executableTimeout).Should(gexec.Exit(0))
+			Expect(session).Should(gbytes.Say(eulas[0].Name))
+		})
+
 		It("accepts EULAs", func() {
 			releasesResponse := pivnet.ReleasesResponse{
 				Releases: releases,
