@@ -65,9 +65,6 @@ func (command *ProductFilesCommand) Execute([]string) error {
 			"ID",
 			"Name",
 			"File Version",
-			"File Type",
-			"Description",
-			"MD5",
 			"AWS Object Key",
 		})
 
@@ -76,9 +73,6 @@ func (command *ProductFilesCommand) Execute([]string) error {
 				strconv.Itoa(productFile.ID),
 				productFile.Name,
 				productFile.FileVersion,
-				productFile.FileType,
-				productFile.Description,
-				productFile.MD5,
 				productFile.AWSObjectKey,
 			}
 			table.Append(productFileAsString)
