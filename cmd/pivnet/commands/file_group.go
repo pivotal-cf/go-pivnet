@@ -17,6 +17,11 @@ type FileGroupsCommand struct {
 	ProductSlug string `long:"product-slug" description:"Product slug e.g. p-mysql" required:"true"`
 }
 
+type DeleteFileGroupCommand struct {
+	ProductSlug string `long:"product-slug" description:"Product slug e.g. p-mysql" required:"true"`
+	FileGroupID int    `long:"file-group-id" description:"File group ID e.g. 1234" required:"true"`
+}
+
 func (command *FileGroupsCommand) Execute([]string) error {
 	client := NewClient()
 
@@ -76,4 +81,18 @@ func printFileGroups(fileGroups []pivnet.FileGroup) error {
 	}
 
 	return nil
+}
+
+func (command *DeleteFileGroupCommand) Execute([]string) error {
+	client := NewClient()
+
+	fileGroup, err := client.FileGroups.Delete(
+		command.ProductSlug,
+		command.FileGroupID,
+	)
+	if err != nil {
+		return err
+	}
+
+	return printFileGroups([]pivnet.FileGroup{fileGroup})
 }

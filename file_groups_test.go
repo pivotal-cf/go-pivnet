@@ -91,4 +91,45 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 			})
 		})
 	})
+
+	Describe("Delete File Group", func() {
+		var (
+			id = 1234
+		)
+
+		It("deletes the file group", func() {
+			response := []byte(`{"id":1234}`)
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"DELETE",
+						fmt.Sprintf("%s/products/%s/file_groups/%d", apiPrefix, productSlug, id)),
+					ghttp.RespondWith(http.StatusOK, response),
+				),
+			)
+
+			fileGroup, err := client.FileGroups.Delete(productSlug, id)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(fileGroup.ID).To(Equal(id))
+		})
+
+		Context("when the server responds with a non-2XX status code", func() {
+			It("returns an error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(
+							"DELETE",
+							fmt.Sprintf("%s/products/%s/file_groups/%d", apiPrefix, productSlug, id)),
+						ghttp.RespondWith(http.StatusTeapot, nil),
+					),
+				)
+
+				_, err := client.FileGroups.Delete(productSlug, id)
+				Expect(err).To(MatchError(errors.New(
+					"Pivnet returned status code: 418 for the request - expected 200")))
+			})
+		})
+	})
 })

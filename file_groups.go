@@ -42,3 +42,25 @@ func (e FileGroupsService) List(productSlug string) ([]FileGroup, error) {
 
 	return response.FileGroups, nil
 }
+
+func (p FileGroupsService) Delete(productSlug string, id int) (FileGroup, error) {
+	url := fmt.Sprintf(
+		"/products/%s/file_groups/%d",
+		productSlug,
+		id,
+	)
+
+	var response FileGroup
+	err := p.client.makeRequest(
+		"DELETE",
+		url,
+		http.StatusOK,
+		nil,
+		&response,
+	)
+	if err != nil {
+		return FileGroup{}, err
+	}
+
+	return response, nil
+}

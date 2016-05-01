@@ -405,7 +405,7 @@ var _ = Describe("pivnet cli", func() {
 			Expect(session).Should(gbytes.Say(releases[0].Version))
 		})
 
-		It("displays release for the provided product slug and release version", func() {
+		It("deletes release for the provided product slug and release version", func() {
 			releasesResponse := pivnet.ReleasesResponse{
 				Releases: releases,
 			}
@@ -1001,6 +1001,46 @@ var _ = Describe("pivnet cli", func() {
 			Eventually(session, executableTimeout).Should(gexec.Exit(0))
 			Expect(session).Should(gbytes.Say(fileGroups[0].Name))
 			Expect(session).Should(gbytes.Say(fileGroups[1].Name))
+		})
+	})
+
+	Describe("delete file-group", func() {
+		var (
+			fileGroup pivnet.FileGroup
+		)
+
+		BeforeEach(func() {
+			fileGroup = pivnet.FileGroup{
+				ID:   1234,
+				Name: "some-file-group",
+			}
+
+			response := fileGroup
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"DELETE",
+						fmt.Sprintf(
+							"%s/products/%s/file_groups/%d",
+							apiPrefix,
+							product.Slug,
+							fileGroup.ID,
+						),
+					),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, response),
+				),
+			)
+		})
+
+		It("deletes file group", func() {
+			session := runMainWithArgs(
+				"delete-file-group",
+				"--product-slug", product.Slug,
+				"--file-group-id", strconv.Itoa(fileGroup.ID),
+			)
+
+			Eventually(session, executableTimeout).Should(gexec.Exit(0))
 		})
 	})
 
