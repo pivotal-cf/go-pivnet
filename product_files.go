@@ -201,3 +201,39 @@ func (p ProductFilesService) AddToRelease(
 
 	return nil
 }
+
+func (p ProductFilesService) RemoveFromRelease(
+	productSlug string,
+	releaseID int,
+	productFileID int,
+) error {
+	url := fmt.Sprintf(
+		"/products/%s/releases/%d/remove_product_file",
+		productSlug,
+		releaseID,
+	)
+
+	body := createProductFileBody{
+		ProductFile: ProductFile{
+			ID: productFileID,
+		},
+	}
+
+	b, err := json.Marshal(body)
+	if err != nil {
+		panic(err)
+	}
+
+	err = p.client.makeRequest(
+		"PATCH",
+		url,
+		http.StatusNoContent,
+		bytes.NewReader(b),
+		nil,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

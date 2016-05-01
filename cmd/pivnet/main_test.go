@@ -857,6 +857,63 @@ var _ = Describe("pivnet cli", func() {
 		})
 	})
 
+	Describe("remove product-file", func() {
+		var (
+			productFile pivnet.ProductFile
+		)
+
+		BeforeEach(func() {
+			releasesResponse := pivnet.ReleasesResponse{
+				Releases: releases,
+			}
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf("%s/products/%s/releases", apiPrefix, product.Slug),
+					),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, releasesResponse),
+				),
+			)
+
+			productFile = pivnet.ProductFile{
+				ID:   1234,
+				Name: "some-product-file",
+			}
+
+			response := pivnet.ProductFileResponse{
+				ProductFile: productFile,
+			}
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"PATCH",
+						fmt.Sprintf(
+							"%s/products/%s/releases/%d/remove_product_file",
+							apiPrefix,
+							product.Slug,
+							release.ID,
+						),
+					),
+					ghttp.RespondWithJSONEncoded(http.StatusNoContent, response),
+				),
+			)
+		})
+
+		It("removes product file", func() {
+			session := runMainWithArgs(
+				"remove-product-file",
+				"--product-slug", product.Slug,
+				"--release-version", release.Version,
+				"--product-file-id", strconv.Itoa(productFile.ID),
+			)
+
+			Eventually(session, executableTimeout).Should(gexec.Exit(0))
+		})
+	})
+
 	Describe("delete product-file", func() {
 		var (
 			productFile pivnet.ProductFile

@@ -495,4 +495,54 @@ var _ = Describe("PivnetClient - product files", func() {
 			})
 		})
 	})
+
+	Describe("Remove Product File", func() {
+		var (
+			productSlug   = "some-product"
+			releaseID     = 2345
+			productFileID = 3456
+
+			expectedRequestBody = `{"product_file":{"id":3456}}`
+		)
+
+		Context("when the server responds with a 204 status code", func() {
+			It("returns without error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/releases/%d/remove_product_file",
+							apiPrefix,
+							productSlug,
+							releaseID,
+						)),
+						ghttp.VerifyJSON(expectedRequestBody),
+						ghttp.RespondWith(http.StatusNoContent, nil),
+					),
+				)
+
+				err := client.ProductFiles.RemoveFromRelease(productSlug, releaseID, productFileID)
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+
+		Context("when the server responds with a non-204 status code", func() {
+			It("returns an error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/releases/%d/remove_product_file",
+							apiPrefix,
+							productSlug,
+							releaseID,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, nil),
+					),
+				)
+
+				err := client.ProductFiles.RemoveFromRelease(productSlug, releaseID, productFileID)
+				Expect(err).To(MatchError(errors.New(
+					"Pivnet returned status code: 418 for the request - expected 204")))
+			})
+		})
+	})
 })

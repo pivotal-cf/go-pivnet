@@ -29,6 +29,12 @@ type AddProductFileCommand struct {
 	ProductFileID  int    `long:"product-file-id" description:"Product file ID e.g. 1234" required:"true"`
 }
 
+type RemoveProductFileCommand struct {
+	ProductSlug    string `long:"product-slug" description:"Product slug e.g. p-mysql" required:"true"`
+	ReleaseVersion string `long:"release-version" description:"Release version e.g. 0.1.2-rc1" required:"true"`
+	ProductFileID  int    `long:"product-file-id" description:"Product file ID e.g. 1234" required:"true"`
+}
+
 type DeleteProductFileCommand struct {
 	ProductSlug   string `long:"product-slug" description:"Product slug e.g. p-mysql" required:"true"`
 	ProductFileID int    `long:"product-file-id" description:"Product file ID e.g. 1234" required:"true"`
@@ -217,6 +223,38 @@ func (command *AddProductFileCommand) Execute([]string) error {
 	}
 
 	err = client.ProductFiles.AddToRelease(
+		command.ProductSlug,
+		release.ID,
+		command.ProductFileID,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (command *RemoveProductFileCommand) Execute([]string) error {
+	client := NewClient()
+
+	releases, err := client.Releases.List(command.ProductSlug)
+	if err != nil {
+		return err
+	}
+
+	var release pivnet.Release
+	for _, r := range releases {
+		if r.Version == command.ReleaseVersion {
+			release = r
+			break
+		}
+	}
+
+	if release.Version != command.ReleaseVersion {
+		return fmt.Errorf("release not found")
+	}
+
+	err = client.ProductFiles.RemoveFromRelease(
 		command.ProductSlug,
 		release.ID,
 		command.ProductFileID,
