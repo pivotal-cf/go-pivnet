@@ -33,9 +33,10 @@ type PivnetCommand struct {
 	Products ProductsCommand `command:"products" description:"List products"`
 	Product  ProductCommand  `command:"product" description:"Show product"`
 
-	ProductFiles   ProductFilesCommand   `command:"product-files" description:"List product files"`
-	ProductFile    ProductFileCommand    `command:"product-file" description:"Show product file"`
-	AddProductFile AddProductFileCommand `command:"add-product-file" description:"Add product file to release"`
+	ProductFiles      ProductFilesCommand      `command:"product-files" description:"List product files"`
+	ProductFile       ProductFileCommand       `command:"product-file" description:"Show product file"`
+	AddProductFile    AddProductFileCommand    `command:"add-product-file" description:"Add product file to release"`
+	DeleteProductFile DeleteProductFileCommand `command:"delete-product-file" description:"Delete product file"`
 
 	Releases      ReleasesCommand      `command:"releases" description:"List releases"`
 	Release       ReleaseCommand       `command:"release" description:"Show release"`

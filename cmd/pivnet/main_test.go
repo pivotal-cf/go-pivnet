@@ -722,6 +722,48 @@ var _ = Describe("pivnet cli", func() {
 		})
 	})
 
+	Describe("delete product-file", func() {
+		var (
+			productFile pivnet.ProductFile
+		)
+
+		BeforeEach(func() {
+			productFile = pivnet.ProductFile{
+				ID:   1234,
+				Name: "some-product-file",
+			}
+
+			response := pivnet.ProductFileResponse{
+				ProductFile: productFile,
+			}
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"DELETE",
+						fmt.Sprintf(
+							"%s/products/%s/product_files/%d",
+							apiPrefix,
+							product.Slug,
+							productFile.ID,
+						),
+					),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, response),
+				),
+			)
+		})
+
+		It("deletes product file", func() {
+			session := runMainWithArgs(
+				"delete-product-file",
+				"--product-slug", product.Slug,
+				"--product-file-id", strconv.Itoa(productFile.ID),
+			)
+
+			Eventually(session, executableTimeout).Should(gexec.Exit(0))
+		})
+	})
+
 	Describe("Release upgrade paths", func() {
 		It("displays release upgrade paths for the provided product slug and release version", func() {
 			releasesResponse := pivnet.ReleasesResponse{
