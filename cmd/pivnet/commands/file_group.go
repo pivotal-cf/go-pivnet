@@ -38,7 +38,6 @@ func printFileGroups(fileGroups []pivnet.FileGroup) error {
 		table.SetHeader([]string{
 			"ID",
 			"Name",
-			"Product Name",
 			"Product File Names",
 		})
 
@@ -52,7 +51,6 @@ func printFileGroups(fileGroups []pivnet.FileGroup) error {
 			fileGroupAsString := []string{
 				strconv.Itoa(fileGroup.ID),
 				fileGroup.Name,
-				fileGroup.Product.Name,
 				strings.Join(productFileNames, " "),
 			}
 			table.Append(fileGroupAsString)
