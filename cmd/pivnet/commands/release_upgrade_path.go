@@ -20,7 +20,7 @@ type ReleaseUpgradePathsCommand struct {
 func (command *ReleaseUpgradePathsCommand) Execute([]string) error {
 	client := NewClient()
 
-	releases, err := client.Releases.GetByProductSlug(command.ProductSlug)
+	releases, err := client.Releases.List(command.ProductSlug)
 	if err != nil {
 		return err
 	}

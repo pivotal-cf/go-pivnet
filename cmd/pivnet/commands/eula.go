@@ -64,7 +64,7 @@ func (command *EULAsCommand) Execute([]string) error {
 func (command *AcceptEULACommand) Execute([]string) error {
 	client := NewClient()
 
-	releases, err := client.Releases.GetByProductSlug(command.ProductSlug)
+	releases, err := client.Releases.List(command.ProductSlug)
 	if err != nil {
 		return err
 	}

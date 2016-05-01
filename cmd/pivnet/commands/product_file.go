@@ -32,7 +32,7 @@ type AddProductFileCommand struct {
 func (command *ProductFilesCommand) Execute([]string) error {
 	client := NewClient()
 
-	releases, err := client.Releases.GetByProductSlug(command.ProductSlug)
+	releases, err := client.Releases.List(command.ProductSlug)
 	if err != nil {
 		return err
 	}
@@ -103,7 +103,7 @@ func (command *ProductFilesCommand) Execute([]string) error {
 func (command *ProductFileCommand) Execute([]string) error {
 	client := NewClient()
 
-	releases, err := client.Releases.GetByProductSlug(command.ProductSlug)
+	releases, err := client.Releases.List(command.ProductSlug)
 	if err != nil {
 		return err
 	}
@@ -179,7 +179,7 @@ func (command *ProductFileCommand) Execute([]string) error {
 func (command *AddProductFileCommand) Execute([]string) error {
 	client := NewClient()
 
-	releases, err := client.Releases.GetByProductSlug(command.ProductSlug)
+	releases, err := client.Releases.List(command.ProductSlug)
 	if err != nil {
 		return err
 	}

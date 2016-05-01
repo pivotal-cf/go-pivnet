@@ -28,7 +28,7 @@ type DeleteReleaseCommand struct {
 
 func (command *ReleasesCommand) Execute([]string) error {
 	client := NewClient()
-	releases, err := client.Releases.GetByProductSlug(command.ProductSlug)
+	releases, err := client.Releases.List(command.ProductSlug)
 	if err != nil {
 		return err
 	}
@@ -68,7 +68,7 @@ func (command *ReleasesCommand) Execute([]string) error {
 
 func (command *ReleaseCommand) Execute([]string) error {
 	client := NewClient()
-	releases, err := client.Releases.GetByProductSlug(command.ProductSlug)
+	releases, err := client.Releases.List(command.ProductSlug)
 	if err != nil {
 		return err
 	}
@@ -118,7 +118,7 @@ func (command *ReleaseCommand) Execute([]string) error {
 
 func (command *DeleteReleaseCommand) Execute([]string) error {
 	client := NewClient()
-	releases, err := client.Releases.GetByProductSlug(command.ProductSlug)
+	releases, err := client.Releases.List(command.ProductSlug)
 	if err != nil {
 		return err
 	}

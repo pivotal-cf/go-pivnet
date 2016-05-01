@@ -44,7 +44,7 @@ var _ = Describe("PivnetClient - product files", func() {
 		server.Close()
 	})
 
-	Describe("Get", func() {
+	Describe("List", func() {
 		It("returns the releases for the product slug", func() {
 			response := `{"releases": [{"id":2,"version":"1.2.3"},{"id": 3, "version": "3.2.1", "_links": {"product_files": {"href":"https://banana.org/cookies/download"}}}]}`
 
@@ -55,7 +55,7 @@ var _ = Describe("PivnetClient - product files", func() {
 				),
 			)
 
-			releases, err := client.Releases.GetByProductSlug("banana")
+			releases, err := client.Releases.List("banana")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(releases).To(HaveLen(2))
 			Expect(releases[0].ID).To(Equal(2))
@@ -71,7 +71,7 @@ var _ = Describe("PivnetClient - product files", func() {
 					),
 				)
 
-				_, err := client.Releases.GetByProductSlug("banana")
+				_, err := client.Releases.List("banana")
 				Expect(err).To(MatchError(errors.New(
 					"Pivnet returned status code: 418 for the request - expected 200")))
 			})

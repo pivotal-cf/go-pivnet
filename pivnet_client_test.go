@@ -84,7 +84,7 @@ var _ = Describe("PivnetClient", func() {
 			)
 		}
 
-		_, err := client.Releases.GetByProductSlug(productSlug)
+		_, err := client.Releases.List(productSlug)
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -115,7 +115,7 @@ var _ = Describe("PivnetClient", func() {
 			)
 		}
 
-		_, err := client.Releases.GetByProductSlug(productSlug)
+		_, err := client.Releases.List(productSlug)
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -124,7 +124,7 @@ var _ = Describe("PivnetClient", func() {
 			newClientConfig.Host = "%%%"
 			client = pivnet.NewClient(newClientConfig, fakeLogger)
 
-			_, err := client.Releases.GetByProductSlug("some product")
+			_, err := client.Releases.List("some product")
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("%%%"))
 		})
@@ -135,7 +135,7 @@ var _ = Describe("PivnetClient", func() {
 			newClientConfig.Host = "https://not-a-real-url.com"
 			client = pivnet.NewClient(newClientConfig, fakeLogger)
 
-			_, err := client.Releases.GetByProductSlug("some-product")
+			_, err := client.Releases.List("some-product")
 			Expect(err).To(HaveOccurred())
 		})
 	})
@@ -149,7 +149,7 @@ var _ = Describe("PivnetClient", func() {
 				),
 			)
 
-			_, err := client.Releases.GetByProductSlug("my-product-id")
+			_, err := client.Releases.List("my-product-id")
 			Expect(err).To(HaveOccurred())
 			Expect(err).To(MatchError(
 				"Pivnet returned status code: 404 for the request - expected 200"))
@@ -165,7 +165,7 @@ var _ = Describe("PivnetClient", func() {
 				),
 			)
 
-			_, err := client.Releases.GetByProductSlug("my-product-id")
+			_, err := client.Releases.List("my-product-id")
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("invalid character"))
 		})

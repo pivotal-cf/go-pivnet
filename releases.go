@@ -61,7 +61,7 @@ type CreateReleaseConfig struct {
 	EndOfAvailabilityDate string
 }
 
-func (r ReleasesService) GetByProductSlug(productSlug string) ([]Release, error) {
+func (r ReleasesService) List(productSlug string) ([]Release, error) {
 	url := fmt.Sprintf("/products/%s/releases", productSlug)
 
 	var response ReleasesResponse
