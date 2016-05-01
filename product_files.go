@@ -39,6 +39,26 @@ type ProductFile struct {
 	Description  string `json:"description,omitempty"`
 }
 
+func (p ProductFilesService) List(productSlug string) ([]ProductFile, error) {
+	url := fmt.Sprintf("/products/%s/product_files",
+		productSlug,
+	)
+	response := ProductFilesResponse{}
+
+	err := p.client.makeRequest(
+		"GET",
+		url,
+		http.StatusOK,
+		nil,
+		&response,
+	)
+	if err != nil {
+		return []ProductFile{}, err
+	}
+
+	return response.ProductFiles, nil
+}
+
 func (p ProductFilesService) ListForRelease(productSlug string, releaseID int) ([]ProductFile, error) {
 	url := fmt.Sprintf("/products/%s/releases/%d/product_files",
 		productSlug,

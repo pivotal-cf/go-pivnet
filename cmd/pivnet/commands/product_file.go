@@ -14,7 +14,7 @@ import (
 
 type ProductFilesCommand struct {
 	ProductSlug    string `long:"product-slug" description:"Product slug e.g. p-mysql" required:"true"`
-	ReleaseVersion string `long:"release-version" description:"Release version e.g. 0.1.2-rc1" required:"true"`
+	ReleaseVersion string `long:"release-version" description:"Release version e.g. 0.1.2-rc1"`
 }
 
 type ProductFileCommand struct {
@@ -36,6 +36,17 @@ type DeleteProductFileCommand struct {
 
 func (command *ProductFilesCommand) Execute([]string) error {
 	client := NewClient()
+
+	if command.ReleaseVersion == "" {
+		productFiles, err := client.ProductFiles.List(
+			command.ProductSlug,
+		)
+		if err != nil {
+			return err
+		}
+
+		return printProductFiles(productFiles)
+	}
 
 	releases, err := client.Releases.List(command.ProductSlug)
 	if err != nil {
@@ -62,6 +73,10 @@ func (command *ProductFilesCommand) Execute([]string) error {
 		return err
 	}
 
+	return printProductFiles(productFiles)
+}
+
+func printProductFiles(productFiles []pivnet.ProductFile) error {
 	switch Pivnet.Format {
 
 	case printAsTable:
