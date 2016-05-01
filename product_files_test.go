@@ -96,7 +96,7 @@ var _ = Describe("PivnetClient - product files", func() {
 		})
 
 		It("returns the product file without error", func() {
-			productFiles, err := client.ProductFiles.List(
+			productFiles, err := client.ProductFiles.ListForRelease(
 				productSlug,
 				releaseID,
 			)
@@ -112,7 +112,7 @@ var _ = Describe("PivnetClient - product files", func() {
 			})
 
 			It("returns an error", func() {
-				_, err := client.ProductFiles.List(
+				_, err := client.ProductFiles.ListForRelease(
 					productSlug,
 					releaseID,
 				)

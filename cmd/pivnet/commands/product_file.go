@@ -54,7 +54,7 @@ func (command *ProductFilesCommand) Execute([]string) error {
 		return fmt.Errorf("release not found")
 	}
 
-	productFiles, err := client.ProductFiles.List(
+	productFiles, err := client.ProductFiles.ListForRelease(
 		command.ProductSlug,
 		release.ID,
 	)

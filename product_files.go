@@ -39,7 +39,7 @@ type ProductFile struct {
 	Description  string `json:"description,omitempty"`
 }
 
-func (p ProductFilesService) List(productSlug string, releaseID int) ([]ProductFile, error) {
+func (p ProductFilesService) ListForRelease(productSlug string, releaseID int) ([]ProductFile, error) {
 	url := fmt.Sprintf("/products/%s/releases/%d/product_files",
 		productSlug,
 		releaseID,
