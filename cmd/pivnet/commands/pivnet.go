@@ -40,6 +40,8 @@ type PivnetCommand struct {
 	RemoveProductFile RemoveProductFileCommand `command:"remove-product-file" description:"Remove product file from release"`
 	DeleteProductFile DeleteProductFileCommand `command:"delete-product-file" description:"Delete product file"`
 
+	FileGroups FileGroupsCommand `command:"file-groups" description:"List file groups"`
+
 	Releases      ReleasesCommand      `command:"releases" description:"List releases"`
 	Release       ReleaseCommand       `command:"release" description:"Show release"`
 	DeleteRelease DeleteReleaseCommand `command:"delete-release" description:"Delete release"`

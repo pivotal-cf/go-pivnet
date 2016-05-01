@@ -956,6 +956,54 @@ var _ = Describe("pivnet cli", func() {
 		})
 	})
 
+	Describe("file-groups", func() {
+		var (
+			fileGroups []pivnet.FileGroup
+		)
+
+		BeforeEach(func() {
+			fileGroups = []pivnet.FileGroup{
+				pivnet.FileGroup{
+					ID:   1234,
+					Name: "some-file-group",
+				},
+				pivnet.FileGroup{
+					ID:   2345,
+					Name: "some-other-file-group",
+				},
+			}
+
+		})
+
+		It("displays product files", func() {
+			response := pivnet.FileGroupsResponse{
+				FileGroups: fileGroups,
+			}
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf("%s/products/%s/file_groups",
+							apiPrefix,
+							product.Slug,
+						),
+					),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, response),
+				),
+			)
+
+			session := runMainWithArgs(
+				"file-groups",
+				"--product-slug", product.Slug,
+			)
+
+			Eventually(session, executableTimeout).Should(gexec.Exit(0))
+			Expect(session).Should(gbytes.Say(fileGroups[0].Name))
+			Expect(session).Should(gbytes.Say(fileGroups[1].Name))
+		})
+	})
+
 	Describe("Release upgrade paths", func() {
 		It("displays release upgrade paths for the provided product slug and release version", func() {
 			releasesResponse := pivnet.ReleasesResponse{
