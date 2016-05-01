@@ -427,59 +427,142 @@ var _ = Describe("pivnet cli", func() {
 	})
 
 	Describe("User groups", func() {
-		It("displays user groups for the provided product slug and release version", func() {
-			releasesResponse := pivnet.ReleasesResponse{
-				Releases: releases,
-			}
+		var (
+			args []string
+		)
 
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(
-						"GET",
-						fmt.Sprintf("%s/products/%s/releases", apiPrefix, product.Slug),
-					),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, releasesResponse),
-				),
-			)
+		BeforeEach(func() {
+			args = []string{"user-groups"}
+		})
 
-			userGroups := []pivnet.UserGroup{
-				{
-					ID:   1234,
-					Name: "Some user group",
-				},
-				{
-					ID:   2345,
-					Name: "Another user group",
-				},
-			}
+		Context("when product slug and release version are not provided", func() {
+			It("displays all user groups", func() {
+				userGroups := []pivnet.UserGroup{
+					{
+						ID:   1234,
+						Name: "Some user group",
+					},
+					{
+						ID:   2345,
+						Name: "Another user group",
+					},
+				}
 
-			userGroupsResponse := pivnet.UserGroups{
-				UserGroups: userGroups,
-			}
+				userGroupsResponse := pivnet.UserGroups{
+					UserGroups: userGroups,
+				}
 
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(
-						"GET",
-						fmt.Sprintf(
-							"%s/products/%s/releases/%d/user_groups",
-							apiPrefix,
-							product.Slug,
-							release.ID,
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(
+							"GET",
+							fmt.Sprintf(
+								"%s/user_groups",
+								apiPrefix,
+							),
 						),
+						ghttp.RespondWithJSONEncoded(http.StatusOK, userGroupsResponse),
 					),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, userGroupsResponse),
-				),
-			)
+				)
 
-			session := runMainWithArgs(
-				"user-groups",
-				"--product-slug", product.Slug,
-				"--release-version", releases[0].Version,
-			)
+				session := runMainWithArgs(args...)
 
-			Eventually(session, executableTimeout).Should(gexec.Exit(0))
-			Expect(session).Should(gbytes.Say(userGroups[0].Name))
+				Eventually(session, executableTimeout).Should(gexec.Exit(0))
+				Expect(session).Should(gbytes.Say(userGroups[0].Name))
+			})
+		})
+
+		Context("when product slug and release version are provided", func() {
+			BeforeEach(func() {
+				args = append(
+					args,
+					"--product-slug", product.Slug,
+					"--release-version", releases[0].Version,
+				)
+			})
+
+			It("displays user groups for the provided product slug and release version", func() {
+				releasesResponse := pivnet.ReleasesResponse{
+					Releases: releases,
+				}
+
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(
+							"GET",
+							fmt.Sprintf("%s/products/%s/releases", apiPrefix, product.Slug),
+						),
+						ghttp.RespondWithJSONEncoded(http.StatusOK, releasesResponse),
+					),
+				)
+
+				userGroups := []pivnet.UserGroup{
+					{
+						ID:   1234,
+						Name: "Some user group",
+					},
+					{
+						ID:   2345,
+						Name: "Another user group",
+					},
+				}
+
+				userGroupsResponse := pivnet.UserGroups{
+					UserGroups: userGroups,
+				}
+
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(
+							"GET",
+							fmt.Sprintf(
+								"%s/products/%s/releases/%d/user_groups",
+								apiPrefix,
+								product.Slug,
+								release.ID,
+							),
+						),
+						ghttp.RespondWithJSONEncoded(http.StatusOK, userGroupsResponse),
+					),
+				)
+
+				session := runMainWithArgs(args...)
+
+				Eventually(session, executableTimeout).Should(gexec.Exit(0))
+				Expect(session).Should(gbytes.Say(userGroups[0].Name))
+			})
+		})
+
+		Context("when only product slug is provided", func() {
+			BeforeEach(func() {
+				args = append(
+					args,
+					"--product-slug", product.Slug,
+				)
+			})
+
+			It("exits with error", func() {
+				session := runMainWithArgs(args...)
+
+				Eventually(session, executableTimeout).Should(gexec.Exit(1))
+				Expect(server.ReceivedRequests()).To(HaveLen(0))
+			})
+		})
+
+		Context("when only release version is provided", func() {
+			BeforeEach(func() {
+				args = append(
+					args,
+					"--release-version", releases[0].Version,
+				)
+			})
+
+			It("exits with error", func() {
+				session := runMainWithArgs(args...)
+
+				Eventually(session, executableTimeout).Should(gexec.Exit(1))
+				Expect(server.ReceivedRequests()).To(HaveLen(0))
+			})
 		})
 	})
 

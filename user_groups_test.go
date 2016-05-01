@@ -43,7 +43,42 @@ var _ = Describe("PivnetClient - user groups", func() {
 		server.Close()
 	})
 
-	Describe("Get", func() {
+	Describe("List", func() {
+		It("returns all user groups", func() {
+			response := `{"user_groups": [{"id":2,"name":"group 1"},{"id": 3, "name": "group 2"}]}`
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/user_groups", apiPrefix)),
+					ghttp.RespondWith(http.StatusOK, response),
+				),
+			)
+
+			userGroups, err := client.UserGroups.List()
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(userGroups).To(HaveLen(2))
+			Expect(userGroups[0].ID).To(Equal(2))
+			Expect(userGroups[1].ID).To(Equal(3))
+		})
+
+		Context("when the server responds with a non-2XX status code", func() {
+			It("returns an error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", fmt.Sprintf("%s/user_groups", apiPrefix)),
+						ghttp.RespondWith(http.StatusTeapot, nil),
+					),
+				)
+
+				_, err := client.UserGroups.List()
+				Expect(err).To(MatchError(errors.New(
+					"Pivnet returned status code: 418 for the request - expected 200")))
+			})
+		})
+	})
+
+	Describe("List for release", func() {
 		var (
 			releaseID int
 		)
@@ -62,7 +97,7 @@ var _ = Describe("PivnetClient - user groups", func() {
 				),
 			)
 
-			userGroups, err := client.UserGroups.List("banana", releaseID)
+			userGroups, err := client.UserGroups.ListForRelease("banana", releaseID)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(userGroups).To(HaveLen(2))
@@ -79,7 +114,7 @@ var _ = Describe("PivnetClient - user groups", func() {
 					),
 				)
 
-				_, err := client.UserGroups.List("banana", releaseID)
+				_, err := client.UserGroups.ListForRelease("banana", releaseID)
 				Expect(err).To(MatchError(errors.New(
 					"Pivnet returned status code: 418 for the request - expected 200")))
 			})

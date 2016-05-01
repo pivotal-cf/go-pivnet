@@ -25,7 +25,25 @@ type UserGroup struct {
 	Description string `json:"description,omitempty"`
 }
 
-func (u UserGroupsService) List(productSlug string, releaseID int) ([]UserGroup, error) {
+func (u UserGroupsService) List() ([]UserGroup, error) {
+	url := "/user_groups"
+
+	var response UserGroups
+	err := u.client.makeRequest(
+		"GET",
+		url,
+		http.StatusOK,
+		nil,
+		&response,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return response.UserGroups, nil
+}
+
+func (u UserGroupsService) ListForRelease(productSlug string, releaseID int) ([]UserGroup, error) {
 	url := fmt.Sprintf(
 		"/products/%s/releases/%d/user_groups",
 		productSlug,
