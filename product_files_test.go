@@ -195,6 +195,73 @@ var _ = Describe("PivnetClient - product files", func() {
 	Describe("Get Product File", func() {
 		var (
 			productSlug   string
+			productFileID int
+
+			response           pivnet.ProductFileResponse
+			responseStatusCode int
+		)
+
+		BeforeEach(func() {
+			productSlug = "banana"
+			productFileID = 1234
+
+			response = pivnet.ProductFileResponse{pivnet.ProductFile{
+				ID:           productFileID,
+				AWSObjectKey: "something",
+			}}
+
+			responseStatusCode = http.StatusOK
+		})
+
+		JustBeforeEach(func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf(
+							"%s/products/%s/product_files/%d",
+							apiPrefix,
+							productSlug,
+							productFileID,
+						),
+					),
+					ghttp.RespondWithJSONEncoded(responseStatusCode, response),
+				),
+			)
+		})
+
+		It("returns the product file without error", func() {
+			productFile, err := client.ProductFiles.Get(
+				productSlug,
+				productFileID,
+			)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(productFile.ID).To(Equal(productFileID))
+			Expect(productFile.AWSObjectKey).To(Equal("something"))
+		})
+
+		Context("when the server responds with a non-2XX status code", func() {
+			BeforeEach(func() {
+				responseStatusCode = http.StatusTeapot
+			})
+
+			It("returns an error", func() {
+				_, err := client.ProductFiles.Get(
+					productSlug,
+					productFileID,
+				)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err).To(MatchError(errors.New(
+					"Pivnet returned status code: 418 for the request - expected 200")))
+			})
+		})
+	})
+
+	Describe("Get product file for release", func() {
+		var (
+			productSlug   string
 			releaseID     int
 			productFileID int
 
@@ -242,7 +309,7 @@ var _ = Describe("PivnetClient - product files", func() {
 		})
 
 		It("returns the product file without error", func() {
-			productFile, err := client.ProductFiles.Get(
+			productFile, err := client.ProductFiles.GetForRelease(
 				productSlug,
 				releaseID,
 				productFileID,
@@ -267,7 +334,7 @@ var _ = Describe("PivnetClient - product files", func() {
 			})
 
 			It("returns an error", func() {
-				_, err := client.ProductFiles.Get(
+				_, err := client.ProductFiles.GetForRelease(
 					productSlug,
 					releaseID,
 					productFileID,

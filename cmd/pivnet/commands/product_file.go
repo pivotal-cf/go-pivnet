@@ -19,7 +19,7 @@ type ProductFilesCommand struct {
 
 type ProductFileCommand struct {
 	ProductSlug    string `long:"product-slug" description:"Product slug e.g. p-mysql" required:"true"`
-	ReleaseVersion string `long:"release-version" description:"Release version e.g. 0.1.2-rc1" required:"true"`
+	ReleaseVersion string `long:"release-version" description:"Release version e.g. 0.1.2-rc1"`
 	ProductFileID  int    `long:"product-file-id" description:"Product file ID e.g. 1234" required:"true"`
 }
 
@@ -129,6 +129,17 @@ func printProductFiles(productFiles []pivnet.ProductFile) error {
 func (command *ProductFileCommand) Execute([]string) error {
 	client := NewClient()
 
+	if command.ReleaseVersion == "" {
+		productFile, err := client.ProductFiles.Get(
+			command.ProductSlug,
+			command.ProductFileID,
+		)
+		if err != nil {
+			return err
+		}
+		return printProductFiles([]pivnet.ProductFile{productFile})
+	}
+
 	releases, err := client.Releases.List(command.ProductSlug)
 	if err != nil {
 		return err
@@ -146,7 +157,7 @@ func (command *ProductFileCommand) Execute([]string) error {
 		return fmt.Errorf("release not found")
 	}
 
-	productFile, err := client.ProductFiles.Get(
+	productFile, err := client.ProductFiles.GetForRelease(
 		command.ProductSlug,
 		release.ID,
 		command.ProductFileID,

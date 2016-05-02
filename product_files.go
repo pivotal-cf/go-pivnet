@@ -80,7 +80,28 @@ func (p ProductFilesService) ListForRelease(productSlug string, releaseID int) (
 	return response.ProductFiles, nil
 }
 
-func (p ProductFilesService) Get(productSlug string, releaseID int, productFileID int) (ProductFile, error) {
+func (p ProductFilesService) Get(productSlug string, productFileID int) (ProductFile, error) {
+	url := fmt.Sprintf("/products/%s/product_files/%d",
+		productSlug,
+		productFileID,
+	)
+	response := ProductFileResponse{}
+
+	err := p.client.makeRequest(
+		"GET",
+		url,
+		http.StatusOK,
+		nil,
+		&response,
+	)
+	if err != nil {
+		return ProductFile{}, err
+	}
+
+	return response.ProductFile, nil
+}
+
+func (p ProductFilesService) GetForRelease(productSlug string, releaseID int, productFileID int) (ProductFile, error) {
 	url := fmt.Sprintf("/products/%s/releases/%d/product_files/%d",
 		productSlug,
 		releaseID,

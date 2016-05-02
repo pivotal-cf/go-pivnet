@@ -748,25 +748,13 @@ var _ = Describe("pivnet cli", func() {
 		)
 
 		BeforeEach(func() {
-			releasesResponse := pivnet.ReleasesResponse{
-				Releases: releases,
-			}
-
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(
-						"GET",
-						fmt.Sprintf("%s/products/%s/releases", apiPrefix, product.Slug),
-					),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, releasesResponse),
-				),
-			)
-
 			productFile = pivnet.ProductFile{
 				ID:   1234,
 				Name: "some-product-file",
 			}
+		})
 
+		It("displays product file", func() {
 			response := pivnet.ProductFileResponse{
 				ProductFile: productFile,
 			}
@@ -775,28 +763,73 @@ var _ = Describe("pivnet cli", func() {
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest(
 						"GET",
-						fmt.Sprintf("%s/products/%s/releases/%d/product_files/%d",
+						fmt.Sprintf("%s/products/%s/product_files/%d",
 							apiPrefix,
 							product.Slug,
-							release.ID,
 							productFile.ID,
 						),
 					),
 					ghttp.RespondWithJSONEncoded(http.StatusOK, response),
 				),
 			)
-		})
 
-		It("displays product file", func() {
 			session := runMainWithArgs(
 				"product-file",
 				"--product-slug", product.Slug,
-				"--release-version", release.Version,
 				"--product-file-id", strconv.Itoa(productFile.ID),
 			)
 
 			Eventually(session, executableTimeout).Should(gexec.Exit(0))
 			Expect(session).Should(gbytes.Say(productFile.Name))
+		})
+
+		Context("when release version is provided", func() {
+			BeforeEach(func() {
+				releasesResponse := pivnet.ReleasesResponse{
+					Releases: releases,
+				}
+
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(
+							"GET",
+							fmt.Sprintf("%s/products/%s/releases", apiPrefix, product.Slug),
+						),
+						ghttp.RespondWithJSONEncoded(http.StatusOK, releasesResponse),
+					),
+				)
+			})
+
+			It("displays product files for release", func() {
+				response := pivnet.ProductFileResponse{
+					ProductFile: productFile,
+				}
+
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(
+							"GET",
+							fmt.Sprintf("%s/products/%s/releases/%d/product_files/%d",
+								apiPrefix,
+								product.Slug,
+								release.ID,
+								productFile.ID,
+							),
+						),
+						ghttp.RespondWithJSONEncoded(http.StatusOK, response),
+					),
+				)
+
+				session := runMainWithArgs(
+					"product-file",
+					"--product-slug", product.Slug,
+					"--release-version", release.Version,
+					"--product-file-id", strconv.Itoa(productFile.ID),
+				)
+
+				Eventually(session, executableTimeout).Should(gexec.Exit(0))
+				Expect(session).Should(gbytes.Say(productFile.Name))
+			})
 		})
 	})
 
