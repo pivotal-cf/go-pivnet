@@ -168,7 +168,6 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 	Describe("Get File group", func() {
 		var (
 			productSlug string
-			releaseID   int
 			fileGroupID int
 
 			response           pivnet.FileGroup
@@ -177,7 +176,6 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 
 		BeforeEach(func() {
 			productSlug = "banana"
-			releaseID = 12
 			fileGroupID = 1234
 
 			response = pivnet.FileGroup{
@@ -194,10 +192,9 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 					ghttp.VerifyRequest(
 						"GET",
 						fmt.Sprintf(
-							"%s/products/%s/releases/%d/file_groups/%d",
+							"%s/products/%s/file_groups/%d",
 							apiPrefix,
 							productSlug,
-							releaseID,
 							fileGroupID,
 						),
 					),
@@ -206,10 +203,9 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 			)
 		})
 
-		It("returns the product file without error", func() {
+		It("returns the file group without error", func() {
 			fileGroup, err := client.FileGroups.Get(
 				productSlug,
-				releaseID,
 				fileGroupID,
 			)
 			Expect(err).NotTo(HaveOccurred())
@@ -226,7 +222,6 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 			It("returns an error", func() {
 				_, err := client.FileGroups.Get(
 					productSlug,
-					releaseID,
 					fileGroupID,
 				)
 				Expect(err).To(HaveOccurred())

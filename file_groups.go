@@ -43,10 +43,9 @@ func (e FileGroupsService) List(productSlug string) ([]FileGroup, error) {
 	return response.FileGroups, nil
 }
 
-func (p FileGroupsService) Get(productSlug string, releaseID int, fileGroupID int) (FileGroup, error) {
-	url := fmt.Sprintf("/products/%s/releases/%d/file_groups/%d",
+func (p FileGroupsService) Get(productSlug string, fileGroupID int) (FileGroup, error) {
+	url := fmt.Sprintf("/products/%s/file_groups/%d",
 		productSlug,
-		releaseID,
 		fileGroupID,
 	)
 	response := FileGroup{}
