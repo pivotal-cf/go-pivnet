@@ -163,7 +163,7 @@ var _ = Describe("PivnetClient - product files", func() {
 			)
 		})
 
-		It("returns the product file without error", func() {
+		It("returns the product files without error", func() {
 			productFiles, err := client.ProductFiles.ListForRelease(
 				productSlug,
 				releaseID,
@@ -321,7 +321,7 @@ var _ = Describe("PivnetClient - product files", func() {
 				}
 			})
 
-			It("creates the release with the minimum required fields", func() {
+			It("creates the product file with the minimum required fields", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("POST", apiPrefix+"/products/"+productSlug+"/product_files"),

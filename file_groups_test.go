@@ -92,6 +92,79 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 		})
 	})
 
+	Describe("List for release", func() {
+		var (
+			productSlug string
+			releaseID   int
+
+			response           pivnet.FileGroupsResponse
+			responseStatusCode int
+		)
+
+		BeforeEach(func() {
+			productSlug = "banana"
+			releaseID = 12
+
+			response = pivnet.FileGroupsResponse{[]pivnet.FileGroup{
+				{
+					ID:   1234,
+					Name: "something",
+				},
+				{
+					ID:   2345,
+					Name: "something-else",
+				},
+			}}
+
+			responseStatusCode = http.StatusOK
+		})
+
+		JustBeforeEach(func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf(
+							"%s/products/%s/releases/%d/file_groups",
+							apiPrefix,
+							productSlug,
+							releaseID,
+						),
+					),
+					ghttp.RespondWithJSONEncoded(responseStatusCode, response),
+				),
+			)
+		})
+
+		It("returns the product file without error", func() {
+			productFiles, err := client.FileGroups.ListForRelease(
+				productSlug,
+				releaseID,
+			)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(productFiles).To(HaveLen(2))
+			Expect(productFiles[0].ID).To(Equal(1234))
+		})
+
+		Context("when the server responds with a non-2XX status code", func() {
+			BeforeEach(func() {
+				responseStatusCode = http.StatusTeapot
+			})
+
+			It("returns an error", func() {
+				_, err := client.FileGroups.ListForRelease(
+					productSlug,
+					releaseID,
+				)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err).To(MatchError(errors.New(
+					"Pivnet returned status code: 418 for the request - expected 200")))
+			})
+		})
+	})
+
 	Describe("Delete File Group", func() {
 		var (
 			id = 1234

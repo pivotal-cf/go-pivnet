@@ -14,7 +14,8 @@ import (
 )
 
 type FileGroupsCommand struct {
-	ProductSlug string `long:"product-slug" description:"Product slug e.g. p-mysql" required:"true"`
+	ProductSlug    string `long:"product-slug" description:"Product slug e.g. p-mysql" required:"true"`
+	ReleaseVersion string `long:"release-version" description:"Release version e.g. 0.1.2-rc1"`
 }
 
 type DeleteFileGroupCommand struct {
@@ -25,8 +26,36 @@ type DeleteFileGroupCommand struct {
 func (command *FileGroupsCommand) Execute([]string) error {
 	client := NewClient()
 
-	fileGroups, err := client.FileGroups.List(
+	if command.ReleaseVersion == "" {
+		fileGroups, err := client.FileGroups.List(
+			command.ProductSlug,
+		)
+		if err != nil {
+			return err
+		}
+		return printFileGroups(fileGroups)
+	}
+
+	releases, err := client.Releases.List(command.ProductSlug)
+	if err != nil {
+		return err
+	}
+
+	var release pivnet.Release
+	for _, r := range releases {
+		if r.Version == command.ReleaseVersion {
+			release = r
+			break
+		}
+	}
+
+	if release.Version != command.ReleaseVersion {
+		return fmt.Errorf("release not found")
+	}
+
+	fileGroups, err := client.FileGroups.ListForRelease(
 		command.ProductSlug,
+		release.ID,
 	)
 	if err != nil {
 		return err

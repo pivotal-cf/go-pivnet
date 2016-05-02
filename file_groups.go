@@ -64,3 +64,24 @@ func (p FileGroupsService) Delete(productSlug string, id int) (FileGroup, error)
 
 	return response, nil
 }
+
+func (p FileGroupsService) ListForRelease(productSlug string, releaseID int) ([]FileGroup, error) {
+	url := fmt.Sprintf("/products/%s/releases/%d/file_groups",
+		productSlug,
+		releaseID,
+	)
+	response := FileGroupsResponse{}
+
+	err := p.client.makeRequest(
+		"GET",
+		url,
+		http.StatusOK,
+		nil,
+		&response,
+	)
+	if err != nil {
+		return []FileGroup{}, err
+	}
+
+	return response.FileGroups, nil
+}
