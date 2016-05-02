@@ -85,7 +85,7 @@ func (command *ProductFilesCommand) Execute([]string) error {
 func printProductFiles(productFiles []pivnet.ProductFile) error {
 	switch Pivnet.Format {
 
-	case printAsTable:
+	case PrintAsTable:
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{
 			"ID",
@@ -105,7 +105,7 @@ func printProductFiles(productFiles []pivnet.ProductFile) error {
 		}
 		table.Render()
 		return nil
-	case printAsJSON:
+	case PrintAsJSON:
 		b, err := json.Marshal(productFiles)
 		if err != nil {
 			return err
@@ -113,7 +113,7 @@ func printProductFiles(productFiles []pivnet.ProductFile) error {
 
 		fmt.Printf("%s\n", string(b))
 		return nil
-	case printAsYAML:
+	case PrintAsYAML:
 		b, err := yaml.Marshal(productFiles)
 		if err != nil {
 			return err
@@ -168,7 +168,7 @@ func (command *ProductFileCommand) Execute([]string) error {
 
 	switch Pivnet.Format {
 
-	case printAsTable:
+	case PrintAsTable:
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{
 			"ID",
@@ -192,7 +192,7 @@ func (command *ProductFileCommand) Execute([]string) error {
 		table.Append(productFileAsString)
 		table.Render()
 		return nil
-	case printAsJSON:
+	case PrintAsJSON:
 		b, err := json.Marshal(productFile)
 		if err != nil {
 			return err
@@ -200,7 +200,7 @@ func (command *ProductFileCommand) Execute([]string) error {
 
 		fmt.Printf("%s\n", string(b))
 		return nil
-	case printAsYAML:
+	case PrintAsYAML:
 		b, err := yaml.Marshal(productFile)
 		if err != nil {
 			return err
@@ -289,7 +289,7 @@ func (command *DeleteProductFileCommand) Execute([]string) error {
 	}
 
 	switch Pivnet.Format {
-	case printAsTable:
+	case PrintAsTable:
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{
 			"ID",
@@ -313,7 +313,7 @@ func (command *DeleteProductFileCommand) Execute([]string) error {
 		table.Append(productFileAsString)
 		table.Render()
 		return nil
-	case printAsJSON:
+	case PrintAsJSON:
 		b, err := json.Marshal(productFile)
 		if err != nil {
 			return err
@@ -321,7 +321,7 @@ func (command *DeleteProductFileCommand) Execute([]string) error {
 
 		fmt.Printf("%s\n", string(b))
 		return nil
-	case printAsYAML:
+	case PrintAsYAML:
 		b, err := yaml.Marshal(productFile)
 		if err != nil {
 			return err

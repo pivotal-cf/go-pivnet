@@ -43,7 +43,7 @@ func (command *ReleaseUpgradePathsCommand) Execute([]string) error {
 	}
 
 	switch Pivnet.Format {
-	case printAsTable:
+	case PrintAsTable:
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{
 			"ID",
@@ -58,7 +58,7 @@ func (command *ReleaseUpgradePathsCommand) Execute([]string) error {
 		}
 		table.Render()
 		return nil
-	case printAsJSON:
+	case PrintAsJSON:
 		b, err := json.Marshal(releaseUpgradePaths)
 		if err != nil {
 			return err
@@ -66,7 +66,7 @@ func (command *ReleaseUpgradePathsCommand) Execute([]string) error {
 
 		fmt.Printf("%s\n", string(b))
 		return nil
-	case printAsYAML:
+	case PrintAsYAML:
 		b, err := yaml.Marshal(releaseUpgradePaths)
 		if err != nil {
 			return err

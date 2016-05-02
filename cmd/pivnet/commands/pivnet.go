@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/pivotal-cf-experimental/go-pivnet"
@@ -10,11 +11,15 @@ import (
 )
 
 const (
-	printAsTable = "table"
-	printAsJSON  = "json"
-	printAsYAML  = "yaml"
+	PrintAsTable = "table"
+	PrintAsJSON  = "json"
+	PrintAsYAML  = "yaml"
 
 	defaultHost = "https://network.pivotal.io"
+)
+
+var (
+	OutWriter io.Writer
 )
 
 type PivnetCommand struct {
@@ -58,6 +63,8 @@ type PivnetCommand struct {
 var Pivnet PivnetCommand
 
 func init() {
+	OutWriter = os.Stdout
+
 	Pivnet.Version = func() {
 		fmt.Println(version.Version)
 		os.Exit(0)

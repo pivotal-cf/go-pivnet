@@ -3,7 +3,6 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 	"strconv"
 
 	"gopkg.in/yaml.v2"
@@ -31,34 +30,37 @@ func (command *EULAsCommand) Execute([]string) error {
 		return err
 	}
 
+	return printEULAs(eulas)
+}
+
+func printEULA(eula pivnet.EULA) error {
 	switch Pivnet.Format {
-	case printAsTable:
-		table := tablewriter.NewWriter(os.Stdout)
+	case PrintAsTable:
+		table := tablewriter.NewWriter(OutWriter)
 		table.SetHeader([]string{"ID", "Slug", "Name"})
 
-		for _, e := range eulas {
-			eulaAsString := []string{
-				strconv.Itoa(e.ID), e.Slug, e.Name,
-			}
-			table.Append(eulaAsString)
+		eulaAsString := []string{
+			strconv.Itoa(eula.ID), eula.Slug, eula.Name,
 		}
+		table.Append(eulaAsString)
 		table.Render()
 		return nil
-	case printAsJSON:
-		b, err := json.Marshal(eulas)
+	case PrintAsJSON:
+		b, err := json.Marshal(eula)
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("%s\n", string(b))
+		OutWriter.Write(b)
 		return nil
-	case printAsYAML:
-		b, err := yaml.Marshal(eulas)
+	case PrintAsYAML:
+		b, err := yaml.Marshal(eula)
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("---\n%s\n", string(b))
+		output := fmt.Sprintf("---\n%s\n", string(b))
+		OutWriter.Write([]byte(output))
 		return nil
 	}
 
@@ -72,32 +74,39 @@ func (command *EULACommand) Execute([]string) error {
 		return err
 	}
 
+	return printEULA(eula)
+}
+
+func printEULAs(eulas []pivnet.EULA) error {
 	switch Pivnet.Format {
-	case printAsTable:
-		table := tablewriter.NewWriter(os.Stdout)
+	case PrintAsTable:
+		table := tablewriter.NewWriter(OutWriter)
 		table.SetHeader([]string{"ID", "Slug", "Name"})
 
-		eulaAsString := []string{
-			strconv.Itoa(eula.ID), eula.Slug, eula.Name,
+		for _, e := range eulas {
+			eulaAsString := []string{
+				strconv.Itoa(e.ID), e.Slug, e.Name,
+			}
+			table.Append(eulaAsString)
 		}
-		table.Append(eulaAsString)
 		table.Render()
 		return nil
-	case printAsJSON:
-		b, err := json.Marshal(eula)
+	case PrintAsJSON:
+		b, err := json.Marshal(eulas)
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("%s\n", string(b))
+		OutWriter.Write(b)
 		return nil
-	case printAsYAML:
-		b, err := yaml.Marshal(eula)
+	case PrintAsYAML:
+		b, err := yaml.Marshal(eulas)
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("---\n%s\n", string(b))
+		output := fmt.Sprintf("---\n%s\n", string(b))
+		OutWriter.Write([]byte(output))
 		return nil
 	}
 

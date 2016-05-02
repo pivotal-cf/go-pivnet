@@ -72,7 +72,7 @@ func (command *FileGroupsCommand) Execute([]string) error {
 func printFileGroups(fileGroups []pivnet.FileGroup) error {
 	switch Pivnet.Format {
 
-	case printAsTable:
+	case PrintAsTable:
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{
 			"ID",
@@ -96,7 +96,7 @@ func printFileGroups(fileGroups []pivnet.FileGroup) error {
 		}
 		table.Render()
 		return nil
-	case printAsJSON:
+	case PrintAsJSON:
 		b, err := json.Marshal(fileGroups)
 		if err != nil {
 			return err
@@ -104,7 +104,7 @@ func printFileGroups(fileGroups []pivnet.FileGroup) error {
 
 		fmt.Printf("%s\n", string(b))
 		return nil
-	case printAsYAML:
+	case PrintAsYAML:
 		b, err := yaml.Marshal(fileGroups)
 		if err != nil {
 			return err

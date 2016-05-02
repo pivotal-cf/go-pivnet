@@ -43,7 +43,7 @@ func (command *ReleaseDependenciesCommand) Execute([]string) error {
 	}
 
 	switch Pivnet.Format {
-	case printAsTable:
+	case PrintAsTable:
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{
 			"ID",
@@ -62,7 +62,7 @@ func (command *ReleaseDependenciesCommand) Execute([]string) error {
 		}
 		table.Render()
 		return nil
-	case printAsJSON:
+	case PrintAsJSON:
 		b, err := json.Marshal(releaseDependencies)
 		if err != nil {
 			return err
@@ -70,7 +70,7 @@ func (command *ReleaseDependenciesCommand) Execute([]string) error {
 
 		fmt.Printf("%s\n", string(b))
 		return nil
-	case printAsYAML:
+	case PrintAsYAML:
 		b, err := yaml.Marshal(releaseDependencies)
 		if err != nil {
 			return err

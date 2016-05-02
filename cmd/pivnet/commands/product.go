@@ -26,7 +26,7 @@ func (command *ProductCommand) Execute([]string) error {
 	}
 
 	switch Pivnet.Format {
-	case printAsTable:
+	case PrintAsTable:
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"ID", "Slug", "Name"})
 
@@ -36,7 +36,7 @@ func (command *ProductCommand) Execute([]string) error {
 		table.Append(productAsString)
 		table.Render()
 		return nil
-	case printAsJSON:
+	case PrintAsJSON:
 		b, err := json.Marshal(product)
 		if err != nil {
 			return err
@@ -44,7 +44,7 @@ func (command *ProductCommand) Execute([]string) error {
 
 		fmt.Printf("%s\n", string(b))
 		return nil
-	case printAsYAML:
+	case PrintAsYAML:
 		b, err := yaml.Marshal(product)
 		if err != nil {
 			return err
@@ -65,7 +65,7 @@ func (command *ProductsCommand) Execute([]string) error {
 	}
 
 	switch Pivnet.Format {
-	case printAsTable:
+	case PrintAsTable:
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"ID", "Slug", "Name"})
 
@@ -77,7 +77,7 @@ func (command *ProductsCommand) Execute([]string) error {
 		}
 		table.Render()
 		return nil
-	case printAsJSON:
+	case PrintAsJSON:
 		b, err := json.Marshal(products)
 		if err != nil {
 			return err
@@ -85,7 +85,7 @@ func (command *ProductsCommand) Execute([]string) error {
 
 		fmt.Printf("%s\n", string(b))
 		return nil
-	case printAsYAML:
+	case PrintAsYAML:
 		b, err := yaml.Marshal(products)
 		if err != nil {
 			return err

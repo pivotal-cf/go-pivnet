@@ -62,7 +62,7 @@ func (command *UserGroupsCommand) Execute([]string) error {
 func printUserGroups(userGroups []pivnet.UserGroup) error {
 
 	switch Pivnet.Format {
-	case printAsTable:
+	case PrintAsTable:
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"ID", "Name", "Description"})
 
@@ -73,7 +73,7 @@ func printUserGroups(userGroups []pivnet.UserGroup) error {
 		}
 		table.Render()
 		return nil
-	case printAsJSON:
+	case PrintAsJSON:
 		b, err := json.Marshal(userGroups)
 		if err != nil {
 			return err
@@ -81,7 +81,7 @@ func printUserGroups(userGroups []pivnet.UserGroup) error {
 
 		fmt.Printf("%s\n", string(b))
 		return nil
-	case printAsYAML:
+	case PrintAsYAML:
 		b, err := yaml.Marshal(userGroups)
 		if err != nil {
 			return err

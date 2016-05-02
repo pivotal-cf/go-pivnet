@@ -34,7 +34,7 @@ func (command *ReleasesCommand) Execute([]string) error {
 	}
 
 	switch Pivnet.Format {
-	case printAsTable:
+	case PrintAsTable:
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"ID", "Version", "Description"})
 
@@ -45,7 +45,7 @@ func (command *ReleasesCommand) Execute([]string) error {
 		}
 		table.Render()
 		return nil
-	case printAsJSON:
+	case PrintAsJSON:
 		b, err := json.Marshal(releases)
 		if err != nil {
 			return err
@@ -53,7 +53,7 @@ func (command *ReleasesCommand) Execute([]string) error {
 
 		fmt.Printf("%s\n", string(b))
 		return nil
-	case printAsYAML:
+	case PrintAsYAML:
 		b, err := yaml.Marshal(releases)
 		if err != nil {
 			return err
@@ -91,7 +91,7 @@ func (command *ReleaseCommand) Execute([]string) error {
 	}
 
 	switch Pivnet.Format {
-	case printAsTable:
+	case PrintAsTable:
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"ID", "Version", "Description"})
 
@@ -100,7 +100,7 @@ func (command *ReleaseCommand) Execute([]string) error {
 		})
 		table.Render()
 		return nil
-	case printAsJSON:
+	case PrintAsJSON:
 		b, err := json.Marshal(release)
 		if err != nil {
 			return err
@@ -108,7 +108,7 @@ func (command *ReleaseCommand) Execute([]string) error {
 
 		fmt.Printf("%s\n", string(b))
 		return nil
-	case printAsYAML:
+	case PrintAsYAML:
 		b, err := yaml.Marshal(release)
 		if err != nil {
 			return err
