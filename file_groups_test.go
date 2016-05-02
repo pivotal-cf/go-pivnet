@@ -137,14 +137,14 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 		})
 
 		It("returns the product file without error", func() {
-			productFiles, err := client.FileGroups.ListForRelease(
+			fileGroups, err := client.FileGroups.ListForRelease(
 				productSlug,
 				releaseID,
 			)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(productFiles).To(HaveLen(2))
-			Expect(productFiles[0].ID).To(Equal(1234))
+			Expect(fileGroups).To(HaveLen(2))
+			Expect(fileGroups[0].ID).To(Equal(1234))
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
@@ -156,6 +156,78 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 				_, err := client.FileGroups.ListForRelease(
 					productSlug,
 					releaseID,
+				)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err).To(MatchError(errors.New(
+					"Pivnet returned status code: 418 for the request - expected 200")))
+			})
+		})
+	})
+
+	Describe("Get File group", func() {
+		var (
+			productSlug string
+			releaseID   int
+			fileGroupID int
+
+			response           pivnet.FileGroup
+			responseStatusCode int
+		)
+
+		BeforeEach(func() {
+			productSlug = "banana"
+			releaseID = 12
+			fileGroupID = 1234
+
+			response = pivnet.FileGroup{
+				ID:   fileGroupID,
+				Name: "something",
+			}
+
+			responseStatusCode = http.StatusOK
+		})
+
+		JustBeforeEach(func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf(
+							"%s/products/%s/releases/%d/file_groups/%d",
+							apiPrefix,
+							productSlug,
+							releaseID,
+							fileGroupID,
+						),
+					),
+					ghttp.RespondWithJSONEncoded(responseStatusCode, response),
+				),
+			)
+		})
+
+		It("returns the product file without error", func() {
+			fileGroup, err := client.FileGroups.Get(
+				productSlug,
+				releaseID,
+				fileGroupID,
+			)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(fileGroup.ID).To(Equal(fileGroupID))
+			Expect(fileGroup.Name).To(Equal("something"))
+		})
+
+		Context("when the server responds with a non-2XX status code", func() {
+			BeforeEach(func() {
+				responseStatusCode = http.StatusTeapot
+			})
+
+			It("returns an error", func() {
+				_, err := client.FileGroups.Get(
+					productSlug,
+					releaseID,
+					fileGroupID,
 				)
 				Expect(err).To(HaveOccurred())
 

@@ -18,6 +18,12 @@ type FileGroupsCommand struct {
 	ReleaseVersion string `long:"release-version" description:"Release version e.g. 0.1.2-rc1"`
 }
 
+type FileGroupCommand struct {
+	ProductSlug    string `long:"product-slug" description:"Product slug e.g. p-mysql" required:"true"`
+	ReleaseVersion string `long:"release-version" description:"Release version e.g. 0.1.2-rc1" required:"true"`
+	FileGroupID    int    `long:"file-group-id" description:"Filegroup ID e.g. 1234" required:"true"`
+}
+
 type DeleteFileGroupCommand struct {
 	ProductSlug string `long:"product-slug" description:"Product slug e.g. p-mysql" required:"true"`
 	FileGroupID int    `long:"file-group-id" description:"File group ID e.g. 1234" required:"true"`
@@ -110,6 +116,38 @@ func printFileGroups(fileGroups []pivnet.FileGroup) error {
 	}
 
 	return nil
+}
+
+func (command *FileGroupCommand) Execute([]string) error {
+	client := NewClient()
+
+	releases, err := client.Releases.List(command.ProductSlug)
+	if err != nil {
+		return err
+	}
+
+	var release pivnet.Release
+	for _, r := range releases {
+		if r.Version == command.ReleaseVersion {
+			release = r
+			break
+		}
+	}
+
+	if release.Version != command.ReleaseVersion {
+		return fmt.Errorf("release not found")
+	}
+
+	fileGroup, err := client.FileGroups.Get(
+		command.ProductSlug,
+		release.ID,
+		command.FileGroupID,
+	)
+	if err != nil {
+		return err
+	}
+
+	return printFileGroups([]pivnet.FileGroup{fileGroup})
 }
 
 func (command *DeleteFileGroupCommand) Execute([]string) error {

@@ -43,6 +43,28 @@ func (e FileGroupsService) List(productSlug string) ([]FileGroup, error) {
 	return response.FileGroups, nil
 }
 
+func (p FileGroupsService) Get(productSlug string, releaseID int, fileGroupID int) (FileGroup, error) {
+	url := fmt.Sprintf("/products/%s/releases/%d/file_groups/%d",
+		productSlug,
+		releaseID,
+		fileGroupID,
+	)
+	response := FileGroup{}
+
+	err := p.client.makeRequest(
+		"GET",
+		url,
+		http.StatusOK,
+		nil,
+		&response,
+	)
+	if err != nil {
+		return FileGroup{}, err
+	}
+
+	return response, nil
+}
+
 func (p FileGroupsService) Delete(productSlug string, id int) (FileGroup, error) {
 	url := fmt.Sprintf(
 		"/products/%s/file_groups/%d",
