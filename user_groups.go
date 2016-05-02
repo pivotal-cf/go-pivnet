@@ -96,3 +96,23 @@ func (u UserGroupsService) Add(productSlug string, releaseID int, userGroupID in
 
 	return nil
 }
+
+func (u UserGroupsService) Get(userGroupID int) (UserGroup, error) {
+	url := fmt.Sprintf("/user_groups/%d",
+		userGroupID,
+	)
+	response := UserGroup{}
+
+	err := u.client.makeRequest(
+		"GET",
+		url,
+		http.StatusOK,
+		nil,
+		&response,
+	)
+	if err != nil {
+		return UserGroup{}, err
+	}
+
+	return response, nil
+}

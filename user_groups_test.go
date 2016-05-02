@@ -170,4 +170,66 @@ var _ = Describe("PivnetClient - user groups", func() {
 			})
 		})
 	})
+
+	Describe("Get User Group", func() {
+		var (
+			userGroupID int
+
+			response           pivnet.UserGroup
+			responseStatusCode int
+		)
+
+		BeforeEach(func() {
+			userGroupID = 1234
+
+			response = pivnet.UserGroup{
+				ID:   userGroupID,
+				Name: "something",
+			}
+
+			responseStatusCode = http.StatusOK
+		})
+
+		JustBeforeEach(func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf(
+							"%s/user_groups/%d",
+							apiPrefix,
+							userGroupID,
+						),
+					),
+					ghttp.RespondWithJSONEncoded(responseStatusCode, response),
+				),
+			)
+		})
+
+		It("returns the user group without error", func() {
+			userGroup, err := client.UserGroups.Get(
+				userGroupID,
+			)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(userGroup.ID).To(Equal(userGroupID))
+			Expect(userGroup.Name).To(Equal("something"))
+		})
+
+		Context("when the server responds with a non-2XX status code", func() {
+			BeforeEach(func() {
+				responseStatusCode = http.StatusTeapot
+			})
+
+			It("returns an error", func() {
+				_, err := client.UserGroups.Get(
+					userGroupID,
+				)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err).To(MatchError(errors.New(
+					"Pivnet returned status code: 418 for the request - expected 200")))
+			})
+		})
+	})
 })
