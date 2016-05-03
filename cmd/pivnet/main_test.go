@@ -28,11 +28,9 @@ var _ = Describe("pivnet cli", func() {
 		server *ghttp.Server
 		host   string
 
-		product  pivnet.Product
-		products []pivnet.Product
+		product pivnet.Product
 
 		releases []pivnet.Release
-		release  pivnet.Release
 	)
 
 	BeforeEach(func() {
@@ -45,23 +43,12 @@ var _ = Describe("pivnet cli", func() {
 			Name: "some-product-name",
 		}
 
-		products = []pivnet.Product{
-			product,
-			{
-				ID:   2345,
-				Slug: "another-product-slug",
-				Name: "another-product-name",
-			},
-		}
-
-		release = pivnet.Release{
-			ID:          1234,
-			Version:     "version 0.2.3",
-			Description: "Some release with some description.",
-		}
-
 		releases = []pivnet.Release{
-			release,
+			{
+				ID:          1234,
+				Version:     "version 0.2.3",
+				Description: "Some release with some description.",
+			},
 			{
 				ID:          2345,
 				Version:     "version 0.3.4",
@@ -270,7 +257,7 @@ var _ = Describe("pivnet cli", func() {
 								"%s/products/%s/releases/%d/user_groups",
 								apiPrefix,
 								product.Slug,
-								release.ID,
+								releases[0].ID,
 							),
 						),
 						ghttp.RespondWithJSONEncoded(http.StatusOK, userGroupsResponse),
@@ -360,7 +347,7 @@ var _ = Describe("pivnet cli", func() {
 							"%s/products/%s/releases/%d/dependencies",
 							apiPrefix,
 							product.Slug,
-							release.ID,
+							releases[0].ID,
 						),
 					),
 					ghttp.RespondWithJSONEncoded(http.StatusOK, releaseDependenciesResponse),
@@ -452,7 +439,7 @@ var _ = Describe("pivnet cli", func() {
 							fmt.Sprintf("%s/products/%s/releases/%d/product_files",
 								apiPrefix,
 								product.Slug,
-								release.ID,
+								releases[0].ID,
 							),
 						),
 						ghttp.RespondWithJSONEncoded(http.StatusOK, response),
@@ -464,7 +451,7 @@ var _ = Describe("pivnet cli", func() {
 				session := runMainWithArgs(
 					"product-files",
 					"--product-slug", product.Slug,
-					"--release-version", release.Version,
+					"--release-version", releases[0].Version,
 				)
 
 				Eventually(session, executableTimeout).Should(gexec.Exit(0))
@@ -544,7 +531,7 @@ var _ = Describe("pivnet cli", func() {
 							fmt.Sprintf("%s/products/%s/releases/%d/product_files/%d",
 								apiPrefix,
 								product.Slug,
-								release.ID,
+								releases[0].ID,
 								productFile.ID,
 							),
 						),
@@ -555,7 +542,7 @@ var _ = Describe("pivnet cli", func() {
 				session := runMainWithArgs(
 					"product-file",
 					"--product-slug", product.Slug,
-					"--release-version", release.Version,
+					"--release-version", releases[0].Version,
 					"--product-file-id", strconv.Itoa(productFile.ID),
 				)
 
@@ -602,7 +589,7 @@ var _ = Describe("pivnet cli", func() {
 							"%s/products/%s/releases/%d/add_product_file",
 							apiPrefix,
 							product.Slug,
-							release.ID,
+							releases[0].ID,
 						),
 					),
 					ghttp.RespondWithJSONEncoded(http.StatusNoContent, response),
@@ -614,7 +601,7 @@ var _ = Describe("pivnet cli", func() {
 			session := runMainWithArgs(
 				"add-product-file",
 				"--product-slug", product.Slug,
-				"--release-version", release.Version,
+				"--release-version", releases[0].Version,
 				"--product-file-id", strconv.Itoa(productFile.ID),
 			)
 
@@ -659,7 +646,7 @@ var _ = Describe("pivnet cli", func() {
 							"%s/products/%s/releases/%d/remove_product_file",
 							apiPrefix,
 							product.Slug,
-							release.ID,
+							releases[0].ID,
 						),
 					),
 					ghttp.RespondWithJSONEncoded(http.StatusNoContent, response),
@@ -671,7 +658,7 @@ var _ = Describe("pivnet cli", func() {
 			session := runMainWithArgs(
 				"remove-product-file",
 				"--product-slug", product.Slug,
-				"--release-version", release.Version,
+				"--release-version", releases[0].Version,
 				"--product-file-id", strconv.Itoa(productFile.ID),
 			)
 
@@ -795,7 +782,7 @@ var _ = Describe("pivnet cli", func() {
 							fmt.Sprintf("%s/products/%s/releases/%d/file_groups",
 								apiPrefix,
 								product.Slug,
-								release.ID,
+								releases[0].ID,
 							),
 						),
 						ghttp.RespondWithJSONEncoded(http.StatusOK, response),
@@ -807,7 +794,7 @@ var _ = Describe("pivnet cli", func() {
 				session := runMainWithArgs(
 					"file-groups",
 					"--product-slug", product.Slug,
-					"--release-version", release.Version,
+					"--release-version", releases[0].Version,
 				)
 
 				Eventually(session, executableTimeout).Should(gexec.Exit(0))
@@ -940,7 +927,7 @@ var _ = Describe("pivnet cli", func() {
 							"%s/products/%s/releases/%d/upgrade_paths",
 							apiPrefix,
 							product.Slug,
-							release.ID,
+							releases[0].ID,
 						),
 					),
 					ghttp.RespondWithJSONEncoded(http.StatusOK, releaseUpgradePathsResponse),
