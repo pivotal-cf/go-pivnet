@@ -49,30 +49,29 @@ var _ = Describe("eula commands", func() {
 		server.Close()
 	})
 
-	Describe("listing EULAs", func() {
-		It("lists all EULAs", func() {
-			eulasResponse := pivnet.EULAsResponse{
-				EULAs: eulas,
-			}
+	It("lists all EULAs", func() {
+		eulasResponse := pivnet.EULAsResponse{
+			EULAs: eulas,
+		}
 
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/eulas", apiPrefix)),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, eulasResponse),
-				),
-			)
+		server.AppendHandlers(
+			ghttp.CombineHandlers(
+				ghttp.VerifyRequest("GET", fmt.Sprintf("%s/eulas", apiPrefix)),
+				ghttp.RespondWithJSONEncoded(http.StatusOK, eulasResponse),
+			),
+		)
 
-			eulasCommand := commands.EULAsCommand{}
-			err := eulasCommand.Execute(nil)
-			Expect(err).NotTo(HaveOccurred())
+		eulasCommand := commands.EULAsCommand{}
 
-			var returnedEULAs []pivnet.EULA
+		err := eulasCommand.Execute(nil)
+		Expect(err).NotTo(HaveOccurred())
 
-			err = json.Unmarshal(outBuffer.Bytes(), &returnedEULAs)
-			Expect(err).NotTo(HaveOccurred())
+		var returnedEULAs []pivnet.EULA
 
-			Expect(returnedEULAs).To(Equal(eulas))
-		})
+		err = json.Unmarshal(outBuffer.Bytes(), &returnedEULAs)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(returnedEULAs).To(Equal(eulas))
 	})
 
 	It("shows specific EULA", func() {
@@ -87,6 +86,7 @@ var _ = Describe("eula commands", func() {
 
 		eulaCommand := commands.EULACommand{}
 		eulaCommand.EULASlug = eulas[0].Slug
+
 		err := eulaCommand.Execute(nil)
 		Expect(err).NotTo(HaveOccurred())
 
@@ -96,5 +96,62 @@ var _ = Describe("eula commands", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(returnedEULA).To(Equal(eulas[0]))
+	})
+
+	It("accepts EULA", func() {
+		releases := []pivnet.Release{
+			{
+				ID:          1234,
+				Version:     "version 0.2.3",
+				Description: "Some release with some description.",
+			},
+			{
+				ID:          2345,
+				Version:     "version 0.3.4",
+				Description: "Another release with another description.",
+			},
+		}
+
+		releasesResponse := pivnet.ReleasesResponse{
+			Releases: releases,
+		}
+
+		productSlug := "some-product-slug"
+
+		server.AppendHandlers(
+			ghttp.CombineHandlers(
+				ghttp.VerifyRequest(
+					"GET",
+					fmt.Sprintf("%s/products/%s/releases", apiPrefix, productSlug),
+				),
+				ghttp.RespondWithJSONEncoded(http.StatusOK, releasesResponse),
+			),
+		)
+
+		eulaAcceptanceResponse := pivnet.EULAAcceptanceResponse{
+			AcceptedAt: "now",
+		}
+
+		server.AppendHandlers(
+			ghttp.CombineHandlers(
+				ghttp.VerifyRequest(
+					"POST",
+					fmt.Sprintf(
+						"%s/products/%s/releases/%d/eula_acceptance",
+						apiPrefix,
+						productSlug,
+						releases[0].ID,
+					),
+				),
+				ghttp.RespondWithJSONEncoded(http.StatusOK, eulaAcceptanceResponse),
+			),
+		)
+
+		acceptEULACommand := commands.AcceptEULACommand{}
+		acceptEULACommand.ProductSlug = productSlug
+		acceptEULACommand.ReleaseVersion = releases[0].Version
+
+		err := acceptEULACommand.Execute(nil)
+		Expect(err).NotTo(HaveOccurred())
 	})
 })
