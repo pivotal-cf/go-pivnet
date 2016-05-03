@@ -3,7 +3,6 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 	"strconv"
 
 	"gopkg.in/yaml.v2"
@@ -35,7 +34,7 @@ func (command *ReleasesCommand) Execute([]string) error {
 
 	switch Pivnet.Format {
 	case PrintAsTable:
-		table := tablewriter.NewWriter(os.Stdout)
+		table := tablewriter.NewWriter(OutWriter)
 		table.SetHeader([]string{"ID", "Version", "Description"})
 
 		for _, r := range releases {
@@ -51,7 +50,7 @@ func (command *ReleasesCommand) Execute([]string) error {
 			return err
 		}
 
-		fmt.Printf("%s\n", string(b))
+		OutWriter.Write(b)
 		return nil
 	case PrintAsYAML:
 		b, err := yaml.Marshal(releases)
@@ -59,7 +58,8 @@ func (command *ReleasesCommand) Execute([]string) error {
 			return err
 		}
 
-		fmt.Printf("---\n%s\n", string(b))
+		output := fmt.Sprintf("---\n%s\n", string(b))
+		OutWriter.Write([]byte(output))
 		return nil
 	}
 
@@ -92,7 +92,7 @@ func (command *ReleaseCommand) Execute([]string) error {
 
 	switch Pivnet.Format {
 	case PrintAsTable:
-		table := tablewriter.NewWriter(os.Stdout)
+		table := tablewriter.NewWriter(OutWriter)
 		table.SetHeader([]string{"ID", "Version", "Description"})
 
 		table.Append([]string{
@@ -106,7 +106,7 @@ func (command *ReleaseCommand) Execute([]string) error {
 			return err
 		}
 
-		fmt.Printf("%s\n", string(b))
+		OutWriter.Write(b)
 		return nil
 	case PrintAsYAML:
 		b, err := yaml.Marshal(release)
@@ -114,7 +114,8 @@ func (command *ReleaseCommand) Execute([]string) error {
 			return err
 		}
 
-		fmt.Printf("---\n%s\n", string(b))
+		output := fmt.Sprintf("---\n%s\n", string(b))
+		OutWriter.Write([]byte(output))
 		return nil
 	}
 

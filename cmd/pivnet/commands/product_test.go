@@ -83,12 +83,12 @@ var _ = Describe("product commands", func() {
 
 	Describe("ProductCommand", func() {
 		It("shows product", func() {
-			productsResponse := product
+			productResponse := product
 
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/%s", apiPrefix, product.Slug)),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, productsResponse),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, productResponse),
 				),
 			)
 
