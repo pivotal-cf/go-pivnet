@@ -31,8 +31,6 @@ var _ = Describe("pivnet cli", func() {
 		product  pivnet.Product
 		products []pivnet.Product
 
-		eulas []pivnet.EULA
-
 		releases []pivnet.Release
 		release  pivnet.Release
 	)
@@ -53,19 +51,6 @@ var _ = Describe("pivnet cli", func() {
 				ID:   2345,
 				Slug: "another-product-slug",
 				Name: "another-product-name",
-			},
-		}
-
-		eulas = []pivnet.EULA{
-			{
-				ID:   1234,
-				Name: "some eula",
-				Slug: "some-eula",
-			},
-			{
-				ID:   2345,
-				Name: "another eula",
-				Slug: "another-eula",
 			},
 		}
 
@@ -148,7 +133,10 @@ var _ = Describe("pivnet cli", func() {
 		})
 
 		It("prints as json", func() {
-			session := runMainWithArgs("--format=json", "product", "-s", product.Slug)
+			session := runMainWithArgs(
+				"--format=json",
+				"product",
+				"--product-slug", product.Slug)
 
 			Eventually(session, executableTimeout).Should(gexec.Exit(0))
 
@@ -174,7 +162,10 @@ var _ = Describe("pivnet cli", func() {
 		})
 
 		It("prints as yaml", func() {
-			session := runMainWithArgs("--format=yaml", "product", "-s", product.Slug)
+			session := runMainWithArgs(
+				"--format=yaml",
+				"product",
+				"--product-slug", product.Slug)
 
 			Eventually(session, executableTimeout).Should(gexec.Exit(0))
 
@@ -183,52 +174,6 @@ var _ = Describe("pivnet cli", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(receivedProduct.Slug).To(Equal(product.Slug))
-		})
-	})
-
-	Describe("product", func() {
-		BeforeEach(func() {
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(
-						"GET",
-						fmt.Sprintf("%s/products/%s", apiPrefix, product.Slug),
-					),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, product),
-				),
-			)
-		})
-
-		It("displays product for the provided slug", func() {
-			session := runMainWithArgs("product", "-s", product.Slug)
-
-			Eventually(session, executableTimeout).Should(gexec.Exit(0))
-			Expect(session).Should(gbytes.Say(product.Slug))
-		})
-	})
-
-	Describe("products", func() {
-		BeforeEach(func() {
-			response := pivnet.ProductsResponse{
-				Products: products,
-			}
-
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(
-						"GET",
-						fmt.Sprintf("%s/products", apiPrefix),
-					),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, response),
-				),
-			)
-		})
-
-		It("displays products", func() {
-			session := runMainWithArgs("products")
-
-			Eventually(session, executableTimeout).Should(gexec.Exit(0))
-			Expect(session).Should(gbytes.Say(product.Slug))
 		})
 	})
 

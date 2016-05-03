@@ -51,33 +51,35 @@ var _ = Describe("eula commands", func() {
 		server.Close()
 	})
 
-	It("lists all EULAs", func() {
-		eulasResponse := pivnet.EULAsResponse{
-			EULAs: eulas,
-		}
+	Describe("EULAsCommand", func() {
+		It("lists all EULAs", func() {
+			eulasResponse := pivnet.EULAsResponse{
+				EULAs: eulas,
+			}
 
-		server.AppendHandlers(
-			ghttp.CombineHandlers(
-				ghttp.VerifyRequest("GET", fmt.Sprintf("%s/eulas", apiPrefix)),
-				ghttp.RespondWithJSONEncoded(http.StatusOK, eulasResponse),
-			),
-		)
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/eulas", apiPrefix)),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, eulasResponse),
+				),
+			)
 
-		eulasCommand := commands.EULAsCommand{}
+			eulasCommand := commands.EULAsCommand{}
 
-		err := eulasCommand.Execute(nil)
-		Expect(err).NotTo(HaveOccurred())
+			err := eulasCommand.Execute(nil)
+			Expect(err).NotTo(HaveOccurred())
 
-		var returnedEULAs []pivnet.EULA
+			var returnedEULAs []pivnet.EULA
 
-		err = json.Unmarshal(outBuffer.Bytes(), &returnedEULAs)
-		Expect(err).NotTo(HaveOccurred())
+			err = json.Unmarshal(outBuffer.Bytes(), &returnedEULAs)
+			Expect(err).NotTo(HaveOccurred())
 
-		Expect(returnedEULAs).To(Equal(eulas))
+			Expect(returnedEULAs).To(Equal(eulas))
+		})
 	})
 
 	Describe("EULACommand", func() {
-		It("shows specific EULA", func() {
+		It("shows EULA", func() {
 			eulaResponse := eulas[0]
 
 			server.AppendHandlers(
