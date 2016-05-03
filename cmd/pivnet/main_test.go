@@ -304,67 +304,6 @@ var _ = Describe("pivnet cli", func() {
 		})
 	})
 
-	Describe("Release dependencies", func() {
-		It("displays release dependencies for the provided product slug and release version", func() {
-			releasesResponse := pivnet.ReleasesResponse{
-				Releases: releases,
-			}
-
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(
-						"GET",
-						fmt.Sprintf("%s/products/%s/releases", apiPrefix, product.Slug),
-					),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, releasesResponse),
-				),
-			)
-
-			releaseDependencies := []pivnet.ReleaseDependency{
-				{
-					Release: pivnet.DependentRelease{
-						ID:      1234,
-						Version: "Some version",
-					},
-				},
-				{
-					Release: pivnet.DependentRelease{
-						ID:      2345,
-						Version: "Another version",
-					},
-				},
-			}
-
-			releaseDependenciesResponse := pivnet.ReleaseDependenciesResponse{
-				ReleaseDependencies: releaseDependencies,
-			}
-
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(
-						"GET",
-						fmt.Sprintf(
-							"%s/products/%s/releases/%d/dependencies",
-							apiPrefix,
-							product.Slug,
-							releases[0].ID,
-						),
-					),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, releaseDependenciesResponse),
-				),
-			)
-
-			session := runMainWithArgs(
-				"release-dependencies",
-				"--product-slug", product.Slug,
-				"--release-version", releases[0].Version,
-			)
-
-			Eventually(session, executableTimeout).Should(gexec.Exit(0))
-			Expect(session).Should(gbytes.Say(releaseDependencies[0].Release.Version))
-		})
-	})
-
 	Describe("product-files", func() {
 		var (
 			productFiles []pivnet.ProductFile

@@ -1,13 +1,6 @@
 package commands
 
-import (
-	"encoding/json"
-	"fmt"
-
-	"gopkg.in/yaml.v2"
-
-	"github.com/olekukonko/tablewriter"
-)
+import "github.com/olekukonko/tablewriter"
 
 type ReleaseTypesCommand struct {
 }
@@ -30,22 +23,9 @@ func (command *ReleaseTypesCommand) Execute([]string) error {
 		table.Render()
 		return nil
 	case PrintAsJSON:
-		b, err := json.Marshal(releaseTypes)
-		if err != nil {
-			return err
-		}
-
-		OutWriter.Write(b)
-		return nil
+		return printJSON(releaseTypes)
 	case PrintAsYAML:
-		b, err := yaml.Marshal(releaseTypes)
-		if err != nil {
-			return err
-		}
-
-		output := fmt.Sprintf("---\n%s\n", string(b))
-		OutWriter.Write([]byte(output))
-		return nil
+		return printYAML(releaseTypes)
 	}
 
 	return nil

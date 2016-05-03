@@ -1,12 +1,8 @@
 package commands
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
 	"strconv"
-
-	"gopkg.in/yaml.v2"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/pivotal-cf-experimental/go-pivnet"
@@ -44,7 +40,7 @@ func (command *ReleaseDependenciesCommand) Execute([]string) error {
 
 	switch Pivnet.Format {
 	case PrintAsTable:
-		table := tablewriter.NewWriter(os.Stdout)
+		table := tablewriter.NewWriter(OutWriter)
 		table.SetHeader([]string{
 			"ID",
 			"Version",
@@ -63,21 +59,9 @@ func (command *ReleaseDependenciesCommand) Execute([]string) error {
 		table.Render()
 		return nil
 	case PrintAsJSON:
-		b, err := json.Marshal(releaseDependencies)
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("%s\n", string(b))
-		return nil
+		return printJSON(releaseDependencies)
 	case PrintAsYAML:
-		b, err := yaml.Marshal(releaseDependencies)
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("---\n%s\n", string(b))
-		return nil
+		return printYAML(releaseDependencies)
 	}
 
 	return nil

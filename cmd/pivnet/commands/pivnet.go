@@ -1,9 +1,12 @@
 package commands
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
+
+	"gopkg.in/yaml.v2"
 
 	"github.com/pivotal-cf-experimental/go-pivnet"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/version"
@@ -91,4 +94,24 @@ func NewClient() pivnet.Client {
 	)
 
 	return pivnetClient
+}
+
+func printYAML(object interface{}) error {
+	b, err := yaml.Marshal(object)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("---\n%s\n", string(b))
+	return nil
+}
+
+func printJSON(object interface{}) error {
+	b, err := json.Marshal(object)
+	if err != nil {
+		return err
+	}
+
+	OutWriter.Write(b)
+	return nil
 }

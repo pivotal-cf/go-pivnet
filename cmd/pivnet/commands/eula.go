@@ -1,11 +1,8 @@
 package commands
 
 import (
-	"encoding/json"
 	"fmt"
 	"strconv"
-
-	"gopkg.in/yaml.v2"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/pivotal-cf-experimental/go-pivnet"
@@ -46,22 +43,9 @@ func printEULA(eula pivnet.EULA) error {
 		table.Render()
 		return nil
 	case PrintAsJSON:
-		b, err := json.Marshal(eula)
-		if err != nil {
-			return err
-		}
-
-		OutWriter.Write(b)
-		return nil
+		return printJSON(eula)
 	case PrintAsYAML:
-		b, err := yaml.Marshal(eula)
-		if err != nil {
-			return err
-		}
-
-		output := fmt.Sprintf("---\n%s\n", string(b))
-		OutWriter.Write([]byte(output))
-		return nil
+		return printYAML(eula)
 	}
 
 	return nil
@@ -92,22 +76,9 @@ func printEULAs(eulas []pivnet.EULA) error {
 		table.Render()
 		return nil
 	case PrintAsJSON:
-		b, err := json.Marshal(eulas)
-		if err != nil {
-			return err
-		}
-
-		OutWriter.Write(b)
-		return nil
+		return printJSON(eulas)
 	case PrintAsYAML:
-		b, err := yaml.Marshal(eulas)
-		if err != nil {
-			return err
-		}
-
-		output := fmt.Sprintf("---\n%s\n", string(b))
-		OutWriter.Write([]byte(output))
-		return nil
+		return printYAML(eulas)
 	}
 
 	return nil

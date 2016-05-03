@@ -1,11 +1,7 @@
 package commands
 
 import (
-	"encoding/json"
-	"fmt"
 	"strconv"
-
-	"gopkg.in/yaml.v2"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/pivotal-cf-experimental/go-pivnet"
@@ -43,22 +39,9 @@ func printProducts(products []pivnet.Product) error {
 		table.Render()
 		return nil
 	case PrintAsJSON:
-		b, err := json.Marshal(products)
-		if err != nil {
-			return err
-		}
-
-		OutWriter.Write(b)
-		return nil
+		return printJSON(products)
 	case PrintAsYAML:
-		b, err := yaml.Marshal(products)
-		if err != nil {
-			return err
-		}
-
-		output := fmt.Sprintf("---\n%s\n", string(b))
-		OutWriter.Write([]byte(output))
-		return nil
+		return printYAML(products)
 	}
 
 	return nil
@@ -77,22 +60,9 @@ func printProduct(product pivnet.Product) error {
 		table.Render()
 		return nil
 	case PrintAsJSON:
-		b, err := json.Marshal(product)
-		if err != nil {
-			return err
-		}
-
-		OutWriter.Write(b)
-		return nil
+		return printJSON(product)
 	case PrintAsYAML:
-		b, err := yaml.Marshal(product)
-		if err != nil {
-			return err
-		}
-
-		output := fmt.Sprintf("---\n%s\n", string(b))
-		OutWriter.Write([]byte(output))
-		return nil
+		return printYAML(product)
 	}
 
 	return nil
