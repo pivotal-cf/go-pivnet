@@ -3,7 +3,6 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"gopkg.in/yaml.v2"
 
@@ -22,7 +21,7 @@ func (command *ReleaseTypesCommand) Execute([]string) error {
 
 	switch Pivnet.Format {
 	case PrintAsTable:
-		table := tablewriter.NewWriter(os.Stdout)
+		table := tablewriter.NewWriter(OutWriter)
 		table.SetHeader([]string{"ReleaseTypes"})
 
 		for _, r := range releaseTypes {
@@ -36,7 +35,7 @@ func (command *ReleaseTypesCommand) Execute([]string) error {
 			return err
 		}
 
-		fmt.Printf("%s\n", string(b))
+		OutWriter.Write(b)
 		return nil
 	case PrintAsYAML:
 		b, err := yaml.Marshal(releaseTypes)
@@ -44,7 +43,8 @@ func (command *ReleaseTypesCommand) Execute([]string) error {
 			return err
 		}
 
-		fmt.Printf("---\n%s\n", string(b))
+		output := fmt.Sprintf("---\n%s\n", string(b))
+		OutWriter.Write([]byte(output))
 		return nil
 	}
 
