@@ -1,12 +1,8 @@
 package commands
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
 	"strconv"
-
-	"gopkg.in/yaml.v2"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/pivotal-cf-experimental/go-pivnet"
@@ -86,7 +82,7 @@ func printProductFiles(productFiles []pivnet.ProductFile) error {
 	switch Pivnet.Format {
 
 	case PrintAsTable:
-		table := tablewriter.NewWriter(os.Stdout)
+		table := tablewriter.NewWriter(OutWriter)
 		table.SetHeader([]string{
 			"ID",
 			"Name",
@@ -106,21 +102,44 @@ func printProductFiles(productFiles []pivnet.ProductFile) error {
 		table.Render()
 		return nil
 	case PrintAsJSON:
-		b, err := json.Marshal(productFiles)
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("%s\n", string(b))
-		return nil
+		return printJSON(productFiles)
 	case PrintAsYAML:
-		b, err := yaml.Marshal(productFiles)
-		if err != nil {
-			return err
-		}
+		return printYAML(productFiles)
+	}
 
-		fmt.Printf("---\n%s\n", string(b))
+	return nil
+}
+
+func printProductFile(productFile pivnet.ProductFile) error {
+	switch Pivnet.Format {
+	case PrintAsTable:
+		table := tablewriter.NewWriter(OutWriter)
+		table.SetHeader([]string{
+			"ID",
+			"Name",
+			"File Version",
+			"File Type",
+			"Description",
+			"MD5",
+			"AWS Object Key",
+		})
+
+		productFileAsString := []string{
+			strconv.Itoa(productFile.ID),
+			productFile.Name,
+			productFile.FileVersion,
+			productFile.FileType,
+			productFile.Description,
+			productFile.MD5,
+			productFile.AWSObjectKey,
+		}
+		table.Append(productFileAsString)
+		table.Render()
 		return nil
+	case PrintAsJSON:
+		return printJSON(productFile)
+	case PrintAsYAML:
+		return printYAML(productFile)
 	}
 
 	return nil
@@ -137,7 +156,7 @@ func (command *ProductFileCommand) Execute([]string) error {
 		if err != nil {
 			return err
 		}
-		return printProductFiles([]pivnet.ProductFile{productFile})
+		return printProductFile(productFile)
 	}
 
 	releases, err := client.Releases.List(command.ProductSlug)
@@ -166,51 +185,7 @@ func (command *ProductFileCommand) Execute([]string) error {
 		return err
 	}
 
-	switch Pivnet.Format {
-
-	case PrintAsTable:
-		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{
-			"ID",
-			"Name",
-			"File Version",
-			"File Type",
-			"Description",
-			"MD5",
-			"AWS Object Key",
-		})
-
-		productFileAsString := []string{
-			strconv.Itoa(productFile.ID),
-			productFile.Name,
-			productFile.FileVersion,
-			productFile.FileType,
-			productFile.Description,
-			productFile.MD5,
-			productFile.AWSObjectKey,
-		}
-		table.Append(productFileAsString)
-		table.Render()
-		return nil
-	case PrintAsJSON:
-		b, err := json.Marshal(productFile)
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("%s\n", string(b))
-		return nil
-	case PrintAsYAML:
-		b, err := yaml.Marshal(productFile)
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("---\n%s\n", string(b))
-		return nil
-	}
-
-	return nil
+	return printProductFile(productFile)
 }
 
 func (command *AddProductFileCommand) Execute([]string) error {
@@ -288,48 +263,5 @@ func (command *DeleteProductFileCommand) Execute([]string) error {
 		return err
 	}
 
-	switch Pivnet.Format {
-	case PrintAsTable:
-		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{
-			"ID",
-			"Name",
-			"File Version",
-			"File Type",
-			"Description",
-			"MD5",
-			"AWS Object Key",
-		})
-
-		productFileAsString := []string{
-			strconv.Itoa(productFile.ID),
-			productFile.Name,
-			productFile.FileVersion,
-			productFile.FileType,
-			productFile.Description,
-			productFile.MD5,
-			productFile.AWSObjectKey,
-		}
-		table.Append(productFileAsString)
-		table.Render()
-		return nil
-	case PrintAsJSON:
-		b, err := json.Marshal(productFile)
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("%s\n", string(b))
-		return nil
-	case PrintAsYAML:
-		b, err := yaml.Marshal(productFile)
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("---\n%s\n", string(b))
-		return nil
-	}
-
-	return nil
+	return printProductFile(productFile)
 }
