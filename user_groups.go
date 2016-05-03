@@ -15,7 +15,7 @@ type addUserGroupBody struct {
 	UserGroup UserGroup `json:"user_group"`
 }
 
-type UserGroups struct {
+type UserGroupsResponse struct {
 	UserGroups []UserGroup `json:"user_groups,omitempty"`
 }
 
@@ -28,7 +28,7 @@ type UserGroup struct {
 func (u UserGroupsService) List() ([]UserGroup, error) {
 	url := "/user_groups"
 
-	var response UserGroups
+	var response UserGroupsResponse
 	err := u.client.makeRequest(
 		"GET",
 		url,
@@ -50,7 +50,7 @@ func (u UserGroupsService) ListForRelease(productSlug string, releaseID int) ([]
 		releaseID,
 	)
 
-	var response UserGroups
+	var response UserGroupsResponse
 	err := u.client.makeRequest(
 		"GET",
 		url,

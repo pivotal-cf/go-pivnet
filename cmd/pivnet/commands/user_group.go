@@ -1,12 +1,8 @@
 package commands
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
 	"strconv"
-
-	"gopkg.in/yaml.v2"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/pivotal-cf-experimental/go-pivnet"
@@ -63,7 +59,7 @@ func printUserGroups(userGroups []pivnet.UserGroup) error {
 
 	switch Pivnet.Format {
 	case PrintAsTable:
-		table := tablewriter.NewWriter(os.Stdout)
+		table := tablewriter.NewWriter(OutWriter)
 		table.SetHeader([]string{"ID", "Name", "Description"})
 
 		for _, u := range userGroups {
@@ -74,21 +70,9 @@ func printUserGroups(userGroups []pivnet.UserGroup) error {
 		table.Render()
 		return nil
 	case PrintAsJSON:
-		b, err := json.Marshal(userGroups)
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("%s\n", string(b))
-		return nil
+		return printJSON(userGroups)
 	case PrintAsYAML:
-		b, err := yaml.Marshal(userGroups)
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("---\n%s\n", string(b))
-		return nil
+		return printYAML(userGroups)
 	}
 
 	return nil
