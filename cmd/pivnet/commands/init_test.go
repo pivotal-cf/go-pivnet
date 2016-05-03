@@ -2,6 +2,7 @@ package commands_test
 
 import (
 	"os"
+	"reflect"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
@@ -24,3 +25,25 @@ var _ = BeforeSuite(func() {
 	commands.Pivnet = commands.PivnetCommand{}
 	commands.Pivnet.Format = commands.PrintAsJSON
 })
+
+func fieldFor(command interface{}, name string) reflect.StructField {
+	field, success := reflect.TypeOf(command).FieldByName(name)
+	Expect(success).To(BeTrue())
+	return field
+}
+
+func longTag(f reflect.StructField) string {
+	return f.Tag.Get("long")
+}
+
+func shortTag(f reflect.StructField) string {
+	return f.Tag.Get("short")
+}
+
+var command = func(f reflect.StructField) string {
+	return f.Tag.Get("command")
+}
+
+var isRequired = func(f reflect.StructField) bool {
+	return f.Tag.Get("required") == "true"
+}

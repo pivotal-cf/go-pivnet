@@ -13,27 +13,9 @@ var _ = Describe("Pivnet commands", func() {
 		field reflect.StructField
 	)
 
-	var fieldFor = func(name string) reflect.StructField {
-		field, success := reflect.TypeOf(commands.Pivnet).FieldByName(name)
-		Expect(success).To(BeTrue())
-		return field
-	}
-
-	var longTag = func(f reflect.StructField) string {
-		return f.Tag.Get("long")
-	}
-
-	var shortTag = func(f reflect.StructField) string {
-		return f.Tag.Get("short")
-	}
-
-	var command = func(f reflect.StructField) string {
-		return f.Tag.Get("command")
-	}
-
 	Describe("Version", func() {
 		BeforeEach(func() {
-			field = fieldFor("Version")
+			field = fieldFor(commands.Pivnet, "Version")
 		})
 
 		It("contains short flag", func() {
@@ -45,9 +27,9 @@ var _ = Describe("Pivnet commands", func() {
 		})
 	})
 
-	Describe("Format", func() {
+	Describe("Format flag", func() {
 		BeforeEach(func() {
-			field = fieldFor("Format")
+			field = fieldFor(commands.Pivnet, "Format")
 		})
 
 		It("contains long flag", func() {
@@ -59,33 +41,46 @@ var _ = Describe("Pivnet commands", func() {
 		})
 
 		It("contains choice", func() {
-			Expect(string(field.Tag)).To(MatchRegexp(`choice:"table".*choice:"json".*choice:"yaml"`))
+			Expect(string(field.Tag)).To(
+				MatchRegexp(`choice:"table".*choice:"json".*choice:"yaml"`))
+		})
+
+		It("is not required", func() {
+			Expect(isRequired(field)).To(BeFalse())
 		})
 	})
 
-	Describe("APIToken", func() {
+	Describe("APIToken flag", func() {
 		BeforeEach(func() {
-			field = fieldFor("APIToken")
+			field = fieldFor(commands.Pivnet, "APIToken")
 		})
 
 		It("contains long flag", func() {
 			Expect(longTag(field)).To(Equal("api-token"))
 		})
+
+		It("is not required", func() {
+			Expect(isRequired(field)).To(BeFalse())
+		})
 	})
 
-	Describe("Host", func() {
+	Describe("Host flag", func() {
 		BeforeEach(func() {
-			field = fieldFor("Host")
+			field = fieldFor(commands.Pivnet, "Host")
 		})
 
 		It("contains long flag", func() {
 			Expect(longTag(field)).To(Equal("host"))
 		})
+
+		It("is not required", func() {
+			Expect(isRequired(field)).To(BeFalse())
+		})
 	})
 
-	Describe("ReleaseTypes", func() {
+	Describe("ReleaseTypes command", func() {
 		BeforeEach(func() {
-			field = fieldFor("ReleaseTypes")
+			field = fieldFor(commands.Pivnet, "ReleaseTypes")
 		})
 
 		It("contains command", func() {
@@ -93,9 +88,9 @@ var _ = Describe("Pivnet commands", func() {
 		})
 	})
 
-	Describe("EULAs", func() {
+	Describe("EULAs command", func() {
 		BeforeEach(func() {
-			field = fieldFor("EULAs")
+			field = fieldFor(commands.Pivnet, "EULAs")
 		})
 
 		It("contains command", func() {
@@ -103,9 +98,9 @@ var _ = Describe("Pivnet commands", func() {
 		})
 	})
 
-	Describe("EULA", func() {
+	Describe("EULA command", func() {
 		BeforeEach(func() {
-			field = fieldFor("EULA")
+			field = fieldFor(commands.Pivnet, "EULA")
 		})
 
 		It("contains command", func() {
@@ -113,9 +108,9 @@ var _ = Describe("Pivnet commands", func() {
 		})
 	})
 
-	Describe("AcceptEULA", func() {
+	Describe("AcceptEULA command", func() {
 		BeforeEach(func() {
-			field = fieldFor("AcceptEULA")
+			field = fieldFor(commands.Pivnet, "AcceptEULA")
 		})
 
 		It("contains command", func() {
