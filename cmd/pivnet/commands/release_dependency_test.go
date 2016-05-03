@@ -73,7 +73,7 @@ var _ = Describe("release dependency commands", func() {
 	})
 
 	Describe("ReleasesDependenciesCommand", func() {
-		It("lists all release depndencies for the provided product slug and release version", func() {
+		It("lists all release dependencies for the provided product slug and release version", func() {
 			releasesResponse := pivnet.ReleasesResponse{
 				Releases: releases,
 			}

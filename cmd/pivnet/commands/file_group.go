@@ -1,13 +1,9 @@
 package commands
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
-
-	"gopkg.in/yaml.v2"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/pivotal-cf-experimental/go-pivnet"
@@ -73,7 +69,7 @@ func printFileGroups(fileGroups []pivnet.FileGroup) error {
 	switch Pivnet.Format {
 
 	case PrintAsTable:
-		table := tablewriter.NewWriter(os.Stdout)
+		table := tablewriter.NewWriter(OutWriter)
 		table.SetHeader([]string{
 			"ID",
 			"Name",
@@ -97,21 +93,9 @@ func printFileGroups(fileGroups []pivnet.FileGroup) error {
 		table.Render()
 		return nil
 	case PrintAsJSON:
-		b, err := json.Marshal(fileGroups)
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("%s\n", string(b))
-		return nil
+		return printJSON(fileGroups)
 	case PrintAsYAML:
-		b, err := yaml.Marshal(fileGroups)
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("---\n%s\n", string(b))
-		return nil
+		return printYAML(fileGroups)
 	}
 
 	return nil
@@ -128,7 +112,41 @@ func (command *FileGroupCommand) Execute([]string) error {
 		return err
 	}
 
-	return printFileGroups([]pivnet.FileGroup{fileGroup})
+	return printFileGroup(fileGroup)
+}
+
+func printFileGroup(fileGroup pivnet.FileGroup) error {
+	switch Pivnet.Format {
+
+	case PrintAsTable:
+		table := tablewriter.NewWriter(OutWriter)
+		table.SetHeader([]string{
+			"ID",
+			"Name",
+			"Product File Names",
+		})
+
+		var productFileNames []string
+
+		for _, productFile := range fileGroup.ProductFiles {
+			productFileNames = append(productFileNames, productFile.Name)
+		}
+
+		fileGroupAsString := []string{
+			strconv.Itoa(fileGroup.ID),
+			fileGroup.Name,
+			strings.Join(productFileNames, " "),
+		}
+		table.Append(fileGroupAsString)
+		table.Render()
+		return nil
+	case PrintAsJSON:
+		return printJSON(fileGroup)
+	case PrintAsYAML:
+		return printYAML(fileGroup)
+	}
+
+	return nil
 }
 
 func (command *DeleteFileGroupCommand) Execute([]string) error {
@@ -142,5 +160,5 @@ func (command *DeleteFileGroupCommand) Execute([]string) error {
 		return err
 	}
 
-	return printFileGroups([]pivnet.FileGroup{fileGroup})
+	return printFileGroup(fileGroup)
 }
