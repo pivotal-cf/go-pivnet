@@ -1,12 +1,8 @@
 package commands
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
 	"strconv"
-
-	"gopkg.in/yaml.v2"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/pivotal-cf-experimental/go-pivnet"
@@ -44,7 +40,7 @@ func (command *ReleaseUpgradePathsCommand) Execute([]string) error {
 
 	switch Pivnet.Format {
 	case PrintAsTable:
-		table := tablewriter.NewWriter(os.Stdout)
+		table := tablewriter.NewWriter(OutWriter)
 		table.SetHeader([]string{
 			"ID",
 			"Version",
@@ -59,21 +55,9 @@ func (command *ReleaseUpgradePathsCommand) Execute([]string) error {
 		table.Render()
 		return nil
 	case PrintAsJSON:
-		b, err := json.Marshal(releaseUpgradePaths)
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("%s\n", string(b))
-		return nil
+		return printJSON(releaseUpgradePaths)
 	case PrintAsYAML:
-		b, err := yaml.Marshal(releaseUpgradePaths)
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("---\n%s\n", string(b))
-		return nil
+		return printYAML(releaseUpgradePaths)
 	}
 
 	return nil
