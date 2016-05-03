@@ -232,35 +232,6 @@ var _ = Describe("pivnet cli", func() {
 		})
 	})
 
-	Describe("Release Types", func() {
-		var (
-			releaseTypes []string
-		)
-
-		BeforeEach(func() {
-			releaseTypes = []string{"some release type", "another release type"}
-		})
-
-		It("displays all release types", func() {
-			releaseTypesResponse := pivnet.ReleaseTypesResponse{
-				ReleaseTypes: releaseTypes,
-			}
-
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/releases/release_types", apiPrefix)),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, releaseTypesResponse),
-				),
-			)
-
-			session := runMainWithArgs("release-types")
-
-			Eventually(session, executableTimeout).Should(gexec.Exit(0))
-			Expect(session).Should(gbytes.Say(releaseTypes[0]))
-			Expect(session).Should(gbytes.Say(releaseTypes[1]))
-		})
-	})
-
 	Describe("Releases", func() {
 		It("displays all releases for the provided product slug", func() {
 			releasesResponse := pivnet.ReleasesResponse{
