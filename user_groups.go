@@ -16,11 +16,19 @@ type addUserGroupBody struct {
 }
 
 type createUserGroupBody struct {
-	UserGroup CreateUserGroup `json:"user_group"`
+	UserGroup createUserGroup `json:"user_group"`
+}
+
+type updateUserGroupBody struct {
+	UserGroup updateUserGroup `json:"user_group"`
 }
 
 type UserGroupsResponse struct {
 	UserGroups []UserGroup `json:"user_groups,omitempty"`
+}
+
+type UpdateUserGroupResponse struct {
+	UserGroup UserGroup `json:"user_group,omitempty"`
 }
 
 type UserGroup struct {
@@ -30,11 +38,18 @@ type UserGroup struct {
 	Members     []string `json:"members,omitempty"`
 }
 
-type CreateUserGroup struct {
+type createUserGroup struct {
 	ID          int      `json:"id,omitempty"`
 	Name        string   `json:"name,omitempty"`
 	Description string   `json:"description,omitempty"`
 	Members     []string `json:"members"` // do not omit empty to satisfy pivnet
+}
+
+type updateUserGroup struct {
+	ID          int      `json:"id,omitempty"`
+	Name        string   `json:"name,omitempty"`
+	Description string   `json:"description,omitempty"`
+	Members     []string `json:"members,omitempty"`
 }
 
 func (u UserGroupsService) List() ([]UserGroup, error) {
@@ -137,7 +152,7 @@ func (u UserGroupsService) Create(name string, description string, members []str
 	}
 
 	createBody := createUserGroupBody{
-		CreateUserGroup{
+		createUserGroup{
 			Name:        name,
 			Description: description,
 			Members:     members,
@@ -165,6 +180,39 @@ func (u UserGroupsService) Create(name string, description string, members []str
 	}
 
 	return response, nil
+}
+
+func (u UserGroupsService) Update(userGroup UserGroup) (UserGroup, error) {
+	url := fmt.Sprintf("/user_groups/%d", userGroup.ID)
+
+	createBody := updateUserGroupBody{
+		updateUserGroup{
+			Name:        userGroup.Name,
+			Description: userGroup.Description,
+		},
+	}
+
+	b, err := json.Marshal(createBody)
+	if err != nil {
+		panic(err)
+	}
+
+	body := bytes.NewReader(b)
+
+	response := UpdateUserGroupResponse{}
+
+	err = u.client.makeRequest(
+		"PATCH",
+		url,
+		http.StatusOK,
+		body,
+		&response,
+	)
+	if err != nil {
+		return UserGroup{}, err
+	}
+
+	return response.UserGroup, nil
 }
 
 func (r UserGroupsService) Delete(userGroupID int) error {

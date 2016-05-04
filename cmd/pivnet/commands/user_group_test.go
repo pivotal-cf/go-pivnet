@@ -35,12 +35,14 @@ var _ = Describe("user group commands", func() {
 
 		userGroups = []pivnet.UserGroup{
 			{
-				ID:   1234,
-				Name: "Some user group",
+				ID:          1234,
+				Name:        "Some-user-group",
+				Description: "Some user group",
 			},
 			{
-				ID:   2345,
-				Name: "Another user group",
+				ID:          2345,
+				Name:        "Another-user-group",
+				Description: "Another user group",
 			},
 		}
 	})
@@ -293,6 +295,87 @@ var _ = Describe("user group commands", func() {
 
 			It("contains long name", func() {
 				Expect(longTag(field)).To(Equal("member"))
+			})
+		})
+	})
+
+	Describe("UpdateUserGroupCommand", func() {
+		var (
+			name        *string
+			description *string
+		)
+
+		BeforeEach(func() {
+			nameVal := "updated name"
+			descriptionVal := "updated description"
+
+			name = &nameVal
+			description = &descriptionVal
+		})
+
+		It("updates user group", func() {
+			initialUserGroupResponse := userGroups[0]
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/user_groups/%d", apiPrefix, userGroups[0].ID)),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, initialUserGroupResponse),
+				),
+			)
+
+			updatedUserGroup := userGroups[0]
+			updatedUserGroup.Name = *name
+			updatedUserGroup.Description = *description
+			updateUserGroupResponse := pivnet.UpdateUserGroupResponse{updatedUserGroup}
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("PATCH", fmt.Sprintf("%s/user_groups/%d", apiPrefix, userGroups[0].ID)),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, updateUserGroupResponse),
+				),
+			)
+
+			updateUserGroupCommand := commands.UpdateUserGroupCommand{}
+			updateUserGroupCommand.UserGroupID = userGroups[0].ID
+			updateUserGroupCommand.Name = name
+			updateUserGroupCommand.Description = description
+
+			err := updateUserGroupCommand.Execute(nil)
+			Expect(err).NotTo(HaveOccurred())
+
+			var returnedUserGroup pivnet.UserGroup
+
+			err = json.Unmarshal(outBuffer.Bytes(), &returnedUserGroup)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(returnedUserGroup).To(Equal(updatedUserGroup))
+		})
+
+		Describe("Name flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(commands.UpdateUserGroupCommand{}, "Name")
+			})
+
+			It("is not required", func() {
+				Expect(isRequired(field)).To(BeFalse())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("name"))
+			})
+		})
+
+		Describe("Description flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(commands.UpdateUserGroupCommand{}, "Description")
+			})
+
+			It("is not required", func() {
+				Expect(isRequired(field)).To(BeFalse())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("description"))
 			})
 		})
 	})

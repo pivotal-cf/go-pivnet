@@ -24,6 +24,12 @@ type CreateUserGroupCommand struct {
 	Members     []string `long:"member" description:"Email addresses of members to be added"`
 }
 
+type UpdateUserGroupCommand struct {
+	UserGroupID int     `long:"user-group-id" description:"User group ID e.g. 1234" required:"true"`
+	Name        *string `long:"name" description:"Name e.g. all_users"`
+	Description *string `long:"description" description:"Description e.g. 'All users in the world'"`
+}
+
 type DeleteUserGroupCommand struct {
 	UserGroupID int `long:"user-group-id" description:"User group ID e.g. 1234" required:"true"`
 }
@@ -151,4 +157,28 @@ func (command *DeleteUserGroupCommand) Execute([]string) error {
 	}
 
 	return nil
+}
+
+func (command *UpdateUserGroupCommand) Execute([]string) error {
+	client := NewClient()
+
+	userGroup, err := client.UserGroups.Get(command.UserGroupID)
+	if err != nil {
+		return err
+	}
+
+	if command.Name != nil {
+		userGroup.Name = *command.Name
+	}
+
+	if command.Description != nil {
+		userGroup.Description = *command.Description
+	}
+
+	updated, err := client.UserGroups.Update(userGroup)
+	if err != nil {
+		return err
+	}
+
+	return printUserGroup(updated)
 }
