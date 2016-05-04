@@ -30,7 +30,8 @@ type PivnetCommand struct {
 
 	Help HelpCommand `command:"help" description:"Print this help message"`
 
-	Format string `long:"format" description:"Format to print as" default:"table" choice:"table" choice:"json" choice:"yaml"`
+	Format  string `long:"format" description:"Format to print as" default:"table" choice:"table" choice:"json" choice:"yaml"`
+	Verbose bool   `long:"verbose" description:"Display verbose output"`
 
 	APIToken string `long:"api-token" description:"Pivnet API token"`
 	Host     string `long:"host" description:"Pivnet API Host"`
@@ -87,7 +88,10 @@ func NewClient() pivnet.Client {
 		version.Version,
 	)
 	l := lager.NewLogger("pivnet CLI")
-	l.RegisterSink(lager.NewWriterSink(os.Stdout, lager.ERROR))
+
+	if Pivnet.Verbose {
+		l.RegisterSink(lager.NewWriterSink(os.Stdout, lager.DEBUG))
+	}
 
 	pivnetClient := pivnet.NewClient(
 		pivnet.ClientConfig{

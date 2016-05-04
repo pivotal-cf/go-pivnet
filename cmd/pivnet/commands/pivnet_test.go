@@ -27,6 +27,16 @@ var _ = Describe("Pivnet commands", func() {
 		})
 	})
 
+	Describe("Verbose flag", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "Verbose")
+		})
+
+		It("contains long flag", func() {
+			Expect(longTag(field)).To(Equal("verbose"))
+		})
+	})
+
 	Describe("Format flag", func() {
 		BeforeEach(func() {
 			field = fieldFor(commands.Pivnet, "Format")
