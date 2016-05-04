@@ -87,6 +87,20 @@ var _ = Describe("pivnet cli", func() {
 			Eventually(session, executableTimeout).Should(gexec.Exit())
 			Expect(session.Err).Should(gbytes.Say("Usage"))
 		})
+
+		It("displays help with '--help'", func() {
+			session := runMainWithArgs("--help")
+
+			Eventually(session, executableTimeout).Should(gexec.Exit())
+			Expect(session.Err).Should(gbytes.Say("Usage"))
+		})
+
+		It("displays help with 'help'", func() {
+			session := runMainWithArgs("help")
+
+			Eventually(session, executableTimeout).Should(gexec.Exit())
+			Expect(session.Err).Should(gbytes.Say("Usage"))
+		})
 	})
 
 	Describe("Displaying version", func() {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/jessevdk/go-flags"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands"
@@ -24,6 +25,13 @@ func main() {
 
 	_, err := parser.Parse()
 	if err != nil {
+		if err == commands.ErrShowHelpMessage {
+			helpParser := flags.NewParser(&commands.Pivnet, flags.HelpFlag)
+			helpParser.NamespaceDelimiter = "-"
+			helpParser.ParseArgs([]string{"-h"})
+			helpParser.WriteHelp(os.Stderr)
+			os.Exit(0)
+		}
 		log.Fatal(err)
 	}
 }
