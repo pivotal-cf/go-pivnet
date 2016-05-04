@@ -18,7 +18,7 @@ const (
 	PrintAsJSON  = "json"
 	PrintAsYAML  = "yaml"
 
-	defaultHost = "https://network.pivotal.io"
+	DefaultHost = "https://network.pivotal.io"
 )
 
 var (
@@ -76,7 +76,7 @@ func init() {
 	}
 
 	if Pivnet.Host == "" {
-		Pivnet.Host = defaultHost
+		Pivnet.Host = DefaultHost
 	}
 }
 

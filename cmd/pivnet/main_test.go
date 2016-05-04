@@ -99,7 +99,8 @@ var _ = Describe("pivnet cli", func() {
 			session := runMainWithArgs("help")
 
 			Eventually(session, executableTimeout).Should(gexec.Exit())
-			Expect(session.Err).Should(gbytes.Say("Usage"))
+			Expect(session.Err).Should(gbytes.Say("Usage:"))
+			Expect(session.Err).Should(gbytes.Say("network.pivotal.io"))
 		})
 	})
 
