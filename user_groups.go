@@ -166,3 +166,20 @@ func (u UserGroupsService) Create(name string, description string, members []str
 
 	return response, nil
 }
+
+func (r UserGroupsService) Delete(userGroupID int) error {
+	url := fmt.Sprintf("/user_groups/%d", userGroupID)
+
+	err := r.client.makeRequest(
+		"DELETE",
+		url,
+		http.StatusNoContent,
+		nil,
+		nil,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
