@@ -28,8 +28,6 @@ var _ = Describe("pivnet cli", func() {
 		host   string
 
 		product pivnet.Product
-
-		releases []pivnet.Release
 	)
 
 	BeforeEach(func() {
@@ -41,20 +39,6 @@ var _ = Describe("pivnet cli", func() {
 			Slug: "some-product-slug",
 			Name: "some-product-name",
 		}
-
-		releases = []pivnet.Release{
-			{
-				ID:          1234,
-				Version:     "version 0.2.3",
-				Description: "Some release with some description.",
-			},
-			{
-				ID:          2345,
-				Version:     "version 0.3.4",
-				Description: "Another release with another description.",
-			},
-		}
-
 	})
 
 	runMainWithArgs := func(args ...string) *gexec.Session {

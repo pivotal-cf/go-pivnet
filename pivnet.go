@@ -95,13 +95,6 @@ func (c Client) makeRequestWithHTTPResponse(
 	defer resp.Body.Close()
 
 	c.logger.Debug("Response status code", lager.Data{"status code": resp.StatusCode})
-	if resp.StatusCode != expectedStatusCode {
-		return nil, fmt.Errorf(
-			"Pivnet returned status code: %d for the request - expected %d",
-			resp.StatusCode,
-			expectedStatusCode,
-		)
-	}
 
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -114,6 +107,14 @@ func (c Client) makeRequestWithHTTPResponse(
 		if err != nil {
 			return nil, err
 		}
+	}
+
+	if resp.StatusCode != expectedStatusCode {
+		return nil, fmt.Errorf(
+			"Pivnet returned status code: %d for the request - expected %d",
+			resp.StatusCode,
+			expectedStatusCode,
+		)
 	}
 
 	return resp, nil

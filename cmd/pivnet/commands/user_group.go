@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/pivotal-cf-experimental/go-pivnet"
@@ -11,6 +12,12 @@ import (
 type UserGroupsCommand struct {
 	ProductSlug    string `long:"product-slug" description:"Product slug e.g. p-mysql"`
 	ReleaseVersion string `long:"release-version" description:"Release version e.g. 0.1.2-rc1"`
+}
+
+type CreateUserGroupCommand struct {
+	Name        string   `long:"name" description:"Name e.g. all_users" required:"true"`
+	Description string   `long:"description" description:"Description e.g. 'All users in the world'" required:"true"`
+	Members     []string `long:"member" description:"Email addresses of members to be added"`
 }
 
 func (command *UserGroupsCommand) Execute([]string) error {
@@ -56,7 +63,6 @@ func (command *UserGroupsCommand) Execute([]string) error {
 }
 
 func printUserGroups(userGroups []pivnet.UserGroup) error {
-
 	switch Pivnet.Format {
 	case PrintAsTable:
 		table := tablewriter.NewWriter(OutWriter)
@@ -64,7 +70,9 @@ func printUserGroups(userGroups []pivnet.UserGroup) error {
 
 		for _, u := range userGroups {
 			table.Append([]string{
-				strconv.Itoa(u.ID), u.Name, u.Description,
+				strconv.Itoa(u.ID),
+				u.Name,
+				u.Description,
 			})
 		}
 		table.Render()
@@ -73,6 +81,41 @@ func printUserGroups(userGroups []pivnet.UserGroup) error {
 		return printJSON(userGroups)
 	case PrintAsYAML:
 		return printYAML(userGroups)
+	}
+
+	return nil
+}
+
+func (command *CreateUserGroupCommand) Execute([]string) error {
+	client := NewClient()
+
+	userGroup, err := client.UserGroups.Create(command.Name, command.Description, command.Members)
+	if err != nil {
+		return err
+	}
+
+	return printUserGroup(userGroup)
+}
+
+func printUserGroup(userGroup pivnet.UserGroup) error {
+	switch Pivnet.Format {
+	case PrintAsTable:
+		table := tablewriter.NewWriter(OutWriter)
+		table.SetHeader([]string{"ID", "Name", "Description", "Members"})
+
+		table.Append([]string{
+			strconv.Itoa(userGroup.ID),
+			userGroup.Name,
+			userGroup.Description,
+			strings.Join(userGroup.Members, ""),
+		})
+
+		table.Render()
+		return nil
+	case PrintAsJSON:
+		return printJSON(userGroup)
+	case PrintAsYAML:
+		return printYAML(userGroup)
 	}
 
 	return nil

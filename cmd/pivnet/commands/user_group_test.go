@@ -188,4 +188,73 @@ var _ = Describe("user group commands", func() {
 			})
 		})
 	})
+
+	Describe("CreateUserGroupCommand", func() {
+		It("creates user group", func() {
+			createUserGroupResponse := userGroups[0]
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("POST", fmt.Sprintf("%s/user_groups", apiPrefix)),
+					ghttp.RespondWithJSONEncoded(http.StatusCreated, createUserGroupResponse),
+				),
+			)
+
+			createUserGroupCommand := commands.CreateUserGroupCommand{}
+			createUserGroupCommand.Name = "some name"
+			createUserGroupCommand.Description = "some description"
+
+			err := createUserGroupCommand.Execute(nil)
+			Expect(err).NotTo(HaveOccurred())
+
+			var returnedUserGroup pivnet.UserGroup
+
+			err = json.Unmarshal(outBuffer.Bytes(), &returnedUserGroup)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(returnedUserGroup).To(Equal(userGroups[0]))
+		})
+
+		Describe("Name flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(commands.CreateUserGroupCommand{}, "Name")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("name"))
+			})
+		})
+
+		Describe("Description flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(commands.CreateUserGroupCommand{}, "Description")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("description"))
+			})
+		})
+
+		Describe("Members flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(commands.CreateUserGroupCommand{}, "Members")
+			})
+
+			It("is not required", func() {
+				Expect(isRequired(field)).To(BeFalse())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("member"))
+			})
+		})
+	})
 })

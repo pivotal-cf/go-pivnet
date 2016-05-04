@@ -15,14 +15,26 @@ type addUserGroupBody struct {
 	UserGroup UserGroup `json:"user_group"`
 }
 
+type createUserGroupBody struct {
+	UserGroup CreateUserGroup `json:"user_group"`
+}
+
 type UserGroupsResponse struct {
 	UserGroups []UserGroup `json:"user_groups,omitempty"`
 }
 
 type UserGroup struct {
-	ID          int    `json:"id,omitempty"`
-	Name        string `json:"name,omitempty"`
-	Description string `json:"description,omitempty"`
+	ID          int      `json:"id,omitempty"`
+	Name        string   `json:"name,omitempty"`
+	Description string   `json:"description,omitempty"`
+	Members     []string `json:"members,omitempty"`
+}
+
+type CreateUserGroup struct {
+	ID          int      `json:"id,omitempty"`
+	Name        string   `json:"name,omitempty"`
+	Description string   `json:"description,omitempty"`
+	Members     []string `json:"members"` // do not omit empty to satisfy pivnet
 }
 
 func (u UserGroupsService) List() ([]UserGroup, error) {
@@ -65,7 +77,7 @@ func (u UserGroupsService) ListForRelease(productSlug string, releaseID int) ([]
 	return response.UserGroups, nil
 }
 
-func (u UserGroupsService) Add(productSlug string, releaseID int, userGroupID int) error {
+func (u UserGroupsService) AddToRelease(productSlug string, releaseID int, userGroupID int) error {
 	url := fmt.Sprintf(
 		"/products/%s/releases/%d/add_user_group",
 		productSlug,
@@ -108,6 +120,44 @@ func (u UserGroupsService) Get(userGroupID int) (UserGroup, error) {
 		url,
 		http.StatusOK,
 		nil,
+		&response,
+	)
+	if err != nil {
+		return UserGroup{}, err
+	}
+
+	return response, nil
+}
+
+func (u UserGroupsService) Create(name string, description string, members []string) (UserGroup, error) {
+	url := "/user_groups"
+
+	if members == nil {
+		members = []string{}
+	}
+
+	createBody := createUserGroupBody{
+		CreateUserGroup{
+			Name:        name,
+			Description: description,
+			Members:     members,
+		},
+	}
+
+	b, err := json.Marshal(createBody)
+	if err != nil {
+		panic(err)
+	}
+
+	body := bytes.NewReader(b)
+
+	response := UserGroup{}
+
+	err = u.client.makeRequest(
+		"POST",
+		url,
+		http.StatusCreated,
+		body,
 		&response,
 	)
 	if err != nil {

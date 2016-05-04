@@ -145,7 +145,7 @@ var _ = Describe("PivnetClient - user groups", func() {
 					),
 				)
 
-				err := client.UserGroups.Add(productSlug, releaseID, userGroupID)
+				err := client.UserGroups.AddToRelease(productSlug, releaseID, userGroupID)
 				Expect(err).NotTo(HaveOccurred())
 			})
 		})
@@ -164,7 +164,7 @@ var _ = Describe("PivnetClient - user groups", func() {
 					),
 				)
 
-				err := client.UserGroups.Add(productSlug, releaseID, userGroupID)
+				err := client.UserGroups.AddToRelease(productSlug, releaseID, userGroupID)
 				Expect(err).To(MatchError(errors.New(
 					"Pivnet returned status code: 418 for the request - expected 204")))
 			})
@@ -229,6 +229,102 @@ var _ = Describe("PivnetClient - user groups", func() {
 
 				Expect(err).To(MatchError(errors.New(
 					"Pivnet returned status code: 418 for the request - expected 200")))
+			})
+		})
+	})
+
+	Describe("Create", func() {
+		var (
+			name        string
+			description string
+			members     []string
+
+			expectedRequestBody string
+
+			returnedUserGroup pivnet.UserGroup
+		)
+
+		BeforeEach(func() {
+			name = "some name"
+			description = "some description"
+			members = nil
+
+			expectedRequestBody = fmt.Sprintf(
+				`{"user_group":{"name":"%s","description":"%s","members":[]}}`,
+				name,
+				description,
+			)
+		})
+
+		JustBeforeEach(func() {
+			returnedUserGroup = pivnet.UserGroup{
+				ID:          1234,
+				Name:        name,
+				Description: description,
+				Members:     members,
+			}
+		})
+
+		Context("when members is nil", func() {
+			BeforeEach(func() {
+				members = nil
+			})
+
+			It("successfully sends empty array in json body", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("POST", fmt.Sprintf(
+							"%s/user_groups",
+							apiPrefix,
+						)),
+						ghttp.VerifyJSON(expectedRequestBody),
+						ghttp.RespondWithJSONEncoded(http.StatusCreated, returnedUserGroup),
+					),
+				)
+
+				_, err := client.UserGroups.Create(name, description, members)
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+
+		Context("when the server responds with a 201 status code", func() {
+			It("returns without error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("POST", fmt.Sprintf(
+							"%s/user_groups",
+							apiPrefix,
+						)),
+						ghttp.VerifyJSON(expectedRequestBody),
+						ghttp.RespondWithJSONEncoded(http.StatusCreated, returnedUserGroup),
+					),
+				)
+
+				userGroup, err := client.UserGroups.Create(name, description, members)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(userGroup.ID).To(Equal(returnedUserGroup.ID))
+				Expect(userGroup.Name).To(Equal(name))
+				Expect(userGroup.Description).To(Equal(description))
+			})
+		})
+
+		Context("when the server responds with a non-201 status code", func() {
+			It("returns an error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("POST", fmt.Sprintf(
+							"%s/user_groups",
+							apiPrefix,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, nil),
+					),
+				)
+
+				_, err := client.UserGroups.Create(name, description, members)
+
+				Expect(err).To(MatchError(errors.New(
+					"Pivnet returned status code: 418 for the request - expected 201")))
 			})
 		})
 	})

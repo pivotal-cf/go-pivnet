@@ -58,7 +58,8 @@ type PivnetCommand struct {
 	Release       ReleaseCommand       `command:"release" description:"Show release"`
 	DeleteRelease DeleteReleaseCommand `command:"delete-release" description:"Delete release"`
 
-	UserGroups UserGroupsCommand `command:"user-groups" description:"List user groups"`
+	UserGroups      UserGroupsCommand      `command:"user-groups" description:"List user groups"`
+	CreateUserGroup CreateUserGroupCommand `command:"create-user-group" description:"Create user group"`
 
 	ReleaseDependencies ReleaseDependenciesCommand `command:"release-dependencies" description:"List user groups"`
 
@@ -85,6 +86,8 @@ func NewClient() pivnet.Client {
 		"go-pivnet/%s",
 		version.Version,
 	)
+	l := lager.NewLogger("pivnet CLI")
+	l.RegisterSink(lager.NewWriterSink(os.Stdout, lager.ERROR))
 
 	pivnetClient := pivnet.NewClient(
 		pivnet.ClientConfig{
@@ -92,7 +95,7 @@ func NewClient() pivnet.Client {
 			Host:      Pivnet.Host,
 			UserAgent: useragent,
 		},
-		lager.NewLogger("pivnet CLI"),
+		l,
 	)
 
 	return pivnetClient
