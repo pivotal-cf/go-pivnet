@@ -14,6 +14,10 @@ type UserGroupsCommand struct {
 	ReleaseVersion string `long:"release-version" description:"Release version e.g. 0.1.2-rc1"`
 }
 
+type UserGroupCommand struct {
+	UserGroupID int `long:"user-group-id" description:"User group ID e.g. 1234" required:"true"`
+}
+
 type CreateUserGroupCommand struct {
 	Name        string   `long:"name" description:"Name e.g. all_users" required:"true"`
 	Description string   `long:"description" description:"Description e.g. 'All users in the world'" required:"true"`
@@ -22,6 +26,19 @@ type CreateUserGroupCommand struct {
 
 type DeleteUserGroupCommand struct {
 	UserGroupID int `long:"user-group-id" description:"User group ID e.g. 1234" required:"true"`
+}
+
+func (command *UserGroupCommand) Execute([]string) error {
+	client := NewClient()
+
+	userGroup, err := client.UserGroups.Get(
+		command.UserGroupID,
+	)
+	if err != nil {
+		return err
+	}
+
+	return printUserGroup(userGroup)
 }
 
 func (command *UserGroupsCommand) Execute([]string) error {

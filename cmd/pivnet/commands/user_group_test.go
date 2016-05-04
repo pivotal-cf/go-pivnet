@@ -189,6 +189,45 @@ var _ = Describe("user group commands", func() {
 		})
 	})
 
+	Describe("UserGroupCommand", func() {
+		var (
+			userGroup pivnet.UserGroup
+		)
+
+		BeforeEach(func() {
+			userGroup = userGroups[1]
+		})
+
+		It("shows the user group for user group id", func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf(
+							"%s/user_groups/%d",
+							apiPrefix,
+							userGroup.ID,
+						),
+					),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, userGroup),
+				),
+			)
+
+			userGroupCommand := commands.UserGroupCommand{}
+			userGroupCommand.UserGroupID = userGroup.ID
+
+			err := userGroupCommand.Execute(nil)
+			Expect(err).NotTo(HaveOccurred())
+
+			var returned pivnet.UserGroup
+
+			err = json.Unmarshal(outBuffer.Bytes(), &returned)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(returned).To(Equal(userGroup))
+		})
+	})
+
 	Describe("CreateUserGroupCommand", func() {
 		It("creates user group", func() {
 			createUserGroupResponse := userGroups[0]
