@@ -328,4 +328,42 @@ var _ = Describe("PivnetClient - user groups", func() {
 			})
 		})
 	})
+	Describe("Delete", func() {
+		var (
+			userGroup pivnet.UserGroup
+		)
+
+		BeforeEach(func() {
+			userGroup = pivnet.UserGroup{
+				ID: 1234,
+			}
+		})
+
+		It("deletes the release", func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("DELETE", fmt.Sprintf("%s/user_groups/%d", apiPrefix, userGroup.ID)),
+					ghttp.RespondWith(http.StatusNoContent, nil),
+				),
+			)
+
+			err := client.UserGroups.Delete(userGroup.ID)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Context("when the server responds with a non-204 status code", func() {
+			It("returns an error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("DELETE", fmt.Sprintf("%s/user_groups/%d", apiPrefix, userGroup.ID)),
+						ghttp.RespondWith(http.StatusTeapot, nil),
+					),
+				)
+
+				err := client.UserGroups.Delete(userGroup.ID)
+				Expect(err).To(MatchError(errors.New(
+					"Pivnet returned status code: 418 for the request - expected 204")))
+			})
+		})
+	})
 })

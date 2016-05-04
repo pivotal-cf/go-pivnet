@@ -257,4 +257,37 @@ var _ = Describe("user group commands", func() {
 			})
 		})
 	})
+
+	Describe("DeleteUserGroupCommand", func() {
+		It("deletes user group", func() {
+			userGroupID := 1234
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("DELETE", fmt.Sprintf("%s/user_groups/%d", apiPrefix, userGroupID)),
+					ghttp.RespondWithJSONEncoded(http.StatusNoContent, nil),
+				),
+			)
+
+			deleteUserGroupCommand := commands.DeleteUserGroupCommand{}
+			deleteUserGroupCommand.UserGroupID = userGroupID
+
+			err := deleteUserGroupCommand.Execute(nil)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Describe("UserGroupID flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(commands.DeleteUserGroupCommand{}, "UserGroupID")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("user-group-id"))
+			})
+		})
+	})
 })

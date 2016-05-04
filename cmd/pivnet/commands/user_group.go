@@ -20,6 +20,10 @@ type CreateUserGroupCommand struct {
 	Members     []string `long:"member" description:"Email addresses of members to be added"`
 }
 
+type DeleteUserGroupCommand struct {
+	UserGroupID int `long:"user-group-id" description:"User group ID e.g. 1234" required:"true"`
+}
+
 func (command *UserGroupsCommand) Execute([]string) error {
 	client := NewClient()
 
@@ -116,6 +120,17 @@ func printUserGroup(userGroup pivnet.UserGroup) error {
 		return printJSON(userGroup)
 	case PrintAsYAML:
 		return printYAML(userGroup)
+	}
+
+	return nil
+}
+
+func (command *DeleteUserGroupCommand) Execute([]string) error {
+	client := NewClient()
+
+	err := client.UserGroups.Delete(command.UserGroupID)
+	if err != nil {
+		return err
 	}
 
 	return nil

@@ -20,7 +20,7 @@ var (
 
 func TestCLI(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "CLI Suite")
+	RunSpecs(t, "CLI Executable Suite")
 }
 
 var _ = BeforeSuite(func() {
