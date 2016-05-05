@@ -303,6 +303,11 @@ var _ = Describe("user group commands", func() {
 		var (
 			name        *string
 			description *string
+
+			updatedUserGroup           pivnet.UserGroup
+			updateUserGroupRequestBody string
+
+			updateUserGroupCommand commands.UpdateUserGroupCommand
 		)
 
 		BeforeEach(func() {
@@ -311,35 +316,43 @@ var _ = Describe("user group commands", func() {
 
 			name = &nameVal
 			description = &descriptionVal
-		})
-
-		It("updates user group", func() {
-			initialUserGroupResponse := userGroups[0]
 
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/user_groups/%d", apiPrefix, userGroups[0].ID)),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, initialUserGroupResponse),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, userGroups[0]),
 				),
 			)
 
-			updatedUserGroup := userGroups[0]
+			updateUserGroupRequestBody = fmt.Sprintf(
+				`{"user_group":{"name":"%s","description":"%s"}}`,
+				*name,
+				*description,
+			)
+
+			updatedUserGroup = userGroups[0]
 			updatedUserGroup.Name = *name
 			updatedUserGroup.Description = *description
+
+			updateUserGroupCommand = commands.UpdateUserGroupCommand{}
+			updateUserGroupCommand.UserGroupID = userGroups[0].ID
+			updateUserGroupCommand.Name = name
+			updateUserGroupCommand.Description = description
+		})
+
+		JustBeforeEach(func() {
 			updateUserGroupResponse := pivnet.UpdateUserGroupResponse{updatedUserGroup}
 
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("PATCH", fmt.Sprintf("%s/user_groups/%d", apiPrefix, userGroups[0].ID)),
+					ghttp.VerifyJSON(updateUserGroupRequestBody),
 					ghttp.RespondWithJSONEncoded(http.StatusOK, updateUserGroupResponse),
 				),
 			)
+		})
 
-			updateUserGroupCommand := commands.UpdateUserGroupCommand{}
-			updateUserGroupCommand.UserGroupID = userGroups[0].ID
-			updateUserGroupCommand.Name = name
-			updateUserGroupCommand.Description = description
-
+		It("updates name and description for user group", func() {
 			err := updateUserGroupCommand.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
 
@@ -349,6 +362,44 @@ var _ = Describe("user group commands", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(returnedUserGroup).To(Equal(updatedUserGroup))
+		})
+
+		Context("when name is not provided", func() {
+			BeforeEach(func() {
+				updateUserGroupRequestBody = fmt.Sprintf(
+					`{"user_group":{"name":"%s","description":"%s"}}`,
+					userGroups[0].Name,
+					*description,
+				)
+
+				updateUserGroupCommand.Name = nil
+			})
+
+			It("uses previous name in request body", func() {
+				err := updateUserGroupCommand.Execute(nil)
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+
+		Context("when description is not provided", func() {
+			BeforeEach(func() {
+				updateUserGroupRequestBody = fmt.Sprintf(
+					`{"user_group":{"name":"%s","description":"%s"}}`,
+					*name,
+					userGroups[0].Description,
+				)
+
+				updateUserGroupCommand.Description = nil
+			})
+
+			It("uses previous description in request body", func() {
+				err := updateUserGroupCommand.Execute(nil)
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+
+		Context("when description is empty", func() {
+
 		})
 
 		Describe("Name flag", func() {
