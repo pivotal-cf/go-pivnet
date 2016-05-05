@@ -30,6 +30,12 @@ type UpdateUserGroupCommand struct {
 	Description *string `long:"description" description:"Description e.g. 'All users in the world'"`
 }
 
+type AddUserGroupCommand struct {
+	ProductSlug    string `long:"product-slug" description:"Product slug e.g. p-mysql" required:"true"`
+	ReleaseVersion string `long:"release-version" description:"Release version e.g. 0.1.2-rc1" required:"true"`
+	UserGroupID    int    `long:"user-group-id" description:"User Group ID e.g. 1234" required:"true"`
+}
+
 type DeleteUserGroupCommand struct {
 	UserGroupID int `long:"user-group-id" description:"User group ID e.g. 1234" required:"true"`
 }
@@ -181,4 +187,36 @@ func (command *UpdateUserGroupCommand) Execute([]string) error {
 	}
 
 	return printUserGroup(updated)
+}
+
+func (command *AddUserGroupCommand) Execute([]string) error {
+	client := NewClient()
+
+	releases, err := client.Releases.List(command.ProductSlug)
+	if err != nil {
+		return err
+	}
+
+	var release pivnet.Release
+	for _, r := range releases {
+		if r.Version == command.ReleaseVersion {
+			release = r
+			break
+		}
+	}
+
+	if release.Version != command.ReleaseVersion {
+		return fmt.Errorf("release not found")
+	}
+
+	err = client.UserGroups.AddToRelease(
+		command.ProductSlug,
+		release.ID,
+		command.UserGroupID,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

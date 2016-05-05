@@ -23,6 +23,11 @@ var _ = Describe("user group commands", func() {
 		outBuffer bytes.Buffer
 
 		userGroups []pivnet.UserGroup
+		userGroup  pivnet.UserGroup
+
+		releases []pivnet.Release
+
+		productSlug string
 	)
 
 	BeforeEach(func() {
@@ -45,6 +50,20 @@ var _ = Describe("user group commands", func() {
 				Description: "Another user group",
 			},
 		}
+		userGroup = userGroups[1]
+
+		releases = []pivnet.Release{
+			{
+				ID:      1234,
+				Version: "some-release-version",
+			},
+			{
+				ID:      2345,
+				Version: "another-release-version",
+			},
+		}
+
+		productSlug = "some-fake-product-slug"
 	})
 
 	AfterEach(func() {
@@ -192,14 +211,6 @@ var _ = Describe("user group commands", func() {
 	})
 
 	Describe("UserGroupCommand", func() {
-		var (
-			userGroup pivnet.UserGroup
-		)
-
-		BeforeEach(func() {
-			userGroup = userGroups[1]
-		})
-
 		It("shows the user group for user group id", func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
@@ -427,6 +438,86 @@ var _ = Describe("user group commands", func() {
 
 			It("contains long name", func() {
 				Expect(longTag(field)).To(Equal("description"))
+			})
+		})
+	})
+
+	Describe("AddUserGroupCommand", func() {
+		It("adds the user group for the provided product slug and user group id to the specified release", func() {
+			releasesResponse := pivnet.ReleasesResponse{
+				Releases: releases,
+			}
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/%s/releases", apiPrefix, productSlug)),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, releasesResponse),
+				),
+			)
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"PATCH",
+						fmt.Sprintf(
+							"%s/products/%s/releases/%d/add_user_group",
+							apiPrefix,
+							productSlug,
+							releases[0].ID,
+						),
+					),
+					ghttp.RespondWithJSONEncoded(http.StatusNoContent, nil),
+				),
+			)
+
+			userGroupCommand := commands.AddUserGroupCommand{}
+			userGroupCommand.ProductSlug = productSlug
+			userGroupCommand.UserGroupID = userGroup.ID
+			userGroupCommand.ReleaseVersion = releases[0].Version
+
+			err := userGroupCommand.Execute(nil)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Describe("ProductSlug flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(commands.AddUserGroupCommand{}, "ProductSlug")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("product-slug"))
+			})
+		})
+
+		Describe("UserGroupID flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(commands.AddUserGroupCommand{}, "UserGroupID")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("user-group-id"))
+			})
+		})
+
+		Describe("ReleaseVersion flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(commands.AddUserGroupCommand{}, "ReleaseVersion")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("release-version"))
 			})
 		})
 	})
