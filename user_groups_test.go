@@ -247,10 +247,10 @@ var _ = Describe("PivnetClient - user groups", func() {
 		BeforeEach(func() {
 			name = "some name"
 			description = "some description"
-			members = nil
+			members = []string{"some member"}
 
 			expectedRequestBody = fmt.Sprintf(
-				`{"user_group":{"name":"%s","description":"%s","members":[]}}`,
+				`{"user_group":{"name":"%s","description":"%s","members":["some member"]}}`,
 				name,
 				description,
 			)
@@ -268,6 +268,12 @@ var _ = Describe("PivnetClient - user groups", func() {
 		Context("when members is nil", func() {
 			BeforeEach(func() {
 				members = nil
+
+				expectedRequestBody = fmt.Sprintf(
+					`{"user_group":{"name":"%s","description":"%s","members":[]}}`,
+					name,
+					description,
+				)
 			})
 
 			It("successfully sends empty array in json body", func() {
