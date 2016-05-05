@@ -86,7 +86,7 @@ func printFileGroups(fileGroups []pivnet.FileGroup) error {
 			fileGroupAsString := []string{
 				strconv.Itoa(fileGroup.ID),
 				fileGroup.Name,
-				strings.Join(productFileNames, " "),
+				strings.Join(productFileNames, ", "),
 			}
 			table.Append(fileGroupAsString)
 		}
@@ -135,7 +135,7 @@ func printFileGroup(fileGroup pivnet.FileGroup) error {
 		fileGroupAsString := []string{
 			strconv.Itoa(fileGroup.ID),
 			fileGroup.Name,
-			strings.Join(productFileNames, " "),
+			strings.Join(productFileNames, ", "),
 		}
 		table.Append(fileGroupAsString)
 		table.Render()

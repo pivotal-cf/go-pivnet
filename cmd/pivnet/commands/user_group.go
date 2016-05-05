@@ -128,7 +128,7 @@ func printUserGroup(userGroup pivnet.UserGroup) error {
 			strconv.Itoa(userGroup.ID),
 			userGroup.Name,
 			userGroup.Description,
-			strings.Join(userGroup.Members, ""),
+			strings.Join(userGroup.Members, ", "),
 		})
 
 		table.Render()
