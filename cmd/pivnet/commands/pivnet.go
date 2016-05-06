@@ -12,6 +12,7 @@ import (
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/lagershim"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/version"
 	"github.com/pivotal-golang/lager"
+	"github.com/robdimsdale/sanitizer"
 )
 
 const (
@@ -94,8 +95,13 @@ func NewClient() pivnet.Client {
 	)
 	l := lager.NewLogger("pivnet CLI")
 
+	sanitized := map[string]string{
+		Pivnet.APIToken: "*** redacted api token ***",
+	}
+	sanitizer := sanitizer.NewSanitizer(sanitized, OutWriter)
+
 	if Pivnet.Verbose {
-		l.RegisterSink(lager.NewWriterSink(os.Stdout, lager.DEBUG))
+		l.RegisterSink(lager.NewWriterSink(sanitizer, lager.DEBUG))
 	}
 
 	ls := lagershim.NewLagerShim(l)

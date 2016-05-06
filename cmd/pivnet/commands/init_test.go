@@ -24,6 +24,7 @@ var _ = BeforeSuite(func() {
 	commands.OutWriter = os.Stdout
 	commands.Pivnet = commands.PivnetCommand{}
 	commands.Pivnet.Format = commands.PrintAsJSON
+	commands.Pivnet.APIToken = apiToken
 })
 
 func fieldFor(command interface{}, name string) reflect.StructField {

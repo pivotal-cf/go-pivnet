@@ -1,10 +1,15 @@
 package commands_test
 
 import (
+	"bytes"
+	"fmt"
+	"net/http"
 	"reflect"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/ghttp"
+	"github.com/pivotal-cf-experimental/go-pivnet"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands"
 )
 
@@ -12,6 +17,60 @@ var _ = Describe("Pivnet commands", func() {
 	var (
 		field reflect.StructField
 	)
+
+	Describe("redaction", func() {
+		var (
+			server *ghttp.Server
+
+			outBuffer bytes.Buffer
+			client    pivnet.Client
+		)
+
+		BeforeEach(func() {
+			server = ghttp.NewServer()
+
+			commands.Pivnet.Host = server.URL()
+			commands.Pivnet.Verbose = true
+
+			outBuffer = bytes.Buffer{}
+			commands.OutWriter = &outBuffer
+
+			client = commands.NewClient()
+
+			products := []pivnet.Product{
+				{
+					ID:   2345,
+					Slug: "another-product-slug",
+					Name: "another-product-name",
+				},
+			}
+
+			productsResponse := pivnet.ProductsResponse{
+				Products: products,
+			}
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products", apiPrefix)),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, productsResponse),
+				),
+			)
+		})
+
+		It("redacts api token", func() {
+			_, err := client.Products.List()
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(outBuffer.String()).Should(ContainSubstring("*** redacted api token ***"))
+			Expect(outBuffer.String()).ShouldNot(ContainSubstring(apiToken))
+		})
+
+		AfterEach(func() {
+			server.Close()
+
+			commands.Pivnet.Verbose = false
+		})
+	})
 
 	Describe("Version", func() {
 		BeforeEach(func() {
