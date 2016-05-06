@@ -152,7 +152,7 @@ func printFileGroup(fileGroup pivnet.FileGroup) error {
 func (command *DeleteFileGroupCommand) Execute([]string) error {
 	client := NewClient()
 
-	fileGroup, err := client.FileGroups.Delete(
+	_, err := client.FileGroups.Delete(
 		command.ProductSlug,
 		command.FileGroupID,
 	)
@@ -160,5 +160,14 @@ func (command *DeleteFileGroupCommand) Execute([]string) error {
 		return err
 	}
 
-	return printFileGroup(fileGroup)
+	if Pivnet.Format == PrintAsTable {
+		_, err = fmt.Fprintf(
+			StdOutWriter,
+			"file group %d deleted successfully for %s\n",
+			command.FileGroupID,
+			command.ProductSlug,
+		)
+	}
+
+	return err
 }

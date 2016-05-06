@@ -267,13 +267,6 @@ var _ = Describe("file group commands", func() {
 
 			err := deleteFileGroupCommand.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
-
-			var returned pivnet.FileGroup
-
-			err = json.Unmarshal(outBuffer.Bytes(), &returned)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(returned).To(Equal(fileGroups[0]))
 		})
 
 		Describe("ProductSlug flag", func() {

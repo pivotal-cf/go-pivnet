@@ -109,5 +109,14 @@ func (command *AcceptEULACommand) Execute([]string) error {
 		return err
 	}
 
-	return nil
+	if Pivnet.Format == PrintAsTable {
+		_, err = fmt.Fprintf(
+			StdOutWriter,
+			"eula acccepted successfully for %s/%s\n",
+			command.ProductSlug,
+			command.ReleaseVersion,
+		)
+	}
+
+	return err
 }
