@@ -103,10 +103,6 @@ func (c Client) makeRequestWithHTTPResponse(
 
 	if len(b) > 0 {
 		c.logger.Debug("Response body", lager.Data{"response body": string(b)})
-		err = json.Unmarshal(b, data)
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	if resp.StatusCode != expectedStatusCode {
@@ -115,6 +111,13 @@ func (c Client) makeRequestWithHTTPResponse(
 			resp.StatusCode,
 			expectedStatusCode,
 		)
+	}
+
+	if len(b) > 0 {
+		err = json.Unmarshal(b, data)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return resp, nil
