@@ -54,7 +54,7 @@ func NewClient(config ClientConfig, logger logger.Logger) Client {
 	client.EULA = &EULAsService{client: client}
 	client.ProductFiles = &ProductFilesService{client: client}
 	client.FileGroups = &FileGroupsService{client: client}
-	client.Releases = &ReleasesService{client: client}
+	client.Releases = &ReleasesService{client: client, l: logger}
 	client.Products = &ProductsService{client: client, l: logger}
 	client.UserGroups = &UserGroupsService{client: client}
 	client.ReleaseDependencies = &ReleaseDependenciesService{client: client}

@@ -12,6 +12,7 @@ import (
 
 type ReleasesService struct {
 	client Client
+	l      logger.Logger
 }
 
 type createReleaseBody struct {
@@ -111,7 +112,7 @@ func (r ReleasesService) Create(config CreateReleaseConfig) (Release, error) {
 
 	if config.ReleaseDate == "" {
 		body.Release.ReleaseDate = time.Now().Format("2006-01-02")
-		r.client.logger.Debug("No release date found - defaulting to", logger.Data{"release date": body.Release.ReleaseDate})
+		r.l.Debug("No release date found - defaulting to", logger.Data{"release date": body.Release.ReleaseDate})
 	}
 
 	b, err := json.Marshal(body)
