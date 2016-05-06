@@ -6,4 +6,5 @@ type Data map[string]interface{}
 
 type Logger interface {
 	Debug(action string, data ...Data)
+	Info(action string, data ...Data)
 }

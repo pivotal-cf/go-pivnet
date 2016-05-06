@@ -14,6 +14,12 @@ type FakeLogger struct {
 		action string
 		data   []logger.Data
 	}
+	InfoStub        func(action string, data ...logger.Data)
+	infoMutex       sync.RWMutex
+	infoArgsForCall []struct {
+		action string
+		data   []logger.Data
+	}
 }
 
 func (fake *FakeLogger) Debug(action string, data ...logger.Data) {
@@ -38,6 +44,30 @@ func (fake *FakeLogger) DebugArgsForCall(i int) (string, []logger.Data) {
 	fake.debugMutex.RLock()
 	defer fake.debugMutex.RUnlock()
 	return fake.debugArgsForCall[i].action, fake.debugArgsForCall[i].data
+}
+
+func (fake *FakeLogger) Info(action string, data ...logger.Data) {
+	fake.infoMutex.Lock()
+	fake.infoArgsForCall = append(fake.infoArgsForCall, struct {
+		action string
+		data   []logger.Data
+	}{action, data})
+	fake.infoMutex.Unlock()
+	if fake.InfoStub != nil {
+		fake.InfoStub(action, data...)
+	}
+}
+
+func (fake *FakeLogger) InfoCallCount() int {
+	fake.infoMutex.RLock()
+	defer fake.infoMutex.RUnlock()
+	return len(fake.infoArgsForCall)
+}
+
+func (fake *FakeLogger) InfoArgsForCall(i int) (string, []logger.Data) {
+	fake.infoMutex.RLock()
+	defer fake.infoMutex.RUnlock()
+	return fake.infoArgsForCall[i].action, fake.infoArgsForCall[i].data
 }
 
 var _ logger.Logger = new(FakeLogger)
