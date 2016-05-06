@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/pivotal-golang/lager"
+	"github.com/pivotal-cf-experimental/go-pivnet/logger"
 )
 
 type ReleasesService struct {
@@ -111,7 +111,7 @@ func (r ReleasesService) Create(config CreateReleaseConfig) (Release, error) {
 
 	if config.ReleaseDate == "" {
 		body.Release.ReleaseDate = time.Now().Format("2006-01-02")
-		r.client.logger.Debug("No release date found - defaulting to", lager.Data{"release date": body.Release.ReleaseDate})
+		r.client.logger.Debug("No release date found - defaulting to", logger.Data{"release date": body.Release.ReleaseDate})
 	}
 
 	b, err := json.Marshal(body)

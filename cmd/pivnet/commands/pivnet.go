@@ -9,6 +9,7 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/pivotal-cf-experimental/go-pivnet"
+	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/lagershim"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/version"
 	"github.com/pivotal-golang/lager"
 )
@@ -97,13 +98,15 @@ func NewClient() pivnet.Client {
 		l.RegisterSink(lager.NewWriterSink(os.Stdout, lager.DEBUG))
 	}
 
+	ls := lagershim.NewLagerShim(l)
+
 	pivnetClient := pivnet.NewClient(
 		pivnet.ClientConfig{
 			Token:     Pivnet.APIToken,
 			Host:      Pivnet.Host,
 			UserAgent: useragent,
 		},
-		l,
+		ls,
 	)
 
 	return pivnetClient

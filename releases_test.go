@@ -10,7 +10,8 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
 	"github.com/pivotal-cf-experimental/go-pivnet"
-	"github.com/pivotal-golang/lager"
+	"github.com/pivotal-cf-experimental/go-pivnet/logger"
+	"github.com/pivotal-cf-experimental/go-pivnet/logger/loggerfakes"
 )
 
 var _ = Describe("PivnetClient - product files", func() {
@@ -22,7 +23,7 @@ var _ = Describe("PivnetClient - product files", func() {
 		userAgent  string
 
 		newClientConfig pivnet.ClientConfig
-		fakeLogger      lager.Logger
+		fakeLogger      logger.Logger
 	)
 
 	BeforeEach(func() {
@@ -31,7 +32,7 @@ var _ = Describe("PivnetClient - product files", func() {
 		token = "my-auth-token"
 		userAgent = "pivnet-resource/0.1.0 (some-url)"
 
-		fakeLogger = lager.NewLogger("producrt files")
+		fakeLogger = &loggerfakes.FakeLogger{}
 		newClientConfig = pivnet.ClientConfig{
 			Host:      apiAddress,
 			Token:     token,

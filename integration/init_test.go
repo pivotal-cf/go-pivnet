@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/pivotal-cf-experimental/go-pivnet"
-	"github.com/pivotal-golang/lager"
+	"github.com/pivotal-cf-experimental/go-pivnet/logger/loggerfakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -39,8 +39,7 @@ var _ = BeforeSuite(func() {
 		UserAgent: "go-pivnet/integration-test",
 	}
 
-	logger := lager.NewLogger("integration tests")
-	logger.RegisterSink(lager.NewWriterSink(GinkgoWriter, lager.DEBUG))
+	logger := &loggerfakes.FakeLogger{}
 
 	client = pivnet.NewClient(config, logger)
 

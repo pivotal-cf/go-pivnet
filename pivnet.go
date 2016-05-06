@@ -9,7 +9,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 
-	"github.com/pivotal-golang/lager"
+	"github.com/pivotal-cf-experimental/go-pivnet/logger"
 )
 
 const (
@@ -20,7 +20,7 @@ type Client struct {
 	baseURL   string
 	token     string
 	userAgent string
-	logger    lager.Logger
+	logger    logger.Logger
 
 	Auth                *AuthService
 	EULA                *EULAsService
@@ -40,7 +40,7 @@ type ClientConfig struct {
 	UserAgent string
 }
 
-func NewClient(config ClientConfig, logger lager.Logger) Client {
+func NewClient(config ClientConfig, logger logger.Logger) Client {
 	baseURL := fmt.Sprintf("%s%s", config.Host, apiVersion)
 
 	client := Client{
@@ -82,19 +82,19 @@ func (c Client) makeRequestWithHTTPResponse(
 
 	reqBytes, err := httputil.DumpRequestOut(req, true)
 	if err != nil {
-		c.logger.Debug("Error dumping request", lager.Data{"error": err})
+		c.logger.Debug("Error dumping request", logger.Data{"error": err})
 		return nil, err
 	}
 
-	c.logger.Debug("Making request", lager.Data{"request": string(reqBytes)})
+	c.logger.Debug("Making request", logger.Data{"request": string(reqBytes)})
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		c.logger.Debug("Error making request", lager.Data{"error": err})
+		c.logger.Debug("Error making request", logger.Data{"error": err})
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	c.logger.Debug("Response status code", lager.Data{"status code": resp.StatusCode})
+	c.logger.Debug("Response status code", logger.Data{"status code": resp.StatusCode})
 
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -102,7 +102,7 @@ func (c Client) makeRequestWithHTTPResponse(
 	}
 
 	if len(b) > 0 {
-		c.logger.Debug("Response body", lager.Data{"response body": string(b)})
+		c.logger.Debug("Response body", logger.Data{"response body": string(b)})
 	}
 
 	if resp.StatusCode != expectedStatusCode {
