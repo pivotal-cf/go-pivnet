@@ -13,3 +13,6 @@
 [submodule "vendor/github.com/mattn/go-runewidth"]
 	path = vendor/github.com/mattn/go-runewidth
 	url = https://github.com/mattn/go-runewidth
+[submodule "vendor/github.com/robdimsdale/sanitizer"]
+	path = vendor/github.com/robdimsdale/sanitizer
+	url = https://github.com/robdimsdale/sanitizer
