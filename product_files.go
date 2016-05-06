@@ -40,11 +40,9 @@ type ProductFile struct {
 }
 
 func (p ProductFilesService) List(productSlug string) ([]ProductFile, error) {
-	url := fmt.Sprintf("/products/%s/product_files",
-		productSlug,
-	)
-	response := ProductFilesResponse{}
+	url := fmt.Sprintf("/products/%s/product_files", productSlug)
 
+	var response ProductFilesResponse
 	err := p.client.makeRequest(
 		"GET",
 		url,
@@ -60,12 +58,13 @@ func (p ProductFilesService) List(productSlug string) ([]ProductFile, error) {
 }
 
 func (p ProductFilesService) ListForRelease(productSlug string, releaseID int) ([]ProductFile, error) {
-	url := fmt.Sprintf("/products/%s/releases/%d/product_files",
+	url := fmt.Sprintf(
+		"/products/%s/releases/%d/product_files",
 		productSlug,
 		releaseID,
 	)
-	response := ProductFilesResponse{}
 
+	var response ProductFilesResponse
 	err := p.client.makeRequest(
 		"GET",
 		url,
@@ -81,12 +80,13 @@ func (p ProductFilesService) ListForRelease(productSlug string, releaseID int) (
 }
 
 func (p ProductFilesService) Get(productSlug string, productFileID int) (ProductFile, error) {
-	url := fmt.Sprintf("/products/%s/product_files/%d",
+	url := fmt.Sprintf(
+		"/products/%s/product_files/%d",
 		productSlug,
 		productFileID,
 	)
-	response := ProductFileResponse{}
 
+	var response ProductFileResponse
 	err := p.client.makeRequest(
 		"GET",
 		url,
@@ -102,13 +102,14 @@ func (p ProductFilesService) Get(productSlug string, productFileID int) (Product
 }
 
 func (p ProductFilesService) GetForRelease(productSlug string, releaseID int, productFileID int) (ProductFile, error) {
-	url := fmt.Sprintf("/products/%s/releases/%d/product_files/%d",
+	url := fmt.Sprintf(
+		"/products/%s/releases/%d/product_files/%d",
 		productSlug,
 		releaseID,
 		productFileID,
 	)
-	response := ProductFileResponse{}
 
+	var response ProductFileResponse
 	err := p.client.makeRequest(
 		"GET",
 		url,
@@ -128,7 +129,7 @@ func (p ProductFilesService) Create(config CreateProductFileConfig) (ProductFile
 		return ProductFile{}, fmt.Errorf("AWS object key must not be empty")
 	}
 
-	url := "/products/" + config.ProductSlug + "/product_files"
+	url := fmt.Sprintf("/products/%s/product_files", config.ProductSlug)
 
 	body := createProductFileBody{
 		ProductFile: ProductFile{
@@ -143,7 +144,7 @@ func (p ProductFilesService) Create(config CreateProductFileConfig) (ProductFile
 
 	b, err := json.Marshal(body)
 	if err != nil {
-		panic(err)
+		return ProductFile{}, err
 	}
 
 	var response ProductFileResponse
@@ -206,7 +207,7 @@ func (p ProductFilesService) AddToRelease(
 
 	b, err := json.Marshal(body)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	err = p.client.makeRequest(
@@ -242,7 +243,7 @@ func (p ProductFilesService) RemoveFromRelease(
 
 	b, err := json.Marshal(body)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	err = p.client.makeRequest(

@@ -112,16 +112,24 @@ func (r ReleasesService) Create(config CreateReleaseConfig) (Release, error) {
 
 	if config.ReleaseDate == "" {
 		body.Release.ReleaseDate = time.Now().Format("2006-01-02")
-		r.l.Debug("No release date found - defaulting to", logger.Data{"release date": body.Release.ReleaseDate})
+		r.l.Info(
+			"No release date found - using default release date",
+			logger.Data{"release date": body.Release.ReleaseDate})
 	}
 
 	b, err := json.Marshal(body)
 	if err != nil {
-		panic(err)
+		return Release{}, err
 	}
 
 	var response CreateReleaseResponse
-	err = r.client.makeRequest("POST", url, http.StatusCreated, bytes.NewReader(b), &response)
+	err = r.client.makeRequest(
+		"POST",
+		url,
+		http.StatusCreated,
+		bytes.NewReader(b),
+		&response,
+	)
 	if err != nil {
 		return Release{}, err
 	}
@@ -130,7 +138,11 @@ func (r ReleasesService) Create(config CreateReleaseConfig) (Release, error) {
 }
 
 func (r ReleasesService) Update(productSlug string, release Release) (Release, error) {
-	url := fmt.Sprintf("/products/%s/releases/%d", productSlug, release.ID)
+	url := fmt.Sprintf(
+		"/products/%s/releases/%d",
+		productSlug,
+		release.ID,
+	)
 
 	release.OSSCompliant = "confirm"
 
@@ -140,11 +152,17 @@ func (r ReleasesService) Update(productSlug string, release Release) (Release, e
 
 	body, err := json.Marshal(updatedRelease)
 	if err != nil {
-		panic(err)
+		return Release{}, err
 	}
 
 	var response CreateReleaseResponse
-	err = r.client.makeRequest("PATCH", url, http.StatusOK, bytes.NewReader(body), &response)
+	err = r.client.makeRequest(
+		"PATCH",
+		url,
+		http.StatusOK,
+		bytes.NewReader(body),
+		&response,
+	)
 	if err != nil {
 		return Release{}, err
 	}
@@ -153,7 +171,11 @@ func (r ReleasesService) Update(productSlug string, release Release) (Release, e
 }
 
 func (r ReleasesService) Delete(release Release, productSlug string) error {
-	url := fmt.Sprintf("/products/%s/releases/%d", productSlug, release.ID)
+	url := fmt.Sprintf(
+		"/products/%s/releases/%d",
+		productSlug,
+		release.ID,
+	)
 
 	err := r.client.makeRequest(
 		"DELETE",

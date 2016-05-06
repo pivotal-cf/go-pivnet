@@ -48,8 +48,8 @@ func (p FileGroupsService) Get(productSlug string, fileGroupID int) (FileGroup, 
 		productSlug,
 		fileGroupID,
 	)
-	response := FileGroup{}
 
+	var response FileGroup
 	err := p.client.makeRequest(
 		"GET",
 		url,
@@ -91,8 +91,8 @@ func (p FileGroupsService) ListForRelease(productSlug string, releaseID int) ([]
 		productSlug,
 		releaseID,
 	)
-	response := FileGroupsResponse{}
 
+	var response FileGroupsResponse
 	err := p.client.makeRequest(
 		"GET",
 		url,

@@ -82,14 +82,12 @@ func (c Client) makeRequestWithHTTPResponse(
 
 	reqBytes, err := httputil.DumpRequestOut(req, true)
 	if err != nil {
-		c.logger.Debug("Error dumping request", logger.Data{"error": err})
 		return nil, err
 	}
 
 	c.logger.Debug("Making request", logger.Data{"request": string(reqBytes)})
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		c.logger.Debug("Error making request", logger.Data{"error": err})
 		return nil, err
 	}
 	defer resp.Body.Close()

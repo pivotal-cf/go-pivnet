@@ -125,11 +125,9 @@ func (u UserGroupsService) AddToRelease(productSlug string, releaseID int, userG
 }
 
 func (u UserGroupsService) Get(userGroupID int) (UserGroup, error) {
-	url := fmt.Sprintf("/user_groups/%d",
-		userGroupID,
-	)
-	response := UserGroup{}
+	url := fmt.Sprintf("/user_groups/%d", userGroupID)
 
+	var response UserGroup
 	err := u.client.makeRequest(
 		"GET",
 		url,
@@ -161,13 +159,12 @@ func (u UserGroupsService) Create(name string, description string, members []str
 
 	b, err := json.Marshal(createBody)
 	if err != nil {
-		panic(err)
+		return UserGroup{}, err
 	}
 
 	body := bytes.NewReader(b)
 
-	response := UserGroup{}
-
+	var response UserGroup
 	err = u.client.makeRequest(
 		"POST",
 		url,
@@ -194,13 +191,12 @@ func (u UserGroupsService) Update(userGroup UserGroup) (UserGroup, error) {
 
 	b, err := json.Marshal(createBody)
 	if err != nil {
-		panic(err)
+		return UserGroup{}, err
 	}
 
 	body := bytes.NewReader(b)
 
-	response := UpdateUserGroupResponse{}
-
+	var response UpdateUserGroupResponse
 	err = u.client.makeRequest(
 		"PATCH",
 		url,
