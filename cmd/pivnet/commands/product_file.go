@@ -217,6 +217,16 @@ func (command *AddProductFileCommand) Execute([]string) error {
 		return err
 	}
 
+	if Pivnet.Format == PrintAsTable {
+		_, err = fmt.Fprintf(
+			StdOutWriter,
+			"product file %d added successfully to %s/%s\n",
+			command.ProductFileID,
+			command.ProductSlug,
+			command.ReleaseVersion,
+		)
+	}
+
 	return nil
 }
 
@@ -249,6 +259,16 @@ func (command *RemoveProductFileCommand) Execute([]string) error {
 		return err
 	}
 
+	if Pivnet.Format == PrintAsTable {
+		_, err = fmt.Fprintf(
+			StdOutWriter,
+			"product file %d removed successfully from %s/%s\n",
+			command.ProductFileID,
+			command.ProductSlug,
+			command.ReleaseVersion,
+		)
+	}
+
 	return nil
 }
 
@@ -261,6 +281,15 @@ func (command *DeleteProductFileCommand) Execute([]string) error {
 	)
 	if err != nil {
 		return err
+	}
+
+	if Pivnet.Format == PrintAsTable {
+		_, err = fmt.Fprintf(
+			StdOutWriter,
+			"product file %d deleted successfully for %s\n",
+			command.ProductFileID,
+			command.ProductSlug,
+		)
 	}
 
 	return printProductFile(productFile)

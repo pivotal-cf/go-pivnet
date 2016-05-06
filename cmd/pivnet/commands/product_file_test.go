@@ -499,13 +499,6 @@ var _ = Describe("product file commands", func() {
 
 			err := deleteProductFileCommand.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
-
-			var returned pivnet.ProductFile
-
-			err = json.Unmarshal(outBuffer.Bytes(), &returned)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(returned).To(Equal(productFile))
 		})
 
 		Describe("ProductSlug flag", func() {

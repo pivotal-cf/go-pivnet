@@ -146,5 +146,14 @@ func (command *DeleteReleaseCommand) Execute([]string) error {
 		return err
 	}
 
+	if Pivnet.Format == PrintAsTable {
+		_, err = fmt.Fprintf(
+			StdOutWriter,
+			"release %s deleted successfully for %s\n",
+			command.ReleaseVersion,
+			command.ProductSlug,
+		)
+	}
+
 	return nil
 }

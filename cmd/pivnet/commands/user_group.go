@@ -162,6 +162,14 @@ func (command *DeleteUserGroupCommand) Execute([]string) error {
 		return err
 	}
 
+	if Pivnet.Format == PrintAsTable {
+		_, err = fmt.Fprintf(
+			StdOutWriter,
+			"user group %d deleted successfully\n",
+			command.UserGroupID,
+		)
+	}
+
 	return nil
 }
 
@@ -216,6 +224,16 @@ func (command *AddUserGroupCommand) Execute([]string) error {
 	)
 	if err != nil {
 		return err
+	}
+
+	if Pivnet.Format == PrintAsTable {
+		_, err = fmt.Fprintf(
+			StdOutWriter,
+			"user group %d added successfully to %s/%s\n",
+			command.UserGroupID,
+			command.ProductSlug,
+			command.ReleaseVersion,
+		)
 	}
 
 	return nil
