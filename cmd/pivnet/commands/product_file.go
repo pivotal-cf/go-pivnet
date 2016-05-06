@@ -82,7 +82,7 @@ func printProductFiles(productFiles []pivnet.ProductFile) error {
 	switch Pivnet.Format {
 
 	case PrintAsTable:
-		table := tablewriter.NewWriter(StdOutWriter)
+		table := tablewriter.NewWriter(OutputWriter)
 		table.SetHeader([]string{
 			"ID",
 			"Name",
@@ -113,7 +113,7 @@ func printProductFiles(productFiles []pivnet.ProductFile) error {
 func printProductFile(productFile pivnet.ProductFile) error {
 	switch Pivnet.Format {
 	case PrintAsTable:
-		table := tablewriter.NewWriter(StdOutWriter)
+		table := tablewriter.NewWriter(OutputWriter)
 		table.SetHeader([]string{
 			"ID",
 			"Name",
@@ -219,7 +219,7 @@ func (command *AddProductFileCommand) Execute([]string) error {
 
 	if Pivnet.Format == PrintAsTable {
 		_, err = fmt.Fprintf(
-			StdOutWriter,
+			OutputWriter,
 			"product file %d added successfully to %s/%s\n",
 			command.ProductFileID,
 			command.ProductSlug,
@@ -261,7 +261,7 @@ func (command *RemoveProductFileCommand) Execute([]string) error {
 
 	if Pivnet.Format == PrintAsTable {
 		_, err = fmt.Fprintf(
-			StdOutWriter,
+			OutputWriter,
 			"product file %d removed successfully from %s/%s\n",
 			command.ProductFileID,
 			command.ProductSlug,
@@ -285,7 +285,7 @@ func (command *DeleteProductFileCommand) Execute([]string) error {
 
 	if Pivnet.Format == PrintAsTable {
 		_, err = fmt.Fprintf(
-			StdOutWriter,
+			OutputWriter,
 			"product file %d deleted successfully for %s\n",
 			command.ProductFileID,
 			command.ProductSlug,

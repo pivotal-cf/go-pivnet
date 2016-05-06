@@ -98,7 +98,7 @@ func (command *UserGroupsCommand) Execute([]string) error {
 func printUserGroups(userGroups []pivnet.UserGroup) error {
 	switch Pivnet.Format {
 	case PrintAsTable:
-		table := tablewriter.NewWriter(StdOutWriter)
+		table := tablewriter.NewWriter(OutputWriter)
 		table.SetHeader([]string{"ID", "Name", "Description"})
 
 		for _, u := range userGroups {
@@ -133,7 +133,7 @@ func (command *CreateUserGroupCommand) Execute([]string) error {
 func printUserGroup(userGroup pivnet.UserGroup) error {
 	switch Pivnet.Format {
 	case PrintAsTable:
-		table := tablewriter.NewWriter(StdOutWriter)
+		table := tablewriter.NewWriter(OutputWriter)
 		table.SetHeader([]string{"ID", "Name", "Description", "Members"})
 
 		table.Append([]string{
@@ -164,7 +164,7 @@ func (command *DeleteUserGroupCommand) Execute([]string) error {
 
 	if Pivnet.Format == PrintAsTable {
 		_, err = fmt.Fprintf(
-			StdOutWriter,
+			OutputWriter,
 			"user group %d deleted successfully\n",
 			command.UserGroupID,
 		)
@@ -228,7 +228,7 @@ func (command *AddUserGroupCommand) Execute([]string) error {
 
 	if Pivnet.Format == PrintAsTable {
 		_, err = fmt.Fprintf(
-			StdOutWriter,
+			OutputWriter,
 			"user group %d added successfully to %s/%s\n",
 			command.UserGroupID,
 			command.ProductSlug,

@@ -69,7 +69,7 @@ func printFileGroups(fileGroups []pivnet.FileGroup) error {
 	switch Pivnet.Format {
 
 	case PrintAsTable:
-		table := tablewriter.NewWriter(StdOutWriter)
+		table := tablewriter.NewWriter(OutputWriter)
 		table.SetHeader([]string{
 			"ID",
 			"Name",
@@ -119,7 +119,7 @@ func printFileGroup(fileGroup pivnet.FileGroup) error {
 	switch Pivnet.Format {
 
 	case PrintAsTable:
-		table := tablewriter.NewWriter(StdOutWriter)
+		table := tablewriter.NewWriter(OutputWriter)
 		table.SetHeader([]string{
 			"ID",
 			"Name",
@@ -162,7 +162,7 @@ func (command *DeleteFileGroupCommand) Execute([]string) error {
 
 	if Pivnet.Format == PrintAsTable {
 		_, err = fmt.Fprintf(
-			StdOutWriter,
+			OutputWriter,
 			"file group %d deleted successfully for %s\n",
 			command.FileGroupID,
 			command.ProductSlug,

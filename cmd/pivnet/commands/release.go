@@ -34,7 +34,7 @@ func (command *ReleasesCommand) Execute([]string) error {
 
 	switch Pivnet.Format {
 	case PrintAsTable:
-		table := tablewriter.NewWriter(StdOutWriter)
+		table := tablewriter.NewWriter(OutputWriter)
 		table.SetHeader([]string{"ID", "Version", "Description"})
 
 		for _, r := range releases {
@@ -50,7 +50,7 @@ func (command *ReleasesCommand) Execute([]string) error {
 			return err
 		}
 
-		StdOutWriter.Write(b)
+		OutputWriter.Write(b)
 		return nil
 	case PrintAsYAML:
 		b, err := yaml.Marshal(releases)
@@ -59,7 +59,7 @@ func (command *ReleasesCommand) Execute([]string) error {
 		}
 
 		output := fmt.Sprintf("---\n%s\n", string(b))
-		StdOutWriter.Write([]byte(output))
+		OutputWriter.Write([]byte(output))
 		return nil
 	}
 
@@ -92,7 +92,7 @@ func (command *ReleaseCommand) Execute([]string) error {
 
 	switch Pivnet.Format {
 	case PrintAsTable:
-		table := tablewriter.NewWriter(StdOutWriter)
+		table := tablewriter.NewWriter(OutputWriter)
 		table.SetHeader([]string{"ID", "Version", "Description"})
 
 		table.Append([]string{
@@ -106,7 +106,7 @@ func (command *ReleaseCommand) Execute([]string) error {
 			return err
 		}
 
-		StdOutWriter.Write(b)
+		OutputWriter.Write(b)
 		return nil
 	case PrintAsYAML:
 		b, err := yaml.Marshal(release)
@@ -115,7 +115,7 @@ func (command *ReleaseCommand) Execute([]string) error {
 		}
 
 		output := fmt.Sprintf("---\n%s\n", string(b))
-		StdOutWriter.Write([]byte(output))
+		OutputWriter.Write([]byte(output))
 		return nil
 	}
 
@@ -148,7 +148,7 @@ func (command *DeleteReleaseCommand) Execute([]string) error {
 
 	if Pivnet.Format == PrintAsTable {
 		_, err = fmt.Fprintf(
-			StdOutWriter,
+			OutputWriter,
 			"release %s deleted successfully for %s\n",
 			command.ReleaseVersion,
 			command.ProductSlug,

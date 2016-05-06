@@ -36,7 +36,7 @@ var _ = Describe("user group commands", func() {
 		commands.Pivnet.Host = server.URL()
 
 		outBuffer = bytes.Buffer{}
-		commands.StdOutWriter = &outBuffer
+		commands.OutputWriter = &outBuffer
 
 		userGroups = []pivnet.UserGroup{
 			{

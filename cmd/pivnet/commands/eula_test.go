@@ -31,7 +31,7 @@ var _ = Describe("eula commands", func() {
 		commands.Pivnet.Host = server.URL()
 
 		outBuffer = bytes.Buffer{}
-		commands.StdOutWriter = &outBuffer
+		commands.OutputWriter = &outBuffer
 
 		eulas = []pivnet.EULA{
 			{

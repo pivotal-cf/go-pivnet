@@ -24,8 +24,8 @@ const (
 )
 
 var (
-	StdOutWriter io.Writer
-	StdErrWriter io.Writer
+	OutputWriter io.Writer
+	LogWriter    io.Writer
 )
 
 type PivnetCommand struct {
@@ -77,9 +77,6 @@ type PivnetCommand struct {
 var Pivnet PivnetCommand
 
 func init() {
-	StdOutWriter = os.Stdout
-	StdErrWriter = os.Stderr
-
 	Pivnet.Version = func() {
 		fmt.Println(version.Version)
 		os.Exit(0)
@@ -88,26 +85,43 @@ func init() {
 	if Pivnet.Host == "" {
 		Pivnet.Host = DefaultHost
 	}
+
 }
 
 func NewClient() pivnet.Client {
-	useragent := fmt.Sprintf(
-		"go-pivnet/%s",
-		version.Version,
-	)
+	if OutputWriter == nil {
+		OutputWriter = os.Stdout
+	}
+
+	if LogWriter == nil {
+		switch Pivnet.Format {
+		case PrintAsJSON, PrintAsYAML:
+			LogWriter = os.Stderr
+			break
+		default:
+			LogWriter = os.Stdout
+		}
+	}
+
 	l := lager.NewLogger("pivnet CLI")
 
 	sanitized := map[string]string{
 		Pivnet.APIToken: "*** redacted api token ***",
 	}
-	StdOutWriter = sanitizer.NewSanitizer(sanitized, StdOutWriter)
-	StdErrWriter = sanitizer.NewSanitizer(sanitized, StdErrWriter)
 
-	l.RegisterSink(lager.NewWriterSink(StdOutWriter, lager.INFO))
+	OutputWriter = sanitizer.NewSanitizer(sanitized, OutputWriter)
+	LogWriter = sanitizer.NewSanitizer(sanitized, LogWriter)
 
 	if Pivnet.Verbose {
-		l.RegisterSink(lager.NewWriterSink(StdOutWriter, lager.DEBUG))
+		l.RegisterSink(lager.NewWriterSink(LogWriter, lager.DEBUG))
+	} else {
+		l.RegisterSink(lager.NewWriterSink(LogWriter, lager.INFO))
 	}
+
+	useragent := fmt.Sprintf(
+		"go-pivnet/%s",
+		version.Version,
+	)
 
 	ls := lagershim.NewLagerShim(l)
 
@@ -130,7 +144,7 @@ func printYAML(object interface{}) error {
 	}
 
 	output := fmt.Sprintf("---\n%s\n", string(b))
-	StdOutWriter.Write([]byte(output))
+	OutputWriter.Write([]byte(output))
 	return nil
 }
 
@@ -140,6 +154,6 @@ func printJSON(object interface{}) error {
 		return err
 	}
 
-	StdOutWriter.Write(b)
+	OutputWriter.Write(b)
 	return nil
 }

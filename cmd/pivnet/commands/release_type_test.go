@@ -29,7 +29,7 @@ var _ = Describe("release types commands", func() {
 		commands.Pivnet.Host = server.URL()
 
 		outBuffer = bytes.Buffer{}
-		commands.StdOutWriter = &outBuffer
+		commands.OutputWriter = &outBuffer
 
 		releaseTypes = []string{
 			"release type 1",

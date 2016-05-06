@@ -21,7 +21,7 @@ func TestCommands(t *testing.T) {
 }
 
 var _ = BeforeSuite(func() {
-	commands.StdOutWriter = os.Stdout
+	commands.OutputWriter = os.Stdout
 	commands.Pivnet = commands.PivnetCommand{}
 	commands.Pivnet.Format = commands.PrintAsJSON
 	commands.Pivnet.APIToken = apiToken
