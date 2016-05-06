@@ -33,7 +33,7 @@ var _ = Describe("Pivnet commands", func() {
 			commands.Pivnet.Verbose = true
 
 			outBuffer = bytes.Buffer{}
-			commands.OutWriter = &outBuffer
+			commands.StdOutWriter = &outBuffer
 
 			client = commands.NewClient()
 

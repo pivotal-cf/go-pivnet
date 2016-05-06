@@ -33,7 +33,7 @@ func (command *EULAsCommand) Execute([]string) error {
 func printEULA(eula pivnet.EULA) error {
 	switch Pivnet.Format {
 	case PrintAsTable:
-		table := tablewriter.NewWriter(OutWriter)
+		table := tablewriter.NewWriter(StdOutWriter)
 		table.SetHeader([]string{"ID", "Slug", "Name"})
 
 		eulaAsString := []string{
@@ -64,7 +64,7 @@ func (command *EULACommand) Execute([]string) error {
 func printEULAs(eulas []pivnet.EULA) error {
 	switch Pivnet.Format {
 	case PrintAsTable:
-		table := tablewriter.NewWriter(OutWriter)
+		table := tablewriter.NewWriter(StdOutWriter)
 		table.SetHeader([]string{"ID", "Slug", "Name"})
 
 		for _, e := range eulas {

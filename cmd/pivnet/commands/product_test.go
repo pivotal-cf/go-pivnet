@@ -32,7 +32,7 @@ var _ = Describe("product commands", func() {
 		commands.Pivnet.Host = server.URL()
 
 		outBuffer = bytes.Buffer{}
-		commands.OutWriter = &outBuffer
+		commands.StdOutWriter = &outBuffer
 
 		product = pivnet.Product{
 			ID:   1234,

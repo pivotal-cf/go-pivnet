@@ -35,7 +35,7 @@ var _ = Describe("file group commands", func() {
 		commands.Pivnet.Host = server.URL()
 
 		outBuffer = bytes.Buffer{}
-		commands.OutWriter = &outBuffer
+		commands.StdOutWriter = &outBuffer
 
 		productSlug = "some-product-slug"
 

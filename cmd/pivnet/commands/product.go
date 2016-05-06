@@ -27,7 +27,7 @@ func (command *ProductCommand) Execute([]string) error {
 func printProducts(products []pivnet.Product) error {
 	switch Pivnet.Format {
 	case PrintAsTable:
-		table := tablewriter.NewWriter(OutWriter)
+		table := tablewriter.NewWriter(StdOutWriter)
 		table.SetHeader([]string{"ID", "Slug", "Name"})
 
 		for _, product := range products {
@@ -50,7 +50,7 @@ func printProducts(products []pivnet.Product) error {
 func printProduct(product pivnet.Product) error {
 	switch Pivnet.Format {
 	case PrintAsTable:
-		table := tablewriter.NewWriter(OutWriter)
+		table := tablewriter.NewWriter(StdOutWriter)
 		table.SetHeader([]string{"ID", "Slug", "Name"})
 
 		productAsString := []string{

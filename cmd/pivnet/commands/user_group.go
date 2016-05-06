@@ -98,7 +98,7 @@ func (command *UserGroupsCommand) Execute([]string) error {
 func printUserGroups(userGroups []pivnet.UserGroup) error {
 	switch Pivnet.Format {
 	case PrintAsTable:
-		table := tablewriter.NewWriter(OutWriter)
+		table := tablewriter.NewWriter(StdOutWriter)
 		table.SetHeader([]string{"ID", "Name", "Description"})
 
 		for _, u := range userGroups {
@@ -133,7 +133,7 @@ func (command *CreateUserGroupCommand) Execute([]string) error {
 func printUserGroup(userGroup pivnet.UserGroup) error {
 	switch Pivnet.Format {
 	case PrintAsTable:
-		table := tablewriter.NewWriter(OutWriter)
+		table := tablewriter.NewWriter(StdOutWriter)
 		table.SetHeader([]string{"ID", "Name", "Description", "Members"})
 
 		table.Append([]string{

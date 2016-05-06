@@ -3,10 +3,13 @@ package pivnet
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/pivotal-cf-experimental/go-pivnet/logger"
 )
 
 type ProductsService struct {
 	client Client
+	l      logger.Logger
 }
 
 type Product struct {

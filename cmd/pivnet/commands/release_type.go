@@ -14,7 +14,7 @@ func (command *ReleaseTypesCommand) Execute([]string) error {
 
 	switch Pivnet.Format {
 	case PrintAsTable:
-		table := tablewriter.NewWriter(OutWriter)
+		table := tablewriter.NewWriter(StdOutWriter)
 		table.SetHeader([]string{"ReleaseTypes"})
 
 		for _, r := range releaseTypes {

@@ -82,7 +82,7 @@ func printProductFiles(productFiles []pivnet.ProductFile) error {
 	switch Pivnet.Format {
 
 	case PrintAsTable:
-		table := tablewriter.NewWriter(OutWriter)
+		table := tablewriter.NewWriter(StdOutWriter)
 		table.SetHeader([]string{
 			"ID",
 			"Name",
@@ -113,7 +113,7 @@ func printProductFiles(productFiles []pivnet.ProductFile) error {
 func printProductFile(productFile pivnet.ProductFile) error {
 	switch Pivnet.Format {
 	case PrintAsTable:
-		table := tablewriter.NewWriter(OutWriter)
+		table := tablewriter.NewWriter(StdOutWriter)
 		table.SetHeader([]string{
 			"ID",
 			"Name",

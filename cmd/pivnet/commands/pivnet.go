@@ -24,7 +24,8 @@ const (
 )
 
 var (
-	OutWriter io.Writer
+	StdOutWriter io.Writer
+	StdErrWriter io.Writer
 )
 
 type PivnetCommand struct {
@@ -76,7 +77,8 @@ type PivnetCommand struct {
 var Pivnet PivnetCommand
 
 func init() {
-	OutWriter = os.Stdout
+	StdOutWriter = os.Stdout
+	StdErrWriter = os.Stderr
 
 	Pivnet.Version = func() {
 		fmt.Println(version.Version)
@@ -98,10 +100,13 @@ func NewClient() pivnet.Client {
 	sanitized := map[string]string{
 		Pivnet.APIToken: "*** redacted api token ***",
 	}
-	sanitizer := sanitizer.NewSanitizer(sanitized, OutWriter)
+	StdOutWriter = sanitizer.NewSanitizer(sanitized, StdOutWriter)
+	StdErrWriter = sanitizer.NewSanitizer(sanitized, StdErrWriter)
+
+	l.RegisterSink(lager.NewWriterSink(StdOutWriter, lager.INFO))
 
 	if Pivnet.Verbose {
-		l.RegisterSink(lager.NewWriterSink(sanitizer, lager.DEBUG))
+		l.RegisterSink(lager.NewWriterSink(StdOutWriter, lager.DEBUG))
 	}
 
 	ls := lagershim.NewLagerShim(l)
@@ -124,7 +129,8 @@ func printYAML(object interface{}) error {
 		return err
 	}
 
-	fmt.Printf("---\n%s\n", string(b))
+	output := fmt.Sprintf("---\n%s\n", string(b))
+	StdOutWriter.Write([]byte(output))
 	return nil
 }
 
@@ -134,6 +140,6 @@ func printJSON(object interface{}) error {
 		return err
 	}
 
-	OutWriter.Write(b)
+	StdOutWriter.Write(b)
 	return nil
 }
