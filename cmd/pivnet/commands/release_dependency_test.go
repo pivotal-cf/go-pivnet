@@ -104,9 +104,10 @@ var _ = Describe("release dependency commands", func() {
 				),
 			)
 
-			releaseDependenciesCommand := commands.ReleaseDependenciesCommand{}
-			releaseDependenciesCommand.ProductSlug = productSlug
-			releaseDependenciesCommand.ReleaseVersion = releases[0].Version
+			releaseDependenciesCommand := commands.ReleaseDependenciesCommand{
+				ProductSlug:    productSlug,
+				ReleaseVersion: releases[0].Version,
+			}
 
 			err := releaseDependenciesCommand.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())

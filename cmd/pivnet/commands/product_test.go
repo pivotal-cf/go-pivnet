@@ -92,8 +92,9 @@ var _ = Describe("product commands", func() {
 				),
 			)
 
-			productCommand := commands.ProductCommand{}
-			productCommand.ProductSlug = product.Slug
+			productCommand := commands.ProductCommand{
+				ProductSlug: product.Slug,
+			}
 
 			err := productCommand.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())

@@ -91,8 +91,9 @@ var _ = Describe("product file commands", func() {
 				),
 			)
 
-			productFilesCommand := commands.ProductFilesCommand{}
-			productFilesCommand.ProductSlug = productSlug
+			productFilesCommand := commands.ProductFilesCommand{
+				ProductSlug: productSlug,
+			}
 
 			err := productFilesCommand.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
@@ -137,9 +138,10 @@ var _ = Describe("product file commands", func() {
 					),
 				)
 
-				productFilesCommand := commands.ProductFilesCommand{}
-				productFilesCommand.ProductSlug = productSlug
-				productFilesCommand.ReleaseVersion = releases[0].Version
+				productFilesCommand := commands.ProductFilesCommand{
+					ProductSlug:    productSlug,
+					ReleaseVersion: releases[0].Version,
+				}
 
 				err := productFilesCommand.Execute(nil)
 				Expect(err).NotTo(HaveOccurred())
@@ -204,9 +206,10 @@ var _ = Describe("product file commands", func() {
 				),
 			)
 
-			productFileCommand := commands.ProductFileCommand{}
-			productFileCommand.ProductSlug = productSlug
-			productFileCommand.ProductFileID = productFile.ID
+			productFileCommand := commands.ProductFileCommand{
+				ProductSlug:   productSlug,
+				ProductFileID: productFile.ID,
+			}
 
 			err := productFileCommand.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
@@ -252,10 +255,11 @@ var _ = Describe("product file commands", func() {
 					),
 				)
 
-				productFileCommand := commands.ProductFileCommand{}
-				productFileCommand.ProductSlug = productSlug
-				productFileCommand.ReleaseVersion = releases[0].Version
-				productFileCommand.ProductFileID = productFile.ID
+				productFileCommand := commands.ProductFileCommand{
+					ProductSlug:    productSlug,
+					ReleaseVersion: releases[0].Version,
+					ProductFileID:  productFile.ID,
+				}
 
 				err := productFileCommand.Execute(nil)
 				Expect(err).NotTo(HaveOccurred())
@@ -340,10 +344,11 @@ var _ = Describe("product file commands", func() {
 				),
 			)
 
-			addProductFileCommand := commands.AddProductFileCommand{}
-			addProductFileCommand.ProductSlug = productSlug
-			addProductFileCommand.ProductFileID = productFile.ID
-			addProductFileCommand.ReleaseVersion = releases[0].Version
+			addProductFileCommand := commands.AddProductFileCommand{
+				ProductSlug:    productSlug,
+				ProductFileID:  productFile.ID,
+				ReleaseVersion: releases[0].Version,
+			}
 
 			err := addProductFileCommand.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
@@ -420,10 +425,11 @@ var _ = Describe("product file commands", func() {
 				),
 			)
 
-			removeProductFileCommand := commands.RemoveProductFileCommand{}
-			removeProductFileCommand.ProductSlug = productSlug
-			removeProductFileCommand.ProductFileID = productFile.ID
-			removeProductFileCommand.ReleaseVersion = releases[0].Version
+			removeProductFileCommand := commands.RemoveProductFileCommand{
+				ProductSlug:    productSlug,
+				ProductFileID:  productFile.ID,
+				ReleaseVersion: releases[0].Version,
+			}
 
 			err := removeProductFileCommand.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
@@ -493,9 +499,10 @@ var _ = Describe("product file commands", func() {
 				),
 			)
 
-			deleteProductFileCommand := commands.DeleteProductFileCommand{}
-			deleteProductFileCommand.ProductSlug = productSlug
-			deleteProductFileCommand.ProductFileID = productFile.ID
+			deleteProductFileCommand := commands.DeleteProductFileCommand{
+				ProductSlug:   productSlug,
+				ProductFileID: productFile.ID,
+			}
 
 			err := deleteProductFileCommand.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
@@ -503,7 +510,7 @@ var _ = Describe("product file commands", func() {
 
 		Describe("ProductSlug flag", func() {
 			BeforeEach(func() {
-				field = fieldFor(commands.ProductFileCommand{}, "ProductSlug")
+				field = fieldFor(commands.DeleteProductFileCommand{}, "ProductSlug")
 			})
 
 			It("is required", func() {

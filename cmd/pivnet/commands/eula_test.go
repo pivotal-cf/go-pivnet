@@ -89,8 +89,9 @@ var _ = Describe("eula commands", func() {
 				),
 			)
 
-			eulaCommand := commands.EULACommand{}
-			eulaCommand.EULASlug = eulas[0].Slug
+			eulaCommand := commands.EULACommand{
+				EULASlug: eulas[0].Slug,
+			}
 
 			err := eulaCommand.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
@@ -168,9 +169,10 @@ var _ = Describe("eula commands", func() {
 				),
 			)
 
-			acceptEULACommand := commands.AcceptEULACommand{}
-			acceptEULACommand.ProductSlug = productSlug
-			acceptEULACommand.ReleaseVersion = releases[0].Version
+			acceptEULACommand := commands.AcceptEULACommand{
+				ProductSlug:    productSlug,
+				ReleaseVersion: releases[0].Version,
+			}
 
 			err := acceptEULACommand.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())

@@ -88,8 +88,9 @@ var _ = Describe("file group commands", func() {
 				),
 			)
 
-			fileGroupsCommand := commands.FileGroupsCommand{}
-			fileGroupsCommand.ProductSlug = productSlug
+			fileGroupsCommand := commands.FileGroupsCommand{
+				ProductSlug: productSlug,
+			}
 
 			err := fileGroupsCommand.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
@@ -134,9 +135,10 @@ var _ = Describe("file group commands", func() {
 					),
 				)
 
-				fileGroupsCommand := commands.FileGroupsCommand{}
-				fileGroupsCommand.ProductSlug = productSlug
-				fileGroupsCommand.ReleaseVersion = releases[0].Version
+				fileGroupsCommand := commands.FileGroupsCommand{
+					ProductSlug:    productSlug,
+					ReleaseVersion: releases[0].Version,
+				}
 
 				err := fileGroupsCommand.Execute(nil)
 				Expect(err).NotTo(HaveOccurred())
@@ -198,9 +200,10 @@ var _ = Describe("file group commands", func() {
 				),
 			)
 
-			fileGroupCommand := commands.FileGroupCommand{}
-			fileGroupCommand.ProductSlug = productSlug
-			fileGroupCommand.FileGroupID = fileGroups[0].ID
+			fileGroupCommand := commands.FileGroupCommand{
+				ProductSlug: productSlug,
+				FileGroupID: fileGroups[0].ID,
+			}
 
 			err := fileGroupCommand.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())

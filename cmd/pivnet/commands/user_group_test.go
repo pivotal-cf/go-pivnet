@@ -140,9 +140,10 @@ var _ = Describe("user group commands", func() {
 					),
 				)
 
-				userGroupsCommand := commands.UserGroupsCommand{}
-				userGroupsCommand.ProductSlug = productSlug
-				userGroupsCommand.ReleaseVersion = release.Version
+				userGroupsCommand := commands.UserGroupsCommand{
+					ProductSlug:    productSlug,
+					ReleaseVersion: release.Version,
+				}
 
 				err := userGroupsCommand.Execute(nil)
 				Expect(err).NotTo(HaveOccurred())
@@ -158,8 +159,9 @@ var _ = Describe("user group commands", func() {
 
 		Context("when only product slug is provided", func() {
 			It("returns an error", func() {
-				userGroupsCommand := commands.UserGroupsCommand{}
-				userGroupsCommand.ProductSlug = "some-slug"
+				userGroupsCommand := commands.UserGroupsCommand{
+					ProductSlug: "some-slug",
+				}
 
 				err := userGroupsCommand.Execute(nil)
 				Expect(err).To(HaveOccurred())
@@ -171,8 +173,9 @@ var _ = Describe("user group commands", func() {
 
 		Context("when only release version is provided", func() {
 			It("returns an error", func() {
-				userGroupsCommand := commands.UserGroupsCommand{}
-				userGroupsCommand.ReleaseVersion = "some-version"
+				userGroupsCommand := commands.UserGroupsCommand{
+					ReleaseVersion: "some-version",
+				}
 
 				err := userGroupsCommand.Execute(nil)
 				Expect(err).To(HaveOccurred())
@@ -226,8 +229,9 @@ var _ = Describe("user group commands", func() {
 				),
 			)
 
-			userGroupCommand := commands.UserGroupCommand{}
-			userGroupCommand.UserGroupID = userGroup.ID
+			userGroupCommand := commands.UserGroupCommand{
+				UserGroupID: userGroup.ID,
+			}
 
 			err := userGroupCommand.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
@@ -252,9 +256,10 @@ var _ = Describe("user group commands", func() {
 				),
 			)
 
-			createUserGroupCommand := commands.CreateUserGroupCommand{}
-			createUserGroupCommand.Name = "some name"
-			createUserGroupCommand.Description = "some description"
+			createUserGroupCommand := commands.CreateUserGroupCommand{
+				Name:        "some name",
+				Description: "some description",
+			}
 
 			err := createUserGroupCommand.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
@@ -345,10 +350,11 @@ var _ = Describe("user group commands", func() {
 			updatedUserGroup.Name = *name
 			updatedUserGroup.Description = *description
 
-			updateUserGroupCommand = commands.UpdateUserGroupCommand{}
-			updateUserGroupCommand.UserGroupID = userGroups[0].ID
-			updateUserGroupCommand.Name = name
-			updateUserGroupCommand.Description = description
+			updateUserGroupCommand = commands.UpdateUserGroupCommand{
+				UserGroupID: userGroups[0].ID,
+				Name:        name,
+				Description: description,
+			}
 		})
 
 		JustBeforeEach(func() {
@@ -470,10 +476,11 @@ var _ = Describe("user group commands", func() {
 				),
 			)
 
-			userGroupCommand := commands.AddUserGroupCommand{}
-			userGroupCommand.ProductSlug = productSlug
-			userGroupCommand.UserGroupID = userGroup.ID
-			userGroupCommand.ReleaseVersion = releases[0].Version
+			userGroupCommand := commands.AddUserGroupCommand{
+				ProductSlug:    productSlug,
+				UserGroupID:    userGroup.ID,
+				ReleaseVersion: releases[0].Version,
+			}
 
 			err := userGroupCommand.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
@@ -533,8 +540,9 @@ var _ = Describe("user group commands", func() {
 				),
 			)
 
-			deleteUserGroupCommand := commands.DeleteUserGroupCommand{}
-			deleteUserGroupCommand.UserGroupID = userGroupID
+			deleteUserGroupCommand := commands.DeleteUserGroupCommand{
+				UserGroupID: userGroupID,
+			}
 
 			err := deleteUserGroupCommand.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())

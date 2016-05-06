@@ -69,8 +69,9 @@ var _ = Describe("release commands", func() {
 				),
 			)
 
-			releasesCommand := commands.ReleasesCommand{}
-			releasesCommand.ProductSlug = productSlug
+			releasesCommand := commands.ReleasesCommand{
+				ProductSlug: productSlug,
+			}
 
 			err := releasesCommand.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
@@ -106,9 +107,10 @@ var _ = Describe("release commands", func() {
 				),
 			)
 
-			releaseCommand := commands.ReleaseCommand{}
-			releaseCommand.ProductSlug = productSlug
-			releaseCommand.ReleaseVersion = release.Version
+			releaseCommand := commands.ReleaseCommand{
+				ProductSlug:    productSlug,
+				ReleaseVersion: release.Version,
+			}
 
 			err := releaseCommand.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
@@ -172,9 +174,10 @@ var _ = Describe("release commands", func() {
 				),
 			)
 
-			deleteReleaseCommand := commands.DeleteReleaseCommand{}
-			deleteReleaseCommand.ProductSlug = productSlug
-			deleteReleaseCommand.ReleaseVersion = release.Version
+			deleteReleaseCommand := commands.DeleteReleaseCommand{
+				ProductSlug:    productSlug,
+				ReleaseVersion: release.Version,
+			}
 
 			err := deleteReleaseCommand.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())

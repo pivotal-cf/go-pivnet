@@ -22,9 +22,10 @@ func TestCommands(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 	commands.OutputWriter = os.Stdout
-	commands.Pivnet = commands.PivnetCommand{}
-	commands.Pivnet.Format = commands.PrintAsJSON
-	commands.Pivnet.APIToken = apiToken
+	commands.Pivnet = commands.PivnetCommand{
+		Format:   commands.PrintAsJSON,
+		APIToken: apiToken,
+	}
 })
 
 func fieldFor(command interface{}, name string) reflect.StructField {

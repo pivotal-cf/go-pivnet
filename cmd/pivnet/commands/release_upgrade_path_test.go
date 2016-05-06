@@ -104,9 +104,10 @@ var _ = Describe("release upgrade path commands", func() {
 				),
 			)
 
-			releaseUpgradePathsCommand := commands.ReleaseUpgradePathsCommand{}
-			releaseUpgradePathsCommand.ProductSlug = productSlug
-			releaseUpgradePathsCommand.ReleaseVersion = releases[0].Version
+			releaseUpgradePathsCommand := commands.ReleaseUpgradePathsCommand{
+				ProductSlug:    productSlug,
+				ReleaseVersion: releases[0].Version,
+			}
 
 			err := releaseUpgradePathsCommand.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
