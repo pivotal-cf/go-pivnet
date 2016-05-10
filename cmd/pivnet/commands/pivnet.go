@@ -11,6 +11,7 @@ import (
 	"github.com/pivotal-cf-experimental/go-pivnet"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/lagershim"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/version"
+	"github.com/pivotal-cf-experimental/go-pivnet/extension"
 	"github.com/pivotal-golang/lager"
 	"github.com/robdimsdale/sanitizer"
 )
@@ -88,7 +89,7 @@ func init() {
 
 }
 
-func NewClient() pivnet.Client {
+func NewClient() extension.ExtendedClient {
 	if OutputWriter == nil {
 		OutputWriter = os.Stdout
 	}
@@ -125,7 +126,7 @@ func NewClient() pivnet.Client {
 
 	ls := lagershim.NewLagerShim(l)
 
-	pivnetClient := pivnet.NewClient(
+	pivnetClient := extension.NewExtendedClient(
 		pivnet.ClientConfig{
 			Token:     Pivnet.APIToken,
 			Host:      Pivnet.Host,

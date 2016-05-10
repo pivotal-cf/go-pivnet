@@ -26,7 +26,7 @@ func (p ProductsService) List() ([]Product, error) {
 	url := "/products"
 
 	var response ProductsResponse
-	err := p.client.makeRequest(
+	_,err := p.client.MakeRequest(
 		"GET",
 		url,
 		http.StatusOK,
@@ -44,7 +44,7 @@ func (p ProductsService) Get(slug string) (Product, error) {
 	url := fmt.Sprintf("/products/%s", slug)
 
 	var response Product
-	err := p.client.makeRequest(
+	_,err := p.client.MakeRequest(
 		"GET",
 		url,
 		http.StatusOK,

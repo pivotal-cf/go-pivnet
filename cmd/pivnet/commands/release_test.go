@@ -100,10 +100,23 @@ var _ = Describe("release commands", func() {
 
 			releaseResponse := release
 
+			// Once for the release itself
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/%s/releases/%d", apiPrefix, productSlug, release.ID)),
 					ghttp.RespondWithJSONEncoded(http.StatusOK, releaseResponse),
+				),
+			)
+
+			etagHeader := http.Header{
+				"ETag":[]string{`"some-etag"`},
+			}
+
+			// Again for the ETag
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/%s/releases/%d", apiPrefix, productSlug, release.ID)),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, releaseResponse,etagHeader),
 				),
 			)
 
@@ -115,12 +128,14 @@ var _ = Describe("release commands", func() {
 			err := releaseCommand.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
 
-			var returnedRelease pivnet.Release
+			var returnedRelease commands.CLIRelease
 
 			err = json.Unmarshal(outBuffer.Bytes(), &returnedRelease)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(returnedRelease).To(Equal(release))
+			Expect(returnedRelease.ID).To(Equal(release.ID))
+			Expect(returnedRelease.Version).To(Equal(release.Version))
+			Expect(returnedRelease.ETag).To(Equal("some-etag"))
 		})
 
 		Describe("ProductSlug flag", func() {

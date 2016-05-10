@@ -90,33 +90,30 @@ func (command *ReleaseCommand) Execute([]string) error {
 		return err
 	}
 
+	etag, err := client.ReleaseETag(command.ProductSlug,foundRelease.ID)
+	if err != nil {
+		return err
+	}
+
+	r := CLIRelease{
+		release,
+		etag,
+	}
+
 	switch Pivnet.Format {
 	case PrintAsTable:
 		table := tablewriter.NewWriter(OutputWriter)
-		table.SetHeader([]string{"ID", "Version", "Description"})
+		table.SetHeader([]string{"ID", "Version", "Description", "ETag"})
 
 		table.Append([]string{
-			strconv.Itoa(release.ID), release.Version, release.Description,
+			strconv.Itoa(release.ID), release.Version, release.Description, etag,
 		})
 		table.Render()
 		return nil
 	case PrintAsJSON:
-		b, err := json.Marshal(release)
-		if err != nil {
-			return err
-		}
-
-		OutputWriter.Write(b)
-		return nil
+		return printJSON(r)
 	case PrintAsYAML:
-		b, err := yaml.Marshal(release)
-		if err != nil {
-			return err
-		}
-
-		output := fmt.Sprintf("---\n%s\n", string(b))
-		OutputWriter.Write([]byte(output))
-		return nil
+		return printYAML(r)
 	}
 
 	return nil
@@ -156,4 +153,9 @@ func (command *DeleteReleaseCommand) Execute([]string) error {
 	}
 
 	return nil
+}
+
+type CLIRelease struct {
+	pivnet.Release
+	ETag string `json:"etag,omitempty"`
 }

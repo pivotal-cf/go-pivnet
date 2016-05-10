@@ -30,7 +30,7 @@ func (r ReleaseUpgradePathsService) Get(productSlug string, releaseID int) ([]Re
 	)
 
 	var response ReleaseUpgradePathsResponse
-	err := r.client.makeRequest(
+	_,err := r.client.MakeRequest(
 		"GET",
 		url,
 		http.StatusOK,

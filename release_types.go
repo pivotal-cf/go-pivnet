@@ -17,7 +17,7 @@ func (r ReleaseTypesService) Get() ([]string, error) {
 	url := fmt.Sprintf("/releases/release_types")
 
 	var response ReleaseTypesResponse
-	err := r.client.makeRequest(
+	_,err := r.client.MakeRequest(
 		"GET",
 		url,
 		http.StatusOK,

@@ -111,7 +111,7 @@ func (c Client) makeRequestWithHTTPResponse(
 		)
 	}
 
-	if len(b) > 0 {
+	if len(b) > 0 && data != nil {
 		err = json.Unmarshal(b, data)
 		if err != nil {
 			return nil, err
@@ -121,26 +121,26 @@ func (c Client) makeRequestWithHTTPResponse(
 	return resp, nil
 }
 
-func (c Client) makeRequest(
+func (c Client) MakeRequest(
 	requestType string,
 	endpoint string,
 	expectedStatusCode int,
 	body io.Reader,
 	data interface{},
-) error {
+) (*http.Response,error) {
 	u, err := url.Parse(c.baseURL)
 	if err != nil {
-		return err
+		return nil,err
 	}
 
 	u.Path = u.Path + endpoint
 
-	_, err = c.makeRequestWithHTTPResponse(
+	resp, err := c.makeRequestWithHTTPResponse(
 		requestType,
 		u.String(),
 		expectedStatusCode,
 		body,
 		data,
 	)
-	return err
+	return resp,err
 }
