@@ -140,6 +140,6 @@ func (command *DeleteReleaseCommand) Execute([]string) error {
 }
 
 type CLIRelease struct {
-	pivnet.Release
+	pivnet.Release `yaml:",inline"`
 	ETag string `json:"etag,omitempty"`
 }
