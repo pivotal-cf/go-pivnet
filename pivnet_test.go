@@ -19,8 +19,7 @@ var _ = Describe("PivnetClient", func() {
 		token     string
 		userAgent string
 
-		releases   pivnet.ReleasesResponse
-		etagHeader []http.Header
+		releases pivnet.ReleasesResponse
 
 		newClientConfig pivnet.ClientConfig
 		fakeLogger      logger.Logger
@@ -37,11 +36,6 @@ var _ = Describe("PivnetClient", func() {
 				Version: "some-other-version",
 			},
 		}}
-
-		etagHeader = []http.Header{
-			{"ETag": []string{`"etag-0"`}},
-			{"ETag": []string{`"etag-1"`}},
-		}
 
 		server = ghttp.NewServer()
 		token = "my-auth-token"
@@ -72,7 +66,7 @@ var _ = Describe("PivnetClient", func() {
 			),
 		)
 
-		for i, r := range releases.Releases {
+		for _, r := range releases.Releases {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest(
@@ -80,7 +74,7 @@ var _ = Describe("PivnetClient", func() {
 						fmt.Sprintf("%s/products/%s/releases/%d", apiPrefix, productSlug, r.ID),
 					),
 					ghttp.VerifyHeaderKV("Authorization", fmt.Sprintf("Token %s", token)),
-					ghttp.RespondWith(http.StatusOK, nil, etagHeader[i]),
+					ghttp.RespondWith(http.StatusOK, nil),
 				),
 			)
 		}
@@ -102,7 +96,7 @@ var _ = Describe("PivnetClient", func() {
 			),
 		)
 
-		for i, r := range releases.Releases {
+		for _, r := range releases.Releases {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest(
@@ -111,7 +105,7 @@ var _ = Describe("PivnetClient", func() {
 					),
 					ghttp.VerifyHeaderKV("Authorization", fmt.Sprintf("Token %s", token)),
 					ghttp.VerifyHeaderKV("User-Agent", userAgent),
-					ghttp.RespondWith(http.StatusOK, nil, etagHeader[i]),
+					ghttp.RespondWith(http.StatusOK, nil),
 				),
 			)
 		}
@@ -169,6 +163,26 @@ var _ = Describe("PivnetClient", func() {
 			_, err := client.Releases.List("my-product-id")
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("invalid character"))
+		})
+	})
+
+	Context("when nil interface is provided for deserialization", func() {
+		It("skips deserialization", func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/some/endpoint", apiPrefix)),
+					ghttp.RespondWith(http.StatusOK, "{}"),
+				),
+			)
+
+			_, err := client.MakeRequest(
+				"GET",
+				"/some/endpoint",
+				http.StatusOK,
+				nil,
+				nil,
+			)
+			Expect(err).NotTo(HaveOccurred())
 		})
 	})
 })

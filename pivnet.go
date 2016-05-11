@@ -127,10 +127,10 @@ func (c Client) MakeRequest(
 	expectedStatusCode int,
 	body io.Reader,
 	data interface{},
-) (*http.Response,error) {
+) (*http.Response, error) {
 	u, err := url.Parse(c.baseURL)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	u.Path = u.Path + endpoint
@@ -142,5 +142,5 @@ func (c Client) MakeRequest(
 		body,
 		data,
 	)
-	return resp,err
+	return resp, err
 }
