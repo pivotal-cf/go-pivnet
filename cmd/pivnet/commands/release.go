@@ -1,11 +1,8 @@
 package commands
 
 import (
-	"encoding/json"
 	"fmt"
 	"strconv"
-
-	"gopkg.in/yaml.v2"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/pivotal-cf-experimental/go-pivnet"
@@ -45,22 +42,9 @@ func (command *ReleasesCommand) Execute([]string) error {
 		table.Render()
 		return nil
 	case PrintAsJSON:
-		b, err := json.Marshal(releases)
-		if err != nil {
-			return err
-		}
-
-		OutputWriter.Write(b)
-		return nil
+		return printJSON(releases)
 	case PrintAsYAML:
-		b, err := yaml.Marshal(releases)
-		if err != nil {
-			return err
-		}
-
-		output := fmt.Sprintf("---\n%s\n", string(b))
-		OutputWriter.Write([]byte(output))
-		return nil
+		return printYAML(releases)
 	}
 
 	return nil
