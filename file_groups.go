@@ -10,15 +10,15 @@ type FileGroupsService struct {
 }
 
 type FileGroup struct {
-	ID           int              `json:"id,omitempty"`
-	Name         string           `json:"name,omitempty"`
-	Product      FileGroupProduct `json:"product,omitempty"`
-	ProductFiles []ProductFile    `json:"product_files,omitempty"`
+	ID           int              `json:"id,omitempty" yaml:"id,omitempty"`
+	Name         string           `json:"name,omitempty" yaml:"name,omitempty"`
+	Product      FileGroupProduct `json:"product,omitempty" yaml:"product,omitempty"`
+	ProductFiles []ProductFile    `json:"product_files,omitempty" yaml:"product_files,omitempty"`
 }
 
 type FileGroupProduct struct {
-	ID   int    `json:"id,omitempty"`
-	Name string `json:"name,omitempty"`
+	ID   int    `json:"id,omitempty" yaml:"id,omitempty"`
+	Name string `json:"name,omitempty" yaml:"name,omitempty"`
 }
 
 type FileGroupsResponse struct {

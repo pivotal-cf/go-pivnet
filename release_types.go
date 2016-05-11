@@ -10,7 +10,7 @@ type ReleaseTypesService struct {
 }
 
 type ReleaseTypesResponse struct {
-	ReleaseTypes []string `json:"release_types"`
+	ReleaseTypes []string `json:"release_types" yaml:"release_types"`
 }
 
 func (r ReleaseTypesService) Get() ([]string, error) {

@@ -14,12 +14,12 @@ type ReleaseUpgradePathsResponse struct {
 }
 
 type ReleaseUpgradePath struct {
-	Release UpgradePathRelease `json:"release,omitempty"`
+	Release UpgradePathRelease `json:"release,omitempty" yaml:"release,omitempty"`
 }
 
 type UpgradePathRelease struct {
-	ID      int    `json:"id,omitempty"`
-	Version string `json:"version,omitempty"`
+	ID      int    `json:"id,omitempty" yaml:"id,omitempty"`
+	Version string `json:"version,omitempty" yaml:"version,omitempty"`
 }
 
 func (r ReleaseUpgradePathsService) Get(productSlug string, releaseID int) ([]ReleaseUpgradePath, error) {

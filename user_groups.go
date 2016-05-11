@@ -32,10 +32,10 @@ type UpdateUserGroupResponse struct {
 }
 
 type UserGroup struct {
-	ID          int      `json:"id,omitempty"`
-	Name        string   `json:"name,omitempty"`
-	Description string   `json:"description,omitempty"`
-	Members     []string `json:"members,omitempty"`
+	ID          int      `json:"id,omitempty" yaml:"id,omitempty"`
+	Name        string   `json:"name,omitempty" yaml:"name,omitempty"`
+	Description string   `json:"description,omitempty" yaml:"description,omitempty"`
+	Members     []string `json:"members,omitempty" yaml:"members,omitempty"`
 }
 
 type createUserGroup struct {

@@ -14,13 +14,13 @@ type ReleaseDependenciesResponse struct {
 }
 
 type ReleaseDependency struct {
-	Release DependentRelease `json:"release,omitempty"`
+	Release DependentRelease `json:"release,omitempty" yaml:"release,omitempty"`
 }
 
 type DependentRelease struct {
-	ID      int     `json:"id,omitempty"`
-	Version string  `json:"version,omitempty"`
-	Product Product `json:"product,omitempty"`
+	ID      int     `json:"id,omitempty" yaml:"id,omitempty"`
+	Version string  `json:"version,omitempty" yaml:"version,omitempty"`
+	Product Product `json:"product,omitempty" yaml:"product,omitempty"`
 }
 
 func (r ReleaseDependenciesService) Get(productSlug string, releaseID int) ([]ReleaseDependency, error) {

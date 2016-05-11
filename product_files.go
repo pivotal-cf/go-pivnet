@@ -29,14 +29,14 @@ type ProductFileResponse struct {
 }
 
 type ProductFile struct {
-	ID           int    `json:"id,omitempty"`
-	AWSObjectKey string `json:"aws_object_key,omitempty"`
-	Links        *Links `json:"_links,omitempty"`
-	FileType     string `json:"file_type,omitempty"`
-	FileVersion  string `json:"file_version,omitempty"`
-	Name         string `json:"name,omitempty"`
-	MD5          string `json:"md5,omitempty"`
-	Description  string `json:"description,omitempty"`
+	ID           int    `json:"id,omitempty" yaml:"id,omitempty"`
+	AWSObjectKey string `json:"aws_object_key,omitempty" yaml:"aws_object_key,omitempty"`
+	Links        *Links `json:"_links,omitempty" yaml:"_links,omitempty"`
+	FileType     string `json:"file_type,omitempty" yaml:"file_type,omitempty"`
+	FileVersion  string `json:"file_version,omitempty" yaml:"file_version,omitempty"`
+	Name         string `json:"name,omitempty" yaml:"name,omitempty"`
+	MD5          string `json:"md5,omitempty" yaml:"md5,omitempty"`
+	Description  string `json:"description,omitempty" yaml:"description,omitempty"`
 }
 
 func (p ProductFilesService) List(productSlug string) ([]ProductFile, error) {

@@ -13,9 +13,9 @@ type ProductsService struct {
 }
 
 type Product struct {
-	ID   int    `json:"id,omitempty"`
-	Slug string `json:"slug,omitempty"`
-	Name string `json:"name,omitempty"`
+	ID   int    `json:"id,omitempty" yaml:"id,omitempty"`
+	Slug string `json:"slug,omitempty" yaml:"slug,omitempty"`
+	Name string `json:"name,omitempty" yaml:"name,omitempty"`
 }
 
 type ProductsResponse struct {
