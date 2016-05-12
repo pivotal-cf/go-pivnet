@@ -66,7 +66,7 @@ func (r ReleasesService) List(productSlug string) ([]Release, error) {
 	url := fmt.Sprintf("/products/%s/releases", productSlug)
 
 	var response ReleasesResponse
-	_,err := r.client.MakeRequest("GET", url, http.StatusOK, nil, &response)
+	_, err := r.client.MakeRequest("GET", url, http.StatusOK, nil, &response)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (r ReleasesService) Get(productSlug string, releaseID int) (Release, error)
 	url := fmt.Sprintf("/products/%s/releases/%d", productSlug, releaseID)
 
 	var response Release
-	_,err := r.client.MakeRequest("GET", url, http.StatusOK, nil, &response)
+	_, err := r.client.MakeRequest("GET", url, http.StatusOK, nil, &response)
 	if err != nil {
 		return Release{}, err
 	}
@@ -123,7 +123,7 @@ func (r ReleasesService) Create(config CreateReleaseConfig) (Release, error) {
 	}
 
 	var response CreateReleaseResponse
-	_,err = r.client.MakeRequest(
+	_, err = r.client.MakeRequest(
 		"POST",
 		url,
 		http.StatusCreated,
@@ -156,7 +156,7 @@ func (r ReleasesService) Update(productSlug string, release Release) (Release, e
 	}
 
 	var response CreateReleaseResponse
-	_,err = r.client.MakeRequest(
+	_, err = r.client.MakeRequest(
 		"PATCH",
 		url,
 		http.StatusOK,
@@ -177,7 +177,7 @@ func (r ReleasesService) Delete(release Release, productSlug string) error {
 		release.ID,
 	)
 
-	_,err := r.client.MakeRequest(
+	_, err := r.client.MakeRequest(
 		"DELETE",
 		url,
 		http.StatusNoContent,

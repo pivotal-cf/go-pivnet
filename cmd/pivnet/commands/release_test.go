@@ -109,14 +109,14 @@ var _ = Describe("release commands", func() {
 			)
 
 			etagHeader := http.Header{
-				"ETag":[]string{`"some-etag"`},
+				"ETag": []string{`"some-etag"`},
 			}
 
 			// Again for the ETag
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/%s/releases/%d", apiPrefix, productSlug, release.ID)),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, releaseResponse,etagHeader),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, releaseResponse, etagHeader),
 				),
 			)
 

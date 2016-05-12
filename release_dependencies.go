@@ -31,7 +31,7 @@ func (r ReleaseDependenciesService) Get(productSlug string, releaseID int) ([]Re
 	)
 
 	var response ReleaseDependenciesResponse
-	_,err := r.client.MakeRequest(
+	_, err := r.client.MakeRequest(
 		"GET",
 		url,
 		http.StatusOK,

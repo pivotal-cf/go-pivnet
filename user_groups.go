@@ -56,7 +56,7 @@ func (u UserGroupsService) List() ([]UserGroup, error) {
 	url := "/user_groups"
 
 	var response UserGroupsResponse
-	_,err := u.client.MakeRequest(
+	_, err := u.client.MakeRequest(
 		"GET",
 		url,
 		http.StatusOK,
@@ -78,7 +78,7 @@ func (u UserGroupsService) ListForRelease(productSlug string, releaseID int) ([]
 	)
 
 	var response UserGroupsResponse
-	_,err := u.client.MakeRequest(
+	_, err := u.client.MakeRequest(
 		"GET",
 		url,
 		http.StatusOK,
@@ -110,7 +110,7 @@ func (u UserGroupsService) AddToRelease(productSlug string, releaseID int, userG
 		panic(err)
 	}
 
-	_,err = u.client.MakeRequest(
+	_, err = u.client.MakeRequest(
 		"PATCH",
 		url,
 		http.StatusNoContent,
@@ -128,7 +128,7 @@ func (u UserGroupsService) Get(userGroupID int) (UserGroup, error) {
 	url := fmt.Sprintf("/user_groups/%d", userGroupID)
 
 	var response UserGroup
-	_,err := u.client.MakeRequest(
+	_, err := u.client.MakeRequest(
 		"GET",
 		url,
 		http.StatusOK,
@@ -165,7 +165,7 @@ func (u UserGroupsService) Create(name string, description string, members []str
 	body := bytes.NewReader(b)
 
 	var response UserGroup
-	_,err = u.client.MakeRequest(
+	_, err = u.client.MakeRequest(
 		"POST",
 		url,
 		http.StatusCreated,
@@ -197,7 +197,7 @@ func (u UserGroupsService) Update(userGroup UserGroup) (UserGroup, error) {
 	body := bytes.NewReader(b)
 
 	var response UpdateUserGroupResponse
-	_,err = u.client.MakeRequest(
+	_, err = u.client.MakeRequest(
 		"PATCH",
 		url,
 		http.StatusOK,
@@ -214,7 +214,7 @@ func (u UserGroupsService) Update(userGroup UserGroup) (UserGroup, error) {
 func (r UserGroupsService) Delete(userGroupID int) error {
 	url := fmt.Sprintf("/user_groups/%d", userGroupID)
 
-	_,err := r.client.MakeRequest(
+	_, err := r.client.MakeRequest(
 		"DELETE",
 		url,
 		http.StatusNoContent,

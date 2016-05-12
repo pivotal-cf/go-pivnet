@@ -74,7 +74,7 @@ func (command *ReleaseCommand) Execute([]string) error {
 		return err
 	}
 
-	etag, err := client.ReleaseETag(command.ProductSlug,foundRelease.ID)
+	etag, err := client.ReleaseETag(command.ProductSlug, foundRelease.ID)
 	if err != nil {
 		return err
 	}
@@ -141,5 +141,5 @@ func (command *DeleteReleaseCommand) Execute([]string) error {
 
 type CLIRelease struct {
 	pivnet.Release `yaml:",inline"`
-	ETag string `json:"etag,omitempty"`
+	ETag           string `json:"etag,omitempty"`
 }

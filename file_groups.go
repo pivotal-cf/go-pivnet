@@ -29,7 +29,7 @@ func (e FileGroupsService) List(productSlug string) ([]FileGroup, error) {
 	url := fmt.Sprintf("/products/%s/file_groups", productSlug)
 
 	var response FileGroupsResponse
-	_,err := e.client.MakeRequest(
+	_, err := e.client.MakeRequest(
 		"GET",
 		url,
 		http.StatusOK,
@@ -50,7 +50,7 @@ func (p FileGroupsService) Get(productSlug string, fileGroupID int) (FileGroup, 
 	)
 
 	var response FileGroup
-	_,err := p.client.MakeRequest(
+	_, err := p.client.MakeRequest(
 		"GET",
 		url,
 		http.StatusOK,
@@ -72,7 +72,7 @@ func (p FileGroupsService) Delete(productSlug string, id int) (FileGroup, error)
 	)
 
 	var response FileGroup
-	_,err := p.client.MakeRequest(
+	_, err := p.client.MakeRequest(
 		"DELETE",
 		url,
 		http.StatusOK,
@@ -93,7 +93,7 @@ func (p FileGroupsService) ListForRelease(productSlug string, releaseID int) ([]
 	)
 
 	var response FileGroupsResponse
-	_,err := p.client.MakeRequest(
+	_, err := p.client.MakeRequest(
 		"GET",
 		url,
 		http.StatusOK,
