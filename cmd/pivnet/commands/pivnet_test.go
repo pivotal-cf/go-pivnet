@@ -87,6 +87,16 @@ var _ = Describe("Pivnet commands", func() {
 		})
 	})
 
+	Describe("Help command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "Help")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("help"))
+		})
+	})
+
 	Describe("Verbose flag", func() {
 		BeforeEach(func() {
 			field = fieldFor(commands.Pivnet, "Verbose")
@@ -185,6 +195,86 @@ var _ = Describe("Pivnet commands", func() {
 
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("accept-eula"))
+		})
+	})
+
+	Describe("Products command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "Products")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("products"))
+		})
+	})
+
+	Describe("Products command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "Products")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("products"))
+		})
+	})
+
+	Describe("Product command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "Product")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("product"))
+		})
+	})
+
+	Describe("ProductFiles command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "ProductFiles")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("product-files"))
+		})
+	})
+
+	Describe("ProductFile command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "ProductFile")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("product-file"))
+		})
+	})
+
+	Describe("AddProductFile command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "AddProductFile")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("add-product-file"))
+		})
+	})
+
+	Describe("RemoveProductFile command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "RemoveProductFile")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("remove-product-file"))
+		})
+	})
+
+	Describe("DeleteProductFile command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "DeleteProductFile")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("delete-product-file"))
 		})
 	})
 })
