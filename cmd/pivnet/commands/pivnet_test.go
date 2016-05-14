@@ -208,16 +208,6 @@ var _ = Describe("Pivnet commands", func() {
 		})
 	})
 
-	Describe("Products command", func() {
-		BeforeEach(func() {
-			field = fieldFor(commands.Pivnet, "Products")
-		})
-
-		It("contains command", func() {
-			Expect(command(field)).To(Equal("products"))
-		})
-	})
-
 	Describe("Product command", func() {
 		BeforeEach(func() {
 			field = fieldFor(commands.Pivnet, "Product")
@@ -275,6 +265,146 @@ var _ = Describe("Pivnet commands", func() {
 
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("delete-product-file"))
+		})
+	})
+
+	Describe("FileGroups command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "FileGroups")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("file-groups"))
+		})
+	})
+
+	Describe("FileGroup command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "FileGroup")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("file-group"))
+		})
+	})
+
+	Describe("DeleteFileGroup command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "DeleteFileGroup")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("delete-file-group"))
+		})
+	})
+
+	Describe("Releases command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "Releases")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("releases"))
+		})
+	})
+
+	Describe("Release command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "Release")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("release"))
+		})
+	})
+
+	Describe("DeleteRelease command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "DeleteRelease")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("delete-release"))
+		})
+	})
+
+	Describe("UserGroups command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "UserGroups")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("user-groups"))
+		})
+	})
+
+	Describe("UserGroup command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "UserGroup")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("user-group"))
+		})
+	})
+
+	Describe("AddUserGroup command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "AddUserGroup")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("add-user-group"))
+		})
+	})
+
+	Describe("CreateUserGroup command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "CreateUserGroup")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("create-user-group"))
+		})
+	})
+
+	Describe("UpdateUserGroup command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "UpdateUserGroup")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("update-user-group"))
+		})
+	})
+
+	Describe("DeleteUserGroup command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "DeleteUserGroup")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("delete-user-group"))
+		})
+	})
+
+	Describe("ReleaseDependencies command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "ReleaseDependencies")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("release-dependencies"))
+		})
+	})
+
+	Describe("ReleaseUpgradePaths command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "ReleaseUpgradePaths")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("release-upgrade-paths"))
 		})
 	})
 })
