@@ -33,7 +33,8 @@ var _ = Describe("ReleaseETag", func() {
 			Token:     token,
 			UserAgent: userAgent,
 		}
-		client = extension.NewExtendedClient(newClientConfig, fakeLogger)
+		c := pivnet.NewClient(newClientConfig, fakeLogger)
+		client = extension.NewExtendedClient(c, fakeLogger)
 
 		release = pivnet.Release{
 			ID: 1234,

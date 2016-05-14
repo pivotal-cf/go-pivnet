@@ -11,7 +11,6 @@ import (
 	"github.com/onsi/gomega/ghttp"
 	"github.com/pivotal-cf-experimental/go-pivnet"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands"
-	"github.com/pivotal-cf-experimental/go-pivnet/extension"
 )
 
 var _ = Describe("Pivnet commands", func() {
@@ -24,7 +23,7 @@ var _ = Describe("Pivnet commands", func() {
 			server *ghttp.Server
 
 			outBuffer bytes.Buffer
-			client    extension.ExtendedClient
+			client    pivnet.Client
 		)
 
 		BeforeEach(func() {
