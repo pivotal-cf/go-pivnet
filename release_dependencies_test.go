@@ -90,7 +90,7 @@ var _ = Describe("PivnetClient - release dependencies", func() {
 				),
 			)
 
-			releaseDependencies, err := client.ReleaseDependencies.Get(productSlug, releaseID)
+			releaseDependencies, err := client.ReleaseDependencies.List(productSlug, releaseID)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(releaseDependencies).To(HaveLen(2))
@@ -114,7 +114,7 @@ var _ = Describe("PivnetClient - release dependencies", func() {
 			})
 
 			It("returns an error", func() {
-				_, err := client.ReleaseDependencies.Get(productSlug, releaseID)
+				_, err := client.ReleaseDependencies.List(productSlug, releaseID)
 				Expect(err).To(MatchError(errors.New(
 					"Pivnet returned status code: 418 for the request - expected 200")))
 			})
