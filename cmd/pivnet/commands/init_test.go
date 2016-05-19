@@ -30,7 +30,7 @@ var _ = BeforeSuite(func() {
 
 func fieldFor(command interface{}, name string) reflect.StructField {
 	field, success := reflect.TypeOf(command).FieldByName(name)
-	Expect(success).To(BeTrue())
+	Expect(success).To(BeTrue(), "Expected %s field to exist on command", name)
 	return field
 }
 

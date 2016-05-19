@@ -529,6 +529,87 @@ var _ = Describe("user group commands", func() {
 		})
 	})
 
+	Describe("RemoveUserGroupCommand", func() {
+		It("removes the user group for the provided product slug and user group id from the specified release", func() {
+			releasesResponse := pivnet.ReleasesResponse{
+				Releases: releases,
+			}
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/%s/releases", apiPrefix, productSlug)),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, releasesResponse),
+				),
+			)
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"PATCH",
+						fmt.Sprintf(
+							"%s/products/%s/releases/%d/remove_user_group",
+							apiPrefix,
+							productSlug,
+							releases[0].ID,
+						),
+					),
+					ghttp.RespondWithJSONEncoded(http.StatusNoContent, nil),
+				),
+			)
+
+			userGroupCommand := commands.RemoveUserGroupCommand{
+				ProductSlug:    productSlug,
+				UserGroupID:    userGroup.ID,
+				ReleaseVersion: releases[0].Version,
+			}
+
+			err := userGroupCommand.Execute(nil)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Describe("ProductSlug flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(commands.RemoveUserGroupCommand{}, "ProductSlug")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("product-slug"))
+			})
+		})
+
+		Describe("UserGroupID flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(commands.RemoveUserGroupCommand{}, "UserGroupID")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("user-group-id"))
+			})
+		})
+
+		Describe("ReleaseVersion flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(commands.RemoveUserGroupCommand{}, "ReleaseVersion")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("release-version"))
+			})
+		})
+	})
+
 	Describe("DeleteUserGroupCommand", func() {
 		It("deletes user group", func() {
 			userGroupID := 1234

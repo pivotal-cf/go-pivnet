@@ -36,6 +36,12 @@ type AddUserGroupCommand struct {
 	UserGroupID    int    `long:"user-group-id" description:"User Group ID e.g. 1234" required:"true"`
 }
 
+type RemoveUserGroupCommand struct {
+	ProductSlug    string `long:"product-slug" description:"Product slug e.g. p-mysql" required:"true"`
+	ReleaseVersion string `long:"release-version" description:"Release version e.g. 0.1.2-rc1" required:"true"`
+	UserGroupID    int    `long:"user-group-id" description:"User Group ID e.g. 1234" required:"true"`
+}
+
 type DeleteUserGroupCommand struct {
 	UserGroupID int `long:"user-group-id" description:"User group ID e.g. 1234" required:"true"`
 }
@@ -230,6 +236,48 @@ func (command *AddUserGroupCommand) Execute([]string) error {
 		_, err = fmt.Fprintf(
 			OutputWriter,
 			"user group %d added successfully to %s/%s\n",
+			command.UserGroupID,
+			command.ProductSlug,
+			command.ReleaseVersion,
+		)
+	}
+
+	return nil
+}
+
+func (command *RemoveUserGroupCommand) Execute([]string) error {
+	client := NewClient()
+
+	releases, err := client.Releases.List(command.ProductSlug)
+	if err != nil {
+		return err
+	}
+
+	var release pivnet.Release
+	for _, r := range releases {
+		if r.Version == command.ReleaseVersion {
+			release = r
+			break
+		}
+	}
+
+	if release.Version != command.ReleaseVersion {
+		return fmt.Errorf("release not found")
+	}
+
+	err = client.UserGroups.RemoveFromRelease(
+		command.ProductSlug,
+		release.ID,
+		command.UserGroupID,
+	)
+	if err != nil {
+		return err
+	}
+
+	if Pivnet.Format == PrintAsTable {
+		_, err = fmt.Fprintf(
+			OutputWriter,
+			"user group %d removed successfully from %s/%s\n",
 			command.UserGroupID,
 			command.ProductSlug,
 			command.ReleaseVersion,

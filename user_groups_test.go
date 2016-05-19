@@ -122,7 +122,7 @@ var _ = Describe("PivnetClient - user groups", func() {
 		})
 	})
 
-	Describe("Add", func() {
+	Describe("Add To Release", func() {
 		var (
 			productSlug = "banana-slug"
 			releaseID   = 2345
@@ -166,6 +166,56 @@ var _ = Describe("PivnetClient - user groups", func() {
 				)
 
 				err := client.UserGroups.AddToRelease(productSlug, releaseID, userGroupID)
+				Expect(err).To(MatchError(errors.New(
+					"Pivnet returned status code: 418 for the request - expected 204")))
+			})
+		})
+	})
+
+	Describe("Remove From Release", func() {
+		var (
+			productSlug = "banana-slug"
+			releaseID   = 2345
+			userGroupID = 3456
+
+			expectedRequestBody = `{"user_group":{"id":3456}}`
+		)
+
+		Context("when the server responds with a 204 status code", func() {
+			It("returns without error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/releases/%d/remove_user_group",
+							apiPrefix,
+							productSlug,
+							releaseID,
+						)),
+						ghttp.VerifyJSON(expectedRequestBody),
+						ghttp.RespondWith(http.StatusNoContent, nil),
+					),
+				)
+
+				err := client.UserGroups.RemoveFromRelease(productSlug, releaseID, userGroupID)
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+
+		Context("when the server responds with a non-204 status code", func() {
+			It("returns an error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/releases/%d/remove_user_group",
+							apiPrefix,
+							productSlug,
+							releaseID,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, nil),
+					),
+				)
+
+				err := client.UserGroups.RemoveFromRelease(productSlug, releaseID, userGroupID)
 				Expect(err).To(MatchError(errors.New(
 					"Pivnet returned status code: 418 for the request - expected 204")))
 			})
