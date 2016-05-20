@@ -83,6 +83,24 @@ var _ = Describe("release commands", func() {
 
 			Expect(returnedReleases).To(Equal(releases))
 		})
+
+		Describe("ProductSlug flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(commands.ReleasesCommand{}, "ProductSlug")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("p"))
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("product-slug"))
+			})
+		})
 	})
 
 	Describe("ReleaseCommand", func() {
@@ -147,6 +165,10 @@ var _ = Describe("release commands", func() {
 				Expect(isRequired(field)).To(BeTrue())
 			})
 
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("p"))
+			})
+
 			It("contains long name", func() {
 				Expect(longTag(field)).To(Equal("product-slug"))
 			})
@@ -159,6 +181,10 @@ var _ = Describe("release commands", func() {
 
 			It("is required", func() {
 				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("v"))
 			})
 
 			It("contains long name", func() {
@@ -200,11 +226,15 @@ var _ = Describe("release commands", func() {
 
 		Describe("ProductSlug flag", func() {
 			BeforeEach(func() {
-				field = fieldFor(commands.ReleaseCommand{}, "ProductSlug")
+				field = fieldFor(commands.DeleteReleaseCommand{}, "ProductSlug")
 			})
 
 			It("is required", func() {
 				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("p"))
 			})
 
 			It("contains long name", func() {
@@ -214,11 +244,15 @@ var _ = Describe("release commands", func() {
 
 		Describe("ReleaseVersion flag", func() {
 			BeforeEach(func() {
-				field = fieldFor(commands.ReleaseCommand{}, "ReleaseVersion")
+				field = fieldFor(commands.DeleteReleaseCommand{}, "ReleaseVersion")
 			})
 
 			It("is required", func() {
 				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("v"))
 			})
 
 			It("contains long name", func() {

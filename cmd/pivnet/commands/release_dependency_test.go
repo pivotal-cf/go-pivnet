@@ -129,6 +129,10 @@ var _ = Describe("release dependency commands", func() {
 				Expect(isRequired(field)).To(BeTrue())
 			})
 
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("p"))
+			})
+
 			It("contains long name", func() {
 				Expect(longTag(field)).To(Equal("product-slug"))
 			})
@@ -141,6 +145,10 @@ var _ = Describe("release dependency commands", func() {
 
 			It("is required", func() {
 				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("v"))
 			})
 
 			It("contains long name", func() {

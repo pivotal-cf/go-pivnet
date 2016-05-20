@@ -10,8 +10,8 @@ import (
 )
 
 type UserGroupsCommand struct {
-	ProductSlug    string `long:"product-slug" description:"Product slug e.g. p-mysql"`
-	ReleaseVersion string `long:"release-version" description:"Release version e.g. 0.1.2-rc1"`
+	ProductSlug    string `long:"product-slug" short:"p" description:"Product slug e.g. p-mysql"`
+	ReleaseVersion string `long:"release-version" short:"v" description:"Release version e.g. 0.1.2-rc1"`
 }
 
 type UserGroupCommand struct {
@@ -31,14 +31,14 @@ type UpdateUserGroupCommand struct {
 }
 
 type AddUserGroupCommand struct {
-	ProductSlug    string `long:"product-slug" description:"Product slug e.g. p-mysql" required:"true"`
-	ReleaseVersion string `long:"release-version" description:"Release version e.g. 0.1.2-rc1" required:"true"`
+	ProductSlug    string `long:"product-slug" short:"p" description:"Product slug e.g. p-mysql" required:"true"`
+	ReleaseVersion string `long:"release-version" short:"v" description:"Release version e.g. 0.1.2-rc1" required:"true"`
 	UserGroupID    int    `long:"user-group-id" description:"User Group ID e.g. 1234" required:"true"`
 }
 
 type RemoveUserGroupCommand struct {
-	ProductSlug    string `long:"product-slug" description:"Product slug e.g. p-mysql" required:"true"`
-	ReleaseVersion string `long:"release-version" description:"Release version e.g. 0.1.2-rc1" required:"true"`
+	ProductSlug    string `long:"product-slug" short:"p" description:"Product slug e.g. p-mysql" required:"true"`
+	ReleaseVersion string `long:"release-version" short:"v" description:"Release version e.g. 0.1.2-rc1" required:"true"`
 	UserGroupID    int    `long:"user-group-id" description:"User Group ID e.g. 1234" required:"true"`
 }
 

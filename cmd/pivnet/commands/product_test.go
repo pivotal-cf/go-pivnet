@@ -116,6 +116,10 @@ var _ = Describe("product commands", func() {
 				Expect(isRequired(field)).To(BeTrue())
 			})
 
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("p"))
+			})
+
 			It("contains long name", func() {
 				Expect(longTag(field)).To(Equal("product-slug"))
 			})
