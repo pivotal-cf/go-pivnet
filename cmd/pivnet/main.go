@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"os"
 
 	"github.com/jessevdk/go-flags"
@@ -32,6 +31,6 @@ func main() {
 			helpParser.WriteHelp(os.Stderr)
 			os.Exit(0)
 		}
-		log.Fatal(err)
+		os.Exit(1)
 	}
 }

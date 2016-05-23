@@ -6,6 +6,7 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/pivotal-cf-experimental/go-pivnet"
+	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
 	"github.com/pivotal-cf-experimental/go-pivnet/extension"
 )
 
@@ -31,7 +32,7 @@ func (command *ReleasesCommand) Execute([]string) error {
 	}
 
 	switch Pivnet.Format {
-	case PrintAsTable:
+	case printer.PrintAsTable:
 		table := tablewriter.NewWriter(OutputWriter)
 		table.SetHeader([]string{"ID", "Version", "Description"})
 
@@ -42,10 +43,10 @@ func (command *ReleasesCommand) Execute([]string) error {
 		}
 		table.Render()
 		return nil
-	case PrintAsJSON:
-		return printJSON(releases)
-	case PrintAsYAML:
-		return printYAML(releases)
+	case printer.PrintAsJSON:
+		return Printer.PrintJSON(releases)
+	case printer.PrintAsYAML:
+		return Printer.PrintYAML(releases)
 	}
 
 	return nil
@@ -87,7 +88,7 @@ func (command *ReleaseCommand) Execute([]string) error {
 	}
 
 	switch Pivnet.Format {
-	case PrintAsTable:
+	case printer.PrintAsTable:
 		table := tablewriter.NewWriter(OutputWriter)
 		table.SetHeader([]string{"ID", "Version", "Description", "ETag"})
 
@@ -96,10 +97,10 @@ func (command *ReleaseCommand) Execute([]string) error {
 		})
 		table.Render()
 		return nil
-	case PrintAsJSON:
-		return printJSON(r)
-	case PrintAsYAML:
-		return printYAML(r)
+	case printer.PrintAsJSON:
+		return Printer.PrintJSON(r)
+	case printer.PrintAsYAML:
+		return Printer.PrintYAML(r)
 	}
 
 	return nil
@@ -129,7 +130,7 @@ func (command *DeleteReleaseCommand) Execute([]string) error {
 		return err
 	}
 
-	if Pivnet.Format == PrintAsTable {
+	if Pivnet.Format == printer.PrintAsTable {
 		_, err = fmt.Fprintf(
 			OutputWriter,
 			"release %s deleted successfully for %s\n",

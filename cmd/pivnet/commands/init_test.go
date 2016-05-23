@@ -8,6 +8,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands"
+	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
 )
 
 const (
@@ -23,7 +24,7 @@ func TestCommands(t *testing.T) {
 var _ = BeforeSuite(func() {
 	commands.OutputWriter = os.Stdout
 	commands.Pivnet = commands.PivnetCommand{
-		Format:   commands.PrintAsJSON,
+		Format:   printer.PrintAsJSON,
 		APIToken: apiToken,
 	}
 })

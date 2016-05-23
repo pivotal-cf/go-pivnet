@@ -6,6 +6,7 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/pivotal-cf-experimental/go-pivnet"
+	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
 )
 
 type ReleaseUpgradePathsCommand struct {
@@ -39,7 +40,7 @@ func (command *ReleaseUpgradePathsCommand) Execute([]string) error {
 	}
 
 	switch Pivnet.Format {
-	case PrintAsTable:
+	case printer.PrintAsTable:
 		table := tablewriter.NewWriter(OutputWriter)
 		table.SetHeader([]string{
 			"ID",
@@ -54,10 +55,10 @@ func (command *ReleaseUpgradePathsCommand) Execute([]string) error {
 		}
 		table.Render()
 		return nil
-	case PrintAsJSON:
-		return printJSON(releaseUpgradePaths)
-	case PrintAsYAML:
-		return printYAML(releaseUpgradePaths)
+	case printer.PrintAsJSON:
+		return Printer.PrintJSON(releaseUpgradePaths)
+	case printer.PrintAsYAML:
+		return Printer.PrintYAML(releaseUpgradePaths)
 	}
 
 	return nil

@@ -7,6 +7,7 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/pivotal-cf-experimental/go-pivnet"
+	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
 )
 
 type UserGroupsCommand struct {
@@ -103,7 +104,7 @@ func (command *UserGroupsCommand) Execute([]string) error {
 
 func printUserGroups(userGroups []pivnet.UserGroup) error {
 	switch Pivnet.Format {
-	case PrintAsTable:
+	case printer.PrintAsTable:
 		table := tablewriter.NewWriter(OutputWriter)
 		table.SetHeader([]string{"ID", "Name", "Description"})
 
@@ -116,10 +117,10 @@ func printUserGroups(userGroups []pivnet.UserGroup) error {
 		}
 		table.Render()
 		return nil
-	case PrintAsJSON:
-		return printJSON(userGroups)
-	case PrintAsYAML:
-		return printYAML(userGroups)
+	case printer.PrintAsJSON:
+		return Printer.PrintJSON(userGroups)
+	case printer.PrintAsYAML:
+		return Printer.PrintYAML(userGroups)
 	}
 
 	return nil
@@ -138,7 +139,7 @@ func (command *CreateUserGroupCommand) Execute([]string) error {
 
 func printUserGroup(userGroup pivnet.UserGroup) error {
 	switch Pivnet.Format {
-	case PrintAsTable:
+	case printer.PrintAsTable:
 		table := tablewriter.NewWriter(OutputWriter)
 		table.SetHeader([]string{"ID", "Name", "Description", "Members"})
 
@@ -151,10 +152,10 @@ func printUserGroup(userGroup pivnet.UserGroup) error {
 
 		table.Render()
 		return nil
-	case PrintAsJSON:
-		return printJSON(userGroup)
-	case PrintAsYAML:
-		return printYAML(userGroup)
+	case printer.PrintAsJSON:
+		return Printer.PrintJSON(userGroup)
+	case printer.PrintAsYAML:
+		return Printer.PrintYAML(userGroup)
 	}
 
 	return nil
@@ -168,7 +169,7 @@ func (command *DeleteUserGroupCommand) Execute([]string) error {
 		return err
 	}
 
-	if Pivnet.Format == PrintAsTable {
+	if Pivnet.Format == printer.PrintAsTable {
 		_, err = fmt.Fprintf(
 			OutputWriter,
 			"user group %d deleted successfully\n",
@@ -232,7 +233,7 @@ func (command *AddUserGroupCommand) Execute([]string) error {
 		return err
 	}
 
-	if Pivnet.Format == PrintAsTable {
+	if Pivnet.Format == printer.PrintAsTable {
 		_, err = fmt.Fprintf(
 			OutputWriter,
 			"user group %d added successfully to %s/%s\n",
@@ -274,7 +275,7 @@ func (command *RemoveUserGroupCommand) Execute([]string) error {
 		return err
 	}
 
-	if Pivnet.Format == PrintAsTable {
+	if Pivnet.Format == printer.PrintAsTable {
 		_, err = fmt.Fprintf(
 			OutputWriter,
 			"user group %d removed successfully from %s/%s\n",

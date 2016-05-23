@@ -5,6 +5,7 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/pivotal-cf-experimental/go-pivnet"
+	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
 )
 
 type ProductCommand struct {
@@ -26,7 +27,7 @@ func (command *ProductCommand) Execute([]string) error {
 
 func printProducts(products []pivnet.Product) error {
 	switch Pivnet.Format {
-	case PrintAsTable:
+	case printer.PrintAsTable:
 		table := tablewriter.NewWriter(OutputWriter)
 		table.SetHeader([]string{"ID", "Slug", "Name"})
 
@@ -38,10 +39,10 @@ func printProducts(products []pivnet.Product) error {
 		}
 		table.Render()
 		return nil
-	case PrintAsJSON:
-		return printJSON(products)
-	case PrintAsYAML:
-		return printYAML(products)
+	case printer.PrintAsJSON:
+		return Printer.PrintJSON(products)
+	case printer.PrintAsYAML:
+		return Printer.PrintYAML(products)
 	}
 
 	return nil
@@ -49,7 +50,7 @@ func printProducts(products []pivnet.Product) error {
 
 func printProduct(product pivnet.Product) error {
 	switch Pivnet.Format {
-	case PrintAsTable:
+	case printer.PrintAsTable:
 		table := tablewriter.NewWriter(OutputWriter)
 		table.SetHeader([]string{"ID", "Slug", "Name"})
 
@@ -59,10 +60,10 @@ func printProduct(product pivnet.Product) error {
 		table.Append(productAsString)
 		table.Render()
 		return nil
-	case PrintAsJSON:
-		return printJSON(product)
-	case PrintAsYAML:
-		return printYAML(product)
+	case printer.PrintAsJSON:
+		return Printer.PrintJSON(product)
+	case printer.PrintAsYAML:
+		return Printer.PrintYAML(product)
 	}
 
 	return nil

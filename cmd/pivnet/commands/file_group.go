@@ -7,6 +7,7 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/pivotal-cf-experimental/go-pivnet"
+	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
 )
 
 type FileGroupsCommand struct {
@@ -68,7 +69,7 @@ func (command *FileGroupsCommand) Execute([]string) error {
 func printFileGroups(fileGroups []pivnet.FileGroup) error {
 	switch Pivnet.Format {
 
-	case PrintAsTable:
+	case printer.PrintAsTable:
 		table := tablewriter.NewWriter(OutputWriter)
 		table.SetHeader([]string{
 			"ID",
@@ -92,10 +93,10 @@ func printFileGroups(fileGroups []pivnet.FileGroup) error {
 		}
 		table.Render()
 		return nil
-	case PrintAsJSON:
-		return printJSON(fileGroups)
-	case PrintAsYAML:
-		return printYAML(fileGroups)
+	case printer.PrintAsJSON:
+		return Printer.PrintJSON(fileGroups)
+	case printer.PrintAsYAML:
+		return Printer.PrintYAML(fileGroups)
 	}
 
 	return nil
@@ -118,7 +119,7 @@ func (command *FileGroupCommand) Execute([]string) error {
 func printFileGroup(fileGroup pivnet.FileGroup) error {
 	switch Pivnet.Format {
 
-	case PrintAsTable:
+	case printer.PrintAsTable:
 		table := tablewriter.NewWriter(OutputWriter)
 		table.SetHeader([]string{
 			"ID",
@@ -140,10 +141,10 @@ func printFileGroup(fileGroup pivnet.FileGroup) error {
 		table.Append(fileGroupAsString)
 		table.Render()
 		return nil
-	case PrintAsJSON:
-		return printJSON(fileGroup)
-	case PrintAsYAML:
-		return printYAML(fileGroup)
+	case printer.PrintAsJSON:
+		return Printer.PrintJSON(fileGroup)
+	case printer.PrintAsYAML:
+		return Printer.PrintYAML(fileGroup)
 	}
 
 	return nil
@@ -160,7 +161,7 @@ func (command *DeleteFileGroupCommand) Execute([]string) error {
 		return err
 	}
 
-	if Pivnet.Format == PrintAsTable {
+	if Pivnet.Format == printer.PrintAsTable {
 		_, err = fmt.Fprintf(
 			OutputWriter,
 			"file group %d deleted successfully for %s\n",
