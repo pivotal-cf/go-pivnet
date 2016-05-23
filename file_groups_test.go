@@ -78,11 +78,19 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/%s/file_groups", apiPrefix, productSlug)),
-						ghttp.RespondWith(http.StatusTeapot, nil),
+						ghttp.RespondWith(http.StatusTeapot, body),
 					),
 				)
 
@@ -98,7 +106,7 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 			productSlug string
 			releaseID   int
 
-			response           pivnet.FileGroupsResponse
+			response           interface{}
 			responseStatusCode int
 		)
 
@@ -151,6 +159,7 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 		Context("when the server responds with a non-2XX status code", func() {
 			BeforeEach(func() {
 				responseStatusCode = http.StatusTeapot
+				response = pivnetErr{Message: "foo message"}
 			})
 
 			It("returns an error", func() {
@@ -171,7 +180,7 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 			productSlug string
 			fileGroupID int
 
-			response           pivnet.FileGroup
+			response           interface{}
 			responseStatusCode int
 		)
 
@@ -218,6 +227,7 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 		Context("when the server responds with a non-2XX status code", func() {
 			BeforeEach(func() {
 				responseStatusCode = http.StatusTeapot
+				response = pivnetErr{Message: "foo message"}
 			})
 
 			It("returns an error", func() {
@@ -257,13 +267,21 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest(
 							"DELETE",
 							fmt.Sprintf("%s/products/%s/file_groups/%d", apiPrefix, productSlug, id)),
-						ghttp.RespondWith(http.StatusTeapot, nil),
+						ghttp.RespondWith(http.StatusTeapot, body),
 					),
 				)
 

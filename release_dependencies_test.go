@@ -99,6 +99,14 @@ var _ = Describe("PivnetClient - release dependencies", func() {
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
 			BeforeEach(func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
@@ -108,7 +116,7 @@ var _ = Describe("PivnetClient - release dependencies", func() {
 							productSlug,
 							releaseID,
 						)),
-						ghttp.RespondWith(http.StatusTeapot, nil),
+						ghttp.RespondWith(http.StatusTeapot, body),
 					),
 				)
 			})

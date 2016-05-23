@@ -12,6 +12,11 @@ import (
 	"github.com/pivotal-cf-experimental/go-pivnet/logger/loggerfakes"
 )
 
+type pivnetErr struct {
+	Status  int    `json:"status"`
+	Message string `json:"message"`
+}
+
 var _ = Describe("PivnetClient", func() {
 	var (
 		server    *ghttp.Server
@@ -135,19 +140,98 @@ var _ = Describe("PivnetClient", func() {
 		})
 	})
 
-	Context("when a non-200 comes back from Pivnet", func() {
-		It("returns an error", func() {
+	Context("when Pivnet returns a 401", func() {
+		var (
+			body []byte
+		)
+
+		BeforeEach(func() {
+			body = []byte(`{"message":"foo message"}`)
+		})
+
+		It("returns an ErrUnauthorized error with message from Pivnet", func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", apiPrefix+"/products/my-product-id/releases"),
-					ghttp.RespondWith(http.StatusNotFound, nil),
+					ghttp.RespondWith(http.StatusUnauthorized, body),
 				),
 			)
 
 			_, err := client.Releases.List("my-product-id")
 			Expect(err).To(HaveOccurred())
 			Expect(err).To(MatchError(
-				"Pivnet returned status code: 404 for the request - expected 200"))
+				pivnet.ErrUnauthorized{
+					ResponseCode: http.StatusUnauthorized,
+					Message:      "foo message",
+				},
+			))
+		})
+	})
+
+	Context("when Pivnet returns a 404", func() {
+		var (
+			body []byte
+		)
+
+		BeforeEach(func() {
+			body = []byte(`{"message":"foo message"}`)
+		})
+
+		It("returns an ErrNotFound error with message from Pivnet", func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", apiPrefix+"/products/my-product-id/releases"),
+					ghttp.RespondWith(http.StatusNotFound, body),
+				),
+			)
+
+			_, err := client.Releases.List("my-product-id")
+			Expect(err).To(HaveOccurred())
+			Expect(err).To(MatchError(
+				pivnet.ErrNotFound{
+					ResponseCode: http.StatusNotFound,
+					Message:      "foo message",
+				},
+			))
+		})
+	})
+
+	Context("when an unexpected status code comes back from Pivnet", func() {
+		var (
+			body []byte
+		)
+
+		BeforeEach(func() {
+			body = []byte(`{"message":"foo message"}`)
+		})
+
+		It("returns an error", func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", apiPrefix+"/products/my-product-id/releases"),
+					ghttp.RespondWith(http.StatusTeapot, body),
+				),
+			)
+
+			_, err := client.Releases.List("my-product-id")
+			Expect(err).To(HaveOccurred())
+			Expect(err).To(MatchError(
+				"Pivnet returned status code: 418 for the request - expected 200"))
+		})
+
+		Context("when unmarshalling the response from Pivnet returns an error", func() {
+			It("returns an error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", apiPrefix+"/products/my-product-id/releases"),
+						ghttp.RespondWith(http.StatusTeapot, nil),
+					),
+				)
+
+				_, err := client.Releases.List("my-product-id")
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("JSON"))
+			})
 		})
 	})
 

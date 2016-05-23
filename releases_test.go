@@ -64,11 +64,19 @@ var _ = Describe("PivnetClient - product files", func() {
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", apiPrefix+"/products/banana/releases"),
-						ghttp.RespondWith(http.StatusTeapot, nil),
+						ghttp.RespondWith(http.StatusTeapot, body),
 					),
 				)
 
@@ -96,11 +104,19 @@ var _ = Describe("PivnetClient - product files", func() {
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", apiPrefix+"/products/banana/releases/3"),
-						ghttp.RespondWith(http.StatusTeapot, nil),
+						ghttp.RespondWith(http.StatusTeapot, body),
 					),
 				)
 
@@ -306,11 +322,19 @@ var _ = Describe("PivnetClient - product files", func() {
 		})
 
 		Context("when the server responds with a non-201 status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("POST", apiPrefix+"/products/"+productSlug+"/releases"),
-						ghttp.RespondWith(http.StatusTeapot, nil),
+						ghttp.RespondWith(http.StatusTeapot, body),
 					),
 				)
 
@@ -349,6 +373,14 @@ var _ = Describe("PivnetClient - product files", func() {
 		})
 
 		Context("when the server responds with a non-200 status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
 			It("returns the error", func() {
 				release := pivnet.Release{ID: 111}
 				patchURL := fmt.Sprintf("%s/products/%s/releases/%d", apiPrefix, "banana-slug", release.ID)
@@ -356,7 +388,7 @@ var _ = Describe("PivnetClient - product files", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("PATCH", patchURL),
-						ghttp.RespondWith(http.StatusTeapot, nil),
+						ghttp.RespondWith(http.StatusTeapot, body),
 					),
 				)
 
@@ -391,11 +423,19 @@ var _ = Describe("PivnetClient - product files", func() {
 		})
 
 		Context("when the server responds with a non-204 status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("DELETE", fmt.Sprintf("%s/products/banana/releases/%d", apiPrefix, release.ID)),
-						ghttp.RespondWith(http.StatusTeapot, nil),
+						ghttp.RespondWith(http.StatusTeapot, body),
 					),
 				)
 

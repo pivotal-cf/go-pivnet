@@ -64,11 +64,19 @@ var _ = Describe("PivnetClient - user groups", func() {
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", fmt.Sprintf("%s/user_groups", apiPrefix)),
-						ghttp.RespondWith(http.StatusTeapot, nil),
+						ghttp.RespondWith(http.StatusTeapot, body),
 					),
 				)
 
@@ -107,11 +115,19 @@ var _ = Describe("PivnetClient - user groups", func() {
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/banana/releases/%d/user_groups", apiPrefix, releaseID)),
-						ghttp.RespondWith(http.StatusTeapot, nil),
+						ghttp.RespondWith(http.StatusTeapot, body),
 					),
 				)
 
@@ -152,6 +168,14 @@ var _ = Describe("PivnetClient - user groups", func() {
 		})
 
 		Context("when the server responds with a non-204 status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
@@ -161,7 +185,7 @@ var _ = Describe("PivnetClient - user groups", func() {
 							productSlug,
 							releaseID,
 						)),
-						ghttp.RespondWith(http.StatusTeapot, nil),
+						ghttp.RespondWith(http.StatusTeapot, body),
 					),
 				)
 
@@ -202,6 +226,14 @@ var _ = Describe("PivnetClient - user groups", func() {
 		})
 
 		Context("when the server responds with a non-204 status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
@@ -211,7 +243,7 @@ var _ = Describe("PivnetClient - user groups", func() {
 							productSlug,
 							releaseID,
 						)),
-						ghttp.RespondWith(http.StatusTeapot, nil),
+						ghttp.RespondWith(http.StatusTeapot, body),
 					),
 				)
 
@@ -268,11 +300,30 @@ var _ = Describe("PivnetClient - user groups", func() {
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
+			var (
+				body []byte
+			)
+
 			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
 				responseStatusCode = http.StatusTeapot
 			})
 
 			It("returns an error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(
+							"GET",
+							fmt.Sprintf(
+								"%s/user_groups/%d",
+								apiPrefix,
+								userGroupID,
+							),
+						),
+						ghttp.RespondWith(responseStatusCode, body),
+					),
+				)
+
 				_, err := client.UserGroups.Get(
 					userGroupID,
 				)
@@ -365,6 +416,14 @@ var _ = Describe("PivnetClient - user groups", func() {
 		})
 
 		Context("when the server responds with a non-201 status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
@@ -372,7 +431,7 @@ var _ = Describe("PivnetClient - user groups", func() {
 							"%s/user_groups",
 							apiPrefix,
 						)),
-						ghttp.RespondWith(http.StatusTeapot, nil),
+						ghttp.RespondWith(http.StatusTeapot, body),
 					),
 				)
 
@@ -431,6 +490,14 @@ var _ = Describe("PivnetClient - user groups", func() {
 		})
 
 		Context("when the server responds with a non-200 status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
@@ -439,7 +506,7 @@ var _ = Describe("PivnetClient - user groups", func() {
 							apiPrefix,
 							userGroup.ID,
 						)),
-						ghttp.RespondWith(http.StatusTeapot, nil),
+						ghttp.RespondWith(http.StatusTeapot, body),
 					),
 				)
 
@@ -475,11 +542,19 @@ var _ = Describe("PivnetClient - user groups", func() {
 		})
 
 		Context("when the server responds with a non-204 status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("DELETE", fmt.Sprintf("%s/user_groups/%d", apiPrefix, userGroup.ID)),
-						ghttp.RespondWith(http.StatusTeapot, nil),
+						ghttp.RespondWith(http.StatusTeapot, body),
 					),
 				)
 

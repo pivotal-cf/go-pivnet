@@ -62,6 +62,14 @@ var _ = Describe("ReleaseETag", func() {
 	})
 
 	Context("when the server responds with a non-2XX status code", func() {
+		var (
+			body []byte
+		)
+
+		BeforeEach(func() {
+			body = []byte(`{"message":"foo message"}`)
+		})
+
 		It("returns an error", func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
@@ -71,7 +79,7 @@ var _ = Describe("ReleaseETag", func() {
 						productSlug,
 						release.ID,
 					)),
-					ghttp.RespondWith(http.StatusTeapot, nil),
+					ghttp.RespondWith(http.StatusTeapot, body),
 				),
 			)
 

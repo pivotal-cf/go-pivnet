@@ -67,11 +67,19 @@ var _ = Describe("PivnetClient - EULA", func() {
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", fmt.Sprintf("%s/eulas", apiPrefix)),
-						ghttp.RespondWith(http.StatusTeapot, nil),
+						ghttp.RespondWith(http.StatusTeapot, body),
 					),
 				)
 
@@ -110,11 +118,19 @@ var _ = Describe("PivnetClient - EULA", func() {
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", fmt.Sprintf("%s/eulas/%s", apiPrefix, eulaSlug)),
-						ghttp.RespondWith(http.StatusTeapot, nil),
+						ghttp.RespondWith(http.StatusTeapot, body),
 					),
 				)
 
@@ -154,13 +170,21 @@ var _ = Describe("PivnetClient - EULA", func() {
 		})
 
 		Context("when any other non-200 status code comes back", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("POST", EULAAcceptanceURL),
 						ghttp.VerifyHeaderKV("Authorization", fmt.Sprintf("Token %s", token)),
 						ghttp.VerifyJSON(`{}`),
-						ghttp.RespondWith(http.StatusTeapot, nil),
+						ghttp.RespondWith(http.StatusTeapot, body),
 					),
 				)
 

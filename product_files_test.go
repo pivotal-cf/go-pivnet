@@ -48,7 +48,7 @@ var _ = Describe("PivnetClient - product files", func() {
 		var (
 			productSlug string
 
-			response           pivnet.ProductFilesResponse
+			response           interface{}
 			responseStatusCode int
 		)
 
@@ -85,7 +85,7 @@ var _ = Describe("PivnetClient - product files", func() {
 			)
 		})
 
-		It("returns the product file without error", func() {
+		It("returns the product files without error", func() {
 			productFiles, err := client.ProductFiles.List(
 				productSlug,
 			)
@@ -98,6 +98,7 @@ var _ = Describe("PivnetClient - product files", func() {
 		Context("when the server responds with a non-2XX status code", func() {
 			BeforeEach(func() {
 				responseStatusCode = http.StatusTeapot
+				response = pivnetErr{Message: "foo message"}
 			})
 
 			It("returns an error", func() {
@@ -117,7 +118,7 @@ var _ = Describe("PivnetClient - product files", func() {
 			productSlug string
 			releaseID   int
 
-			response           pivnet.ProductFilesResponse
+			response           interface{}
 			responseStatusCode int
 		)
 
@@ -178,6 +179,7 @@ var _ = Describe("PivnetClient - product files", func() {
 		Context("when the server responds with a non-2XX status code", func() {
 			BeforeEach(func() {
 				responseStatusCode = http.StatusTeapot
+				response = pivnetErr{Message: "foo message"}
 			})
 
 			It("returns an error", func() {
@@ -198,7 +200,7 @@ var _ = Describe("PivnetClient - product files", func() {
 			productSlug   string
 			productFileID int
 
-			response           pivnet.ProductFileResponse
+			response           interface{}
 			responseStatusCode int
 		)
 
@@ -245,6 +247,7 @@ var _ = Describe("PivnetClient - product files", func() {
 		Context("when the server responds with a non-2XX status code", func() {
 			BeforeEach(func() {
 				responseStatusCode = http.StatusTeapot
+				response = pivnetErr{Message: "foo message"}
 			})
 
 			It("returns an error", func() {
@@ -266,7 +269,7 @@ var _ = Describe("PivnetClient - product files", func() {
 			releaseID     int
 			productFileID int
 
-			response           pivnet.ProductFileResponse
+			response           interface{}
 			responseStatusCode int
 		)
 
@@ -332,6 +335,7 @@ var _ = Describe("PivnetClient - product files", func() {
 		Context("when the server responds with a non-2XX status code", func() {
 			BeforeEach(func() {
 				responseStatusCode = http.StatusTeapot
+				response = pivnetErr{Message: "foo message"}
 			})
 
 			It("returns an error", func() {
@@ -440,11 +444,19 @@ var _ = Describe("PivnetClient - product files", func() {
 		})
 
 		Context("when the server responds with a non-201 status code", func() {
+			var (
+				response interface{}
+			)
+
+			BeforeEach(func() {
+				response = pivnetErr{Message: "foo message"}
+			})
+
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("POST", apiPrefix+"/products/"+productSlug+"/product_files"),
-						ghttp.RespondWith(http.StatusTeapot, nil),
+						ghttp.RespondWithJSONEncoded(http.StatusTeapot, response),
 					),
 				)
 
@@ -497,13 +509,21 @@ var _ = Describe("PivnetClient - product files", func() {
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
+			var (
+				response interface{}
+			)
+
+			BeforeEach(func() {
+				response = pivnetErr{Message: "foo message"}
+			})
+
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest(
 							"DELETE",
 							fmt.Sprintf("%s/products/%s/product_files/%d", apiPrefix, productSlug, id)),
-						ghttp.RespondWith(http.StatusTeapot, nil),
+						ghttp.RespondWithJSONEncoded(http.StatusTeapot, response),
 					),
 				)
 
@@ -544,6 +564,14 @@ var _ = Describe("PivnetClient - product files", func() {
 		})
 
 		Context("when the server responds with a non-204 status code", func() {
+			var (
+				response interface{}
+			)
+
+			BeforeEach(func() {
+				response = pivnetErr{Message: "foo message"}
+			})
+
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
@@ -553,7 +581,7 @@ var _ = Describe("PivnetClient - product files", func() {
 							productSlug,
 							releaseID,
 						)),
-						ghttp.RespondWith(http.StatusTeapot, nil),
+						ghttp.RespondWithJSONEncoded(http.StatusTeapot, response),
 					),
 				)
 
@@ -594,6 +622,14 @@ var _ = Describe("PivnetClient - product files", func() {
 		})
 
 		Context("when the server responds with a non-204 status code", func() {
+			var (
+				response interface{}
+			)
+
+			BeforeEach(func() {
+				response = pivnetErr{Message: "foo message"}
+			})
+
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
@@ -603,7 +639,7 @@ var _ = Describe("PivnetClient - product files", func() {
 							productSlug,
 							releaseID,
 						)),
-						ghttp.RespondWith(http.StatusTeapot, nil),
+						ghttp.RespondWithJSONEncoded(http.StatusTeapot, response),
 					),
 				)
 

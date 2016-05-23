@@ -17,6 +17,43 @@ const (
 	apiVersion  = "/api/v2"
 )
 
+type pivnetErr struct {
+	Status  int    `json:"status"`
+	Message string `json:"message"`
+}
+
+type ErrUnauthorized struct {
+	ResponseCode int    `json:"response_code" yaml:"response_code"`
+	Message      string `json:"message" yaml:"message"`
+}
+
+func (e ErrUnauthorized) Error() string {
+	return e.Message
+}
+
+func newErrUnauthorized(message string) ErrUnauthorized {
+	return ErrUnauthorized{
+		ResponseCode: http.StatusUnauthorized,
+		Message:      message,
+	}
+}
+
+type ErrNotFound struct {
+	ResponseCode int    `json:"response_code" yaml:"response_code"`
+	Message      string `json:"message" yaml:"message"`
+}
+
+func (e ErrNotFound) Error() string {
+	return e.Message
+}
+
+func newErrNotFound(message string) ErrNotFound {
+	return ErrNotFound{
+		ResponseCode: http.StatusNotFound,
+		Message:      message,
+	}
+}
+
 type Client struct {
 	baseURL   string
 	token     string
@@ -105,6 +142,19 @@ func (c Client) makeRequestWithHTTPResponse(
 	}
 
 	if resp.StatusCode != expectedStatusCode {
+		var pErr pivnetErr
+		err = json.Unmarshal(b, &pErr)
+		if err != nil {
+			return nil, err
+		}
+
+		switch resp.StatusCode {
+		case http.StatusUnauthorized:
+			return nil, newErrUnauthorized(pErr.Message)
+		case http.StatusNotFound:
+			return nil, newErrNotFound(pErr.Message)
+		}
+
 		return nil, fmt.Errorf(
 			"Pivnet returned status code: %d for the request - expected %d",
 			resp.StatusCode,

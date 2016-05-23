@@ -48,6 +48,7 @@ var _ = Describe("PivnetClient - product", func() {
 		var (
 			slug = "my-product"
 		)
+
 		Context("when the product can be found", func() {
 			It("returns the located product", func() {
 				response := fmt.Sprintf(`{"id": 3, "slug": "%s"}`, slug)
@@ -69,6 +70,14 @@ var _ = Describe("PivnetClient - product", func() {
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
@@ -76,7 +85,7 @@ var _ = Describe("PivnetClient - product", func() {
 							"%s/products/%s",
 							apiPrefix,
 							slug)),
-						ghttp.RespondWith(http.StatusTeapot, nil),
+						ghttp.RespondWith(http.StatusTeapot, body),
 					),
 				)
 
@@ -114,13 +123,21 @@ var _ = Describe("PivnetClient - product", func() {
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", fmt.Sprintf(
 							"%s/products",
 							apiPrefix)),
-						ghttp.RespondWith(http.StatusTeapot, nil),
+						ghttp.RespondWith(http.StatusTeapot, body),
 					),
 				)
 
