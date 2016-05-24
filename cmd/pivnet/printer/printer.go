@@ -14,6 +14,8 @@ const (
 	PrintAsYAML  = "yaml"
 )
 
+//go:generate counterfeiter . Printer
+
 type Printer interface {
 	PrintYAML(interface{}) error
 	PrintJSON(interface{}) error

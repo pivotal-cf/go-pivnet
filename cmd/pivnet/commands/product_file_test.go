@@ -11,6 +11,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/pivotal-cf-experimental/go-pivnet"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands"
+	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errors/errorsfakes"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
 
 	"github.com/onsi/gomega/ghttp"
@@ -20,6 +21,8 @@ var _ = Describe("product file commands", func() {
 	var (
 		server *ghttp.Server
 
+		fakeErrorHandler *errorsfakes.FakeErrorHandler
+
 		field     reflect.StructField
 		outBuffer bytes.Buffer
 
@@ -28,6 +31,9 @@ var _ = Describe("product file commands", func() {
 		releases     []pivnet.Release
 		productFile  pivnet.ProductFile
 		productFiles []pivnet.ProductFile
+
+		responseStatusCode int
+		response           interface{}
 	)
 
 	BeforeEach(func() {
@@ -38,6 +44,9 @@ var _ = Describe("product file commands", func() {
 		outBuffer = bytes.Buffer{}
 		commands.OutputWriter = &outBuffer
 		commands.Printer = printer.NewPrinter(commands.OutputWriter)
+
+		fakeErrorHandler = &errorsfakes.FakeErrorHandler{}
+		commands.ErrorHandler = fakeErrorHandler
 
 		productSlug = "some-product-slug"
 
@@ -67,6 +76,8 @@ var _ = Describe("product file commands", func() {
 				Name: "Another name",
 			},
 		}
+
+		responseStatusCode = http.StatusOK
 	})
 
 	AfterEach(func() {
@@ -74,38 +85,61 @@ var _ = Describe("product file commands", func() {
 	})
 
 	Describe("ProductFilesCommand", func() {
-		It("lists all product files for the provided product slug", func() {
-			productFilesResponse := pivnet.ProductFilesResponse{
+		var (
+			command commands.ProductFilesCommand
+		)
+
+		BeforeEach(func() {
+			response = pivnet.ProductFilesResponse{
 				ProductFiles: productFiles,
 			}
 
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(
-						"GET",
-						fmt.Sprintf(
-							"%s/products/%s/product_files",
-							apiPrefix,
-							productSlug,
-						),
-					),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, productFilesResponse),
-				),
-			)
-
-			productFilesCommand := commands.ProductFilesCommand{
+			command = commands.ProductFilesCommand{
 				ProductSlug: productSlug,
 			}
+		})
 
-			err := productFilesCommand.Execute(nil)
-			Expect(err).NotTo(HaveOccurred())
+		Describe("when only product-slug is provided", func() {
+			JustBeforeEach(func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(
+							"GET",
+							fmt.Sprintf(
+								"%s/products/%s/product_files",
+								apiPrefix,
+								productSlug,
+							),
+						),
+						ghttp.RespondWithJSONEncoded(responseStatusCode, response),
+					),
+				)
+			})
 
-			var returned []pivnet.ProductFile
+			It("lists all product files for the provided product slug", func() {
+				err := command.Execute(nil)
+				Expect(err).NotTo(HaveOccurred())
 
-			err = json.Unmarshal(outBuffer.Bytes(), &returned)
-			Expect(err).NotTo(HaveOccurred())
+				var returned []pivnet.ProductFile
 
-			Expect(returned).To(Equal(productFiles))
+				err = json.Unmarshal(outBuffer.Bytes(), &returned)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(returned).To(Equal(productFiles))
+			})
+
+			Context("when there is an error", func() {
+				BeforeEach(func() {
+					responseStatusCode = http.StatusTeapot
+				})
+
+				It("invokes the error handler", func() {
+					err := command.Execute(nil)
+					Expect(err).NotTo(HaveOccurred())
+
+					Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				})
+			})
 		})
 
 		Context("when the release version is provided", func() {
@@ -196,40 +230,63 @@ var _ = Describe("product file commands", func() {
 	})
 
 	Describe("ProductFileCommand", func() {
-		It("shows the product file for the provided product slug and product file id", func() {
-			productFileResponse := pivnet.ProductFileResponse{
+		var (
+			command commands.ProductFileCommand
+		)
+
+		BeforeEach(func() {
+			response = pivnet.ProductFileResponse{
 				ProductFile: productFile,
 			}
 
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(
-						"GET",
-						fmt.Sprintf(
-							"%s/products/%s/product_files/%d",
-							apiPrefix,
-							productSlug,
-							productFile.ID,
-						),
-					),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, productFileResponse),
-				),
-			)
-
-			productFileCommand := commands.ProductFileCommand{
+			command = commands.ProductFileCommand{
 				ProductSlug:   productSlug,
 				ProductFileID: productFile.ID,
 			}
+		})
 
-			err := productFileCommand.Execute(nil)
-			Expect(err).NotTo(HaveOccurred())
+		Describe("when only product-slug is provided", func() {
+			JustBeforeEach(func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(
+							"GET",
+							fmt.Sprintf(
+								"%s/products/%s/product_files/%d",
+								apiPrefix,
+								productSlug,
+								productFile.ID,
+							),
+						),
+						ghttp.RespondWithJSONEncoded(responseStatusCode, response),
+					),
+				)
+			})
 
-			var returned pivnet.ProductFile
+			It("shows the product file for the provided product slug and product file id", func() {
+				err := command.Execute(nil)
+				Expect(err).NotTo(HaveOccurred())
 
-			err = json.Unmarshal(outBuffer.Bytes(), &returned)
-			Expect(err).NotTo(HaveOccurred())
+				var returned pivnet.ProductFile
 
-			Expect(returned).To(Equal(productFile))
+				err = json.Unmarshal(outBuffer.Bytes(), &returned)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(returned).To(Equal(productFile))
+			})
+
+			Context("when there is an error", func() {
+				BeforeEach(func() {
+					responseStatusCode = http.StatusTeapot
+				})
+
+				It("invokes the error handler", func() {
+					err := command.Execute(nil)
+					Expect(err).NotTo(HaveOccurred())
+
+					Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				})
+			})
 		})
 
 		Context("when the release version is provided", func() {
@@ -335,7 +392,21 @@ var _ = Describe("product file commands", func() {
 	})
 
 	Describe("AddProductFileCommand", func() {
-		It("adds the product file for the provided product slug and product file id to the specified release", func() {
+		var (
+			command commands.AddProductFileCommand
+		)
+
+		BeforeEach(func() {
+			responseStatusCode = http.StatusNoContent
+
+			command = commands.AddProductFileCommand{
+				ProductSlug:    productSlug,
+				ProductFileID:  productFile.ID,
+				ReleaseVersion: releases[0].Version,
+			}
+		})
+
+		JustBeforeEach(func() {
 			releasesResponse := pivnet.ReleasesResponse{
 				Releases: releases,
 			}
@@ -358,18 +429,27 @@ var _ = Describe("product file commands", func() {
 							releases[0].ID,
 						),
 					),
-					ghttp.RespondWithJSONEncoded(http.StatusNoContent, nil),
+					ghttp.RespondWithJSONEncoded(responseStatusCode, nil),
 				),
 			)
+		})
 
-			addProductFileCommand := commands.AddProductFileCommand{
-				ProductSlug:    productSlug,
-				ProductFileID:  productFile.ID,
-				ReleaseVersion: releases[0].Version,
-			}
-
-			err := addProductFileCommand.Execute(nil)
+		It("adds the product file for the provided product slug and product file id to the specified release", func() {
+			err := command.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Context("when there is an error", func() {
+			BeforeEach(func() {
+				responseStatusCode = http.StatusTeapot
+			})
+
+			It("invokes the error handler", func() {
+				err := command.Execute(nil)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+			})
 		})
 
 		Describe("ProductSlug flag", func() {

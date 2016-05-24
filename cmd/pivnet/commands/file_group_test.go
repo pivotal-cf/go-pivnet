@@ -96,38 +96,8 @@ var _ = Describe("file group commands", func() {
 			}
 		})
 
-		It("lists all file groups for the provided product slug", func() {
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(
-						"GET",
-						fmt.Sprintf(
-							"%s/products/%s/file_groups",
-							apiPrefix,
-							productSlug,
-						),
-					),
-					ghttp.RespondWithJSONEncoded(responseStatusCode, response),
-				),
-			)
-
-			err := command.Execute(nil)
-			Expect(err).NotTo(HaveOccurred())
-
-			var returned []pivnet.FileGroup
-
-			err = json.Unmarshal(outBuffer.Bytes(), &returned)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(returned).To(Equal(fileGroups))
-		})
-
-		Context("when there is an error", func() {
-			BeforeEach(func() {
-				responseStatusCode = http.StatusTeapot
-			})
-
-			It("invokes the error handler", func() {
+		Describe("when only product-slug is provided", func() {
+			JustBeforeEach(func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest(
@@ -141,11 +111,31 @@ var _ = Describe("file group commands", func() {
 						ghttp.RespondWithJSONEncoded(responseStatusCode, response),
 					),
 				)
+			})
 
+			It("lists all file groups for the provided product slug", func() {
 				err := command.Execute(nil)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				var returned []pivnet.FileGroup
+
+				err = json.Unmarshal(outBuffer.Bytes(), &returned)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(returned).To(Equal(fileGroups))
+			})
+
+			Context("when there is an error", func() {
+				BeforeEach(func() {
+					responseStatusCode = http.StatusTeapot
+				})
+
+				It("invokes the error handler", func() {
+					err := command.Execute(nil)
+					Expect(err).NotTo(HaveOccurred())
+
+					Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				})
 			})
 		})
 

@@ -45,7 +45,7 @@ func (command *ProductFilesCommand) Execute([]string) error {
 			command.ProductSlug,
 		)
 		if err != nil {
-			return err
+			return ErrorHandler.HandleError(err)
 		}
 
 		return printProductFiles(productFiles)
@@ -155,7 +155,7 @@ func (command *ProductFileCommand) Execute([]string) error {
 			command.ProductFileID,
 		)
 		if err != nil {
-			return err
+			return ErrorHandler.HandleError(err)
 		}
 		return printProductFile(productFile)
 	}
@@ -215,7 +215,7 @@ func (command *AddProductFileCommand) Execute([]string) error {
 		command.ProductFileID,
 	)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	if Pivnet.Format == printer.PrintAsTable {
