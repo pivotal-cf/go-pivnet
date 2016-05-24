@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/pivotal-cf-experimental/go-pivnet"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/error"
+	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errors"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/lagershim"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/version"
@@ -23,7 +23,7 @@ var (
 	OutputWriter io.Writer
 	LogWriter    io.Writer
 
-	ErrorHandler error.ErrorHandler
+	ErrorHandler errors.ErrorHandler
 	Printer      printer.Printer
 )
 
@@ -99,7 +99,7 @@ func NewClient() pivnet.Client {
 	}
 
 	if ErrorHandler == nil {
-		ErrorHandler = error.NewErrorHandler(Pivnet.Format, Printer)
+		ErrorHandler = errors.NewErrorHandler(Pivnet.Format, Printer)
 	}
 
 	if LogWriter == nil {

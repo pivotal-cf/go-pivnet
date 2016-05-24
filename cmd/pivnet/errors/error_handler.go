@@ -1,9 +1,11 @@
-package error
+package errors
 
 import (
 	"github.com/pivotal-cf-experimental/go-pivnet"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
 )
+
+//go:generate counterfeiter . ErrorHandler
 
 type ErrorHandler interface {
 	HandleError(err error) error

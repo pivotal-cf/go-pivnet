@@ -11,6 +11,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/pivotal-cf-experimental/go-pivnet"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands"
+	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errors/errorsfakes"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
 
 	"github.com/onsi/gomega/ghttp"
@@ -20,10 +21,15 @@ var _ = Describe("eula commands", func() {
 	var (
 		server *ghttp.Server
 
+		fakeErrorHandler *errorsfakes.FakeErrorHandler
+
 		field     reflect.StructField
 		outBuffer bytes.Buffer
 
 		eulas []pivnet.EULA
+
+		responseStatusCode int
+		response           interface{}
 	)
 
 	BeforeEach(func() {
@@ -34,6 +40,9 @@ var _ = Describe("eula commands", func() {
 		outBuffer = bytes.Buffer{}
 		commands.OutputWriter = &outBuffer
 		commands.Printer = printer.NewPrinter(commands.OutputWriter)
+
+		fakeErrorHandler = &errorsfakes.FakeErrorHandler{}
+		commands.ErrorHandler = fakeErrorHandler
 
 		eulas = []pivnet.EULA{
 			{
@@ -47,6 +56,8 @@ var _ = Describe("eula commands", func() {
 				Slug: "another-eula",
 			},
 		}
+
+		responseStatusCode = http.StatusOK
 	})
 
 	AfterEach(func() {
@@ -54,21 +65,29 @@ var _ = Describe("eula commands", func() {
 	})
 
 	Describe("EULAsCommand", func() {
-		It("lists all EULAs", func() {
-			eulasResponse := pivnet.EULAsResponse{
+		var (
+			command commands.EULAsCommand
+		)
+
+		BeforeEach(func() {
+			response = pivnet.EULAsResponse{
 				EULAs: eulas,
 			}
 
+			command = commands.EULAsCommand{}
+		})
+
+		JustBeforeEach(func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/eulas", apiPrefix)),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, eulasResponse),
+					ghttp.RespondWithJSONEncoded(responseStatusCode, response),
 				),
 			)
+		})
 
-			eulasCommand := commands.EULAsCommand{}
-
-			err := eulasCommand.Execute(nil)
+		It("lists all EULAs", func() {
+			err := command.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
 
 			var returnedEULAs []pivnet.EULA
@@ -78,24 +97,45 @@ var _ = Describe("eula commands", func() {
 
 			Expect(returnedEULAs).To(Equal(eulas))
 		})
+
+		Context("when there is an error", func() {
+			BeforeEach(func() {
+				responseStatusCode = http.StatusTeapot
+			})
+
+			It("invokes the error handler", func() {
+				err := command.Execute(nil)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+			})
+		})
 	})
 
 	Describe("EULACommand", func() {
-		It("shows EULA", func() {
-			eulaResponse := eulas[0]
+		var (
+			command commands.EULACommand
+		)
 
+		BeforeEach(func() {
+			response = eulas[0]
+
+			command = commands.EULACommand{
+				EULASlug: eulas[0].Slug,
+			}
+		})
+
+		JustBeforeEach(func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/eulas/%s", apiPrefix, eulas[0].Slug)),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, eulaResponse),
+					ghttp.RespondWithJSONEncoded(responseStatusCode, response),
 				),
 			)
+		})
 
-			eulaCommand := commands.EULACommand{
-				EULASlug: eulas[0].Slug,
-			}
-
-			err := eulaCommand.Execute(nil)
+		It("shows EULA", func() {
+			err := command.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
 
 			var returnedEULA pivnet.EULA
@@ -104,6 +144,19 @@ var _ = Describe("eula commands", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(returnedEULA).To(Equal(eulas[0]))
+		})
+
+		Context("when there is an error", func() {
+			BeforeEach(func() {
+				responseStatusCode = http.StatusTeapot
+			})
+
+			It("invokes the error handler", func() {
+				err := command.Execute(nil)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+			})
 		})
 
 		Describe("EULASlug flag", func() {
@@ -122,8 +175,21 @@ var _ = Describe("eula commands", func() {
 	})
 
 	Describe("AcceptEULACommand", func() {
-		It("accepts EULA", func() {
-			releases := []pivnet.Release{
+		const (
+			productSlug = "some-product-slug"
+		)
+
+		var (
+			releases []pivnet.Release
+			command  commands.AcceptEULACommand
+		)
+
+		BeforeEach(func() {
+			response = pivnet.EULAAcceptanceResponse{
+				AcceptedAt: "now",
+			}
+
+			releases = []pivnet.Release{
 				{
 					ID:          1234,
 					Version:     "version 0.2.3",
@@ -136,11 +202,16 @@ var _ = Describe("eula commands", func() {
 				},
 			}
 
+			command = commands.AcceptEULACommand{
+				ProductSlug:    productSlug,
+				ReleaseVersion: releases[0].Version,
+			}
+		})
+
+		JustBeforeEach(func() {
 			releasesResponse := pivnet.ReleasesResponse{
 				Releases: releases,
 			}
-
-			productSlug := "some-product-slug"
 
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
@@ -151,10 +222,6 @@ var _ = Describe("eula commands", func() {
 					ghttp.RespondWithJSONEncoded(http.StatusOK, releasesResponse),
 				),
 			)
-
-			eulaAcceptanceResponse := pivnet.EULAAcceptanceResponse{
-				AcceptedAt: "now",
-			}
 
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
@@ -167,17 +234,27 @@ var _ = Describe("eula commands", func() {
 							releases[0].ID,
 						),
 					),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, eulaAcceptanceResponse),
+					ghttp.RespondWithJSONEncoded(responseStatusCode, response),
 				),
 			)
+		})
 
-			acceptEULACommand := commands.AcceptEULACommand{
-				ProductSlug:    productSlug,
-				ReleaseVersion: releases[0].Version,
-			}
-
-			err := acceptEULACommand.Execute(nil)
+		It("accepts EULA", func() {
+			err := command.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Context("when there is an error", func() {
+			BeforeEach(func() {
+				responseStatusCode = http.StatusTeapot
+			})
+
+			It("invokes the error handler", func() {
+				err := command.Execute(nil)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+			})
 		})
 
 		Describe("ProductSlug flag", func() {
