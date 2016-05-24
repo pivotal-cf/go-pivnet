@@ -10,6 +10,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/pivotal-cf-experimental/go-pivnet"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands"
+	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
 
 	"github.com/onsi/gomega/ghttp"
 )
@@ -30,6 +31,7 @@ var _ = Describe("release types commands", func() {
 
 		outBuffer = bytes.Buffer{}
 		commands.OutputWriter = &outBuffer
+		commands.Printer = printer.NewPrinter(commands.OutputWriter)
 
 		releaseTypes = []string{
 			"release type 1",

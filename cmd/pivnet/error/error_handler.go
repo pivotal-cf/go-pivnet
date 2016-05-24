@@ -22,6 +22,10 @@ func NewErrorHandler(format string, printer printer.Printer) ErrorHandler {
 }
 
 func (h errorHandler) HandleError(err error) error {
+	if err == nil {
+		return nil
+	}
+
 	var message string
 
 	switch err.(type) {
@@ -29,12 +33,11 @@ func (h errorHandler) HandleError(err error) error {
 		message = "Please log in first"
 	case pivnet.ErrNotFound:
 		message = "Not found"
+	default:
+		message = err.Error()
 	}
 
 	switch h.format {
-	case printer.PrintAsTable:
-		h.printer.Println(message)
-		return err
 	case printer.PrintAsJSON:
 		e := h.printer.PrintJSON(message)
 		if e != nil {
@@ -46,6 +49,9 @@ func (h errorHandler) HandleError(err error) error {
 		if e != nil {
 			return e
 		}
+		return err
+	default:
+		h.printer.Println(message)
 		return err
 	}
 

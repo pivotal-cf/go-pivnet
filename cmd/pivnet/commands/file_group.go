@@ -33,14 +33,14 @@ func (command *FileGroupsCommand) Execute([]string) error {
 			command.ProductSlug,
 		)
 		if err != nil {
-			return err
+			return ErrorHandler.HandleError(err)
 		}
 		return printFileGroups(fileGroups)
 	}
 
 	releases, err := client.Releases.List(command.ProductSlug)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	var release pivnet.Release
@@ -60,7 +60,7 @@ func (command *FileGroupsCommand) Execute([]string) error {
 		release.ID,
 	)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	return printFileGroups(fileGroups)
@@ -110,7 +110,7 @@ func (command *FileGroupCommand) Execute([]string) error {
 		command.FileGroupID,
 	)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	return printFileGroup(fileGroup)
@@ -158,7 +158,7 @@ func (command *DeleteFileGroupCommand) Execute([]string) error {
 		command.FileGroupID,
 	)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	if Pivnet.Format == printer.PrintAsTable {
@@ -170,5 +170,5 @@ func (command *DeleteFileGroupCommand) Execute([]string) error {
 		)
 	}
 
-	return err
+	return ErrorHandler.HandleError(err)
 }

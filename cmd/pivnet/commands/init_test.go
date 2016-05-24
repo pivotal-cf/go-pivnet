@@ -1,7 +1,6 @@
 package commands_test
 
 import (
-	"os"
 	"reflect"
 	"testing"
 
@@ -22,7 +21,6 @@ func TestCommands(t *testing.T) {
 }
 
 var _ = BeforeSuite(func() {
-	commands.OutputWriter = os.Stdout
 	commands.Pivnet = commands.PivnetCommand{
 		Format:   printer.PrintAsJSON,
 		APIToken: apiToken,

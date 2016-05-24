@@ -25,7 +25,7 @@ func (command *EULAsCommand) Execute([]string) error {
 	client := NewClient()
 	eulas, err := client.EULA.List()
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	return printEULAs(eulas)
@@ -90,7 +90,7 @@ func (command *AcceptEULACommand) Execute([]string) error {
 
 	releases, err := client.Releases.List(command.ProductSlug)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	var release pivnet.Release
@@ -107,7 +107,7 @@ func (command *AcceptEULACommand) Execute([]string) error {
 
 	err = client.EULA.Accept(command.ProductSlug, release.ID)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	if Pivnet.Format == printer.PrintAsTable {

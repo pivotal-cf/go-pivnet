@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/jessevdk/go-flags"
@@ -31,6 +32,17 @@ func main() {
 			helpParser.WriteHelp(os.Stderr)
 			os.Exit(0)
 		}
+
+		// Do not consider the built-in help an error
+		if e, ok := err.(*flags.Error); ok {
+			if e.Type == flags.ErrHelp {
+				fmt.Fprintln(os.Stderr, err.Error())
+				os.Exit(0)
+			}
+		}
+
+		// We have already printed the error by the time we get here,
+		// do not print it again - just exit
 		os.Exit(1)
 	}
 }

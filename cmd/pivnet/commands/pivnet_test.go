@@ -11,6 +11,7 @@ import (
 	"github.com/onsi/gomega/ghttp"
 	"github.com/pivotal-cf-experimental/go-pivnet"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands"
+	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
 )
 
 var _ = Describe("Pivnet commands", func() {
@@ -34,6 +35,7 @@ var _ = Describe("Pivnet commands", func() {
 
 			outBuffer = bytes.Buffer{}
 			commands.LogWriter = &outBuffer
+			commands.Printer = printer.NewPrinter(commands.OutputWriter)
 
 			client = commands.NewClient()
 

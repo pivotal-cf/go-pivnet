@@ -17,7 +17,7 @@ const (
 type Printer interface {
 	PrintYAML(interface{}) error
 	PrintJSON(interface{}) error
-	Println(message string)
+	Println(message string) error
 }
 
 type printer struct {
@@ -37,8 +37,8 @@ func (p printer) PrintYAML(object interface{}) error {
 	}
 
 	output := fmt.Sprintf("---\n%s\n", string(b))
-	p.writer.Write([]byte(output))
-	return nil
+	_, err = p.writer.Write([]byte(output))
+	return err
 }
 
 func (p printer) PrintJSON(object interface{}) error {
@@ -47,9 +47,10 @@ func (p printer) PrintJSON(object interface{}) error {
 		return err
 	}
 
-	p.writer.Write(b)
-	return nil
+	_, err = p.writer.Write(b)
+	return err
 }
-func (p printer) Println(message string) {
-	p.writer.Write([]byte(fmt.Sprintln(message)))
+func (p printer) Println(message string) error {
+	_, err := p.writer.Write([]byte(fmt.Sprintln(message)))
+	return err
 }
