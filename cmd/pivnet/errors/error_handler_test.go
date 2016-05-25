@@ -3,6 +3,7 @@ package errors_test
 import (
 	"bytes"
 	"fmt"
+	"net/http"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -119,6 +120,24 @@ var _ = Describe("ErrorHandler", func() {
 				_ = errorHandler.HandleError(inputErr)
 
 				Expect(outWriter.String()).To(Equal(fmt.Sprintln("Pivnet error: something not found")))
+			})
+		})
+
+		Describe("pivnet.ErrPivnetOther", func() {
+			BeforeEach(func() {
+				inputErr = pivnet.ErrPivnetOther{
+					ResponseCode: http.StatusTeapot,
+					Message:      "something is wrong",
+					Errors:       []string{"err1", "err2"},
+				}
+			})
+
+			It("retuns custom message", func() {
+				_ = errorHandler.HandleError(inputErr)
+
+				Expect(outWriter.String()).To(ContainSubstring("418 - something is wrong"))
+				Expect(outWriter.String()).To(ContainSubstring("err1"))
+				Expect(outWriter.String()).To(ContainSubstring("err2"))
 			})
 		})
 	})

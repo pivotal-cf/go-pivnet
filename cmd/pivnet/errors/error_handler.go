@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/fatih/color"
 	"github.com/pivotal-cf-experimental/go-pivnet"
@@ -51,6 +52,21 @@ func (h errorHandler) HandleError(err error) error {
 		message = fmt.Sprintf("Failed to authenticate - please provide valid API token")
 	case pivnet.ErrNotFound:
 		message = fmt.Sprintf("Pivnet error: %s", err.Error())
+	case pivnet.ErrPivnetOther:
+		e := err.(pivnet.ErrPivnetOther)
+
+		var errorMessages []string
+		for _, pivErr := range e.Errors {
+			errorMessages = append(errorMessages, fmt.Sprintln("- ", pivErr))
+		}
+
+		message = fmt.Sprintf(
+			"Pivnet returned %d - %s.%s%s",
+			e.ResponseCode,
+			e.Message,
+			fmt.Sprintln(),
+			strings.Join(errorMessages, ""),
+		)
 	default:
 		message = err.Error()
 	}
