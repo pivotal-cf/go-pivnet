@@ -257,7 +257,7 @@ func (command *RemoveProductFileCommand) Execute([]string) error {
 		command.ProductFileID,
 	)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	if Pivnet.Format == printer.PrintAsTable {
@@ -281,7 +281,7 @@ func (command *DeleteProductFileCommand) Execute([]string) error {
 		command.ProductFileID,
 	)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	if Pivnet.Format == printer.PrintAsTable {
