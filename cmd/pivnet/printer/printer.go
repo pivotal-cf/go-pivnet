@@ -32,7 +32,21 @@ func NewPrinter(writer io.Writer) Printer {
 	}
 }
 
-func (p printer) PrintYAML(object interface{}) error {
+func (p printer) PrintYAML(object interface{}) (err error) {
+	// We have to do the recovery ourselves here because go-yaml panics
+	// when it fails to marshal, unlike JSON which returns an error.
+	// This logic is heavily inspired by the equivalent in the
+	// json package in the standard library.
+	defer func() {
+		if r := recover(); r != nil {
+			if rString, ok := r.(string); ok {
+				err = fmt.Errorf(rString)
+				return
+			}
+			panic(r)
+		}
+	}()
+
 	b, err := yaml.Marshal(object)
 	if err != nil {
 		return err
@@ -52,6 +66,7 @@ func (p printer) PrintJSON(object interface{}) error {
 	_, err = p.writer.Write(b)
 	return err
 }
+
 func (p printer) Println(message string) error {
 	_, err := p.writer.Write([]byte(fmt.Sprintln(message)))
 	return err

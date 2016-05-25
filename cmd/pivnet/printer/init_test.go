@@ -1,4 +1,4 @@
-package errors_test
+package printer_test
 
 import (
 	"testing"
@@ -9,7 +9,7 @@ import (
 
 const ()
 
-func TestErrors(t *testing.T) {
+func TestPrinter(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Errors Suite")
+	RunSpecs(t, "Printer Suite")
 }
