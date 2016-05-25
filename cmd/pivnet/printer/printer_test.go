@@ -13,13 +13,13 @@ var _ = Describe("Printer", func() {
 	var (
 		p printer.Printer
 
-		w *bytes.Buffer
+		outputWriter *bytes.Buffer
 	)
 
 	BeforeEach(func() {
-		w = &bytes.Buffer{}
+		outputWriter = &bytes.Buffer{}
 
-		p = printer.NewPrinter(w)
+		p = printer.NewPrinter(outputWriter)
 	})
 
 	Describe("Println", func() {
@@ -28,7 +28,7 @@ var _ = Describe("Printer", func() {
 
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(w.String()).To(Equal("some message\n"))
+			Expect(outputWriter.String()).To(Equal("some message\n"))
 		})
 
 		Context("when writing fails", func() {
@@ -61,7 +61,7 @@ var _ = Describe("Printer", func() {
 }
 `
 
-			Expect(w.String()).To(MatchJSON(expectedString))
+			Expect(outputWriter.String()).To(MatchJSON(expectedString))
 		})
 
 		Context("when marshalling the object fails", func() {
@@ -104,7 +104,7 @@ foo: "foo val"
 bar: 1234
 `
 
-			Expect(w.String()).To(MatchYAML(expectedString))
+			Expect(outputWriter.String()).To(MatchYAML(expectedString))
 		})
 
 		Context("when marshalling the object fails", func() {

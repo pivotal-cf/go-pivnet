@@ -23,12 +23,12 @@ type Printer interface {
 }
 
 type printer struct {
-	writer io.Writer
+	outputWriter io.Writer
 }
 
-func NewPrinter(writer io.Writer) Printer {
+func NewPrinter(outputWriter io.Writer) Printer {
 	return &printer{
-		writer: writer,
+		outputWriter: outputWriter,
 	}
 }
 
@@ -53,7 +53,7 @@ func (p printer) PrintYAML(object interface{}) (err error) {
 	}
 
 	output := fmt.Sprintf("---\n%s\n", string(b))
-	_, err = p.writer.Write([]byte(output))
+	_, err = p.outputWriter.Write([]byte(output))
 	return err
 }
 
@@ -63,11 +63,11 @@ func (p printer) PrintJSON(object interface{}) error {
 		return err
 	}
 
-	_, err = p.writer.Write(b)
+	_, err = p.outputWriter.Write(b)
 	return err
 }
 
 func (p printer) Println(message string) error {
-	_, err := p.writer.Write([]byte(fmt.Sprintln(message)))
+	_, err := p.outputWriter.Write([]byte(fmt.Sprintln(message)))
 	return err
 }

@@ -94,14 +94,6 @@ func NewClient() pivnet.Client {
 		OutputWriter = os.Stdout
 	}
 
-	if Printer == nil {
-		Printer = printer.NewPrinter(OutputWriter)
-	}
-
-	if ErrorHandler == nil {
-		ErrorHandler = errors.NewErrorHandler(Pivnet.Format, Printer)
-	}
-
 	if LogWriter == nil {
 		switch Pivnet.Format {
 		case printer.PrintAsJSON, printer.PrintAsYAML:
@@ -110,6 +102,14 @@ func NewClient() pivnet.Client {
 		default:
 			LogWriter = os.Stdout
 		}
+	}
+
+	if ErrorHandler == nil {
+		ErrorHandler = errors.NewErrorHandler(Pivnet.Format, OutputWriter, LogWriter)
+	}
+
+	if Printer == nil {
+		Printer = printer.NewPrinter(OutputWriter)
 	}
 
 	l := lager.NewLogger("pivnet CLI")

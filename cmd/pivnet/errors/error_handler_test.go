@@ -1,6 +1,7 @@
 package errors_test
 
 import (
+	"bytes"
 	"fmt"
 
 	. "github.com/onsi/ginkgo"
@@ -8,23 +9,34 @@ import (
 	"github.com/pivotal-cf-experimental/go-pivnet"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errors"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer/printerfakes"
 )
 
 var _ = Describe("ErrorHandler", func() {
 	var (
-		fakePrinter *printerfakes.FakePrinter
-
 		errorHandler errors.ErrorHandler
-		inputErr     error
+
+		format    string
+		outWriter *bytes.Buffer
+		logWriter *bytes.Buffer
+
+		inputErr error
 	)
 
 	BeforeEach(func() {
-		fakePrinter = &printerfakes.FakePrinter{}
+		outWriter = &bytes.Buffer{}
+		logWriter = &bytes.Buffer{}
 
-		errorHandler = errors.NewErrorHandler(printer.PrintAsTable, fakePrinter)
+		format = printer.PrintAsTable
 
 		inputErr = fmt.Errorf("some error")
+	})
+
+	JustBeforeEach(func() {
+		errorHandler = errors.NewErrorHandler(
+			format,
+			outWriter,
+			logWriter,
+		)
 	})
 
 	It("returns ErrAlreadyHandled", func() {
@@ -33,10 +45,10 @@ var _ = Describe("ErrorHandler", func() {
 		Expect(err).To(Equal(errors.ErrAlreadyHandled))
 	})
 
-	It("writes to printer", func() {
+	It("writes to outWriter", func() {
 		_ = errorHandler.HandleError(inputErr)
 
-		Expect(fakePrinter.PrintlnCallCount()).To(Equal(1))
+		Expect(outWriter.String()).To(Equal(fmt.Sprintln("some error")))
 	})
 
 	Context("when the error is nil", func() {
@@ -53,33 +65,32 @@ var _ = Describe("ErrorHandler", func() {
 		It("does not write to printer", func() {
 			_ = errorHandler.HandleError(nil)
 
-			Expect(fakePrinter.PrintlnCallCount()).To(Equal(0))
-			Expect(fakePrinter.PrintJSONCallCount()).To(Equal(0))
-			Expect(fakePrinter.PrintJSONCallCount()).To(Equal(0))
+			Expect(outWriter.String()).To(BeEmpty())
+			Expect(logWriter.String()).To(BeEmpty())
 		})
 	})
 
 	Describe("print as JSON", func() {
 		BeforeEach(func() {
-			errorHandler = errors.NewErrorHandler(printer.PrintAsJSON, fakePrinter)
+			format = printer.PrintAsJSON
 		})
 
-		It("writes to printer", func() {
+		It("writes to logWriter", func() {
 			_ = errorHandler.HandleError(inputErr)
 
-			Expect(fakePrinter.PrintJSONCallCount()).To(Equal(1))
+			Expect(logWriter.String()).To(Equal(fmt.Sprintln("some error")))
 		})
 	})
 
 	Describe("print as YAML", func() {
 		BeforeEach(func() {
-			errorHandler = errors.NewErrorHandler(printer.PrintAsYAML, fakePrinter)
+			format = printer.PrintAsYAML
 		})
 
-		It("writes to printer", func() {
+		It("writes to logWriter", func() {
 			_ = errorHandler.HandleError(inputErr)
 
-			Expect(fakePrinter.PrintYAMLCallCount()).To(Equal(1))
+			Expect(logWriter.String()).To(Equal(fmt.Sprintln("some error")))
 		})
 	})
 
@@ -92,8 +103,7 @@ var _ = Describe("ErrorHandler", func() {
 			It("retuns custom message", func() {
 				_ = errorHandler.HandleError(inputErr)
 
-				Expect(fakePrinter.PrintlnCallCount()).To(Equal(1))
-				Expect(fakePrinter.PrintlnArgsForCall(0)).To(Equal("Failed to authenticate - please provide valid API token"))
+				Expect(outWriter.String()).To(Equal(fmt.Sprintln("Failed to authenticate - please provide valid API token")))
 			})
 		})
 
@@ -108,8 +118,7 @@ var _ = Describe("ErrorHandler", func() {
 			It("retuns custom message", func() {
 				_ = errorHandler.HandleError(inputErr)
 
-				Expect(fakePrinter.PrintlnCallCount()).To(Equal(1))
-				Expect(fakePrinter.PrintlnArgsForCall(0)).To(Equal("Pivnet error: something not found"))
+				Expect(outWriter.String()).To(Equal(fmt.Sprintln("Pivnet error: something not found")))
 			})
 		})
 	})
