@@ -11,6 +11,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/pivotal-cf-experimental/go-pivnet"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands"
+	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errors/errorsfakes"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
 
 	"github.com/onsi/gomega/ghttp"
@@ -20,6 +21,8 @@ var _ = Describe("release commands", func() {
 	var (
 		server *ghttp.Server
 
+		fakeErrorHandler *errorsfakes.FakeErrorHandler
+
 		field     reflect.StructField
 		outBuffer bytes.Buffer
 
@@ -27,6 +30,9 @@ var _ = Describe("release commands", func() {
 
 		release  pivnet.Release
 		releases []pivnet.Release
+
+		responseStatusCode int
+		response           interface{}
 	)
 
 	BeforeEach(func() {
@@ -37,6 +43,9 @@ var _ = Describe("release commands", func() {
 		outBuffer = bytes.Buffer{}
 		commands.OutputWriter = &outBuffer
 		commands.Printer = printer.NewPrinter(commands.OutputWriter)
+
+		fakeErrorHandler = &errorsfakes.FakeErrorHandler{}
+		commands.ErrorHandler = fakeErrorHandler
 
 		productSlug = "some-product-slug"
 
@@ -59,23 +68,33 @@ var _ = Describe("release commands", func() {
 	})
 
 	Describe("ReleasesCommand", func() {
-		It("lists all releases for the provided product slug", func() {
-			releasesResponse := pivnet.ReleasesResponse{
-				Releases: releases,
-			}
+		var (
+			command commands.ReleasesCommand
+		)
 
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/%s/releases", apiPrefix, productSlug)),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, releasesResponse),
-				),
-			)
+		BeforeEach(func() {
+			responseStatusCode = http.StatusOK
 
-			releasesCommand := commands.ReleasesCommand{
+			command = commands.ReleasesCommand{
 				ProductSlug: productSlug,
 			}
 
-			err := releasesCommand.Execute(nil)
+			response = pivnet.ReleasesResponse{
+				Releases: releases,
+			}
+		})
+
+		JustBeforeEach(func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/%s/releases", apiPrefix, productSlug)),
+					ghttp.RespondWithJSONEncoded(responseStatusCode, response),
+				),
+			)
+		})
+
+		It("lists all releases for the provided product slug", func() {
+			err := command.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
 
 			var returnedReleases []pivnet.Release
@@ -84,6 +103,19 @@ var _ = Describe("release commands", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(returnedReleases).To(Equal(releases))
+		})
+
+		Context("when there is an error", func() {
+			BeforeEach(func() {
+				responseStatusCode = http.StatusTeapot
+			})
+
+			It("invokes the error handler", func() {
+				err := command.Execute(nil)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+			})
 		})
 
 		Describe("ProductSlug flag", func() {
@@ -106,7 +138,22 @@ var _ = Describe("release commands", func() {
 	})
 
 	Describe("ReleaseCommand", func() {
-		It("shows release for the provided product slug and release version", func() {
+		var (
+			command commands.ReleaseCommand
+		)
+
+		BeforeEach(func() {
+			responseStatusCode = http.StatusOK
+
+			command = commands.ReleaseCommand{
+				ProductSlug:    productSlug,
+				ReleaseVersion: release.Version,
+			}
+
+			response = release
+		})
+
+		JustBeforeEach(func() {
 			releasesResponse := pivnet.ReleasesResponse{
 				Releases: releases,
 			}
@@ -118,13 +165,11 @@ var _ = Describe("release commands", func() {
 				),
 			)
 
-			releaseResponse := release
-
 			// Once for the release itself
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/%s/releases/%d", apiPrefix, productSlug, release.ID)),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, releaseResponse),
+					ghttp.RespondWithJSONEncoded(responseStatusCode, response),
 				),
 			)
 
@@ -136,16 +181,13 @@ var _ = Describe("release commands", func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/%s/releases/%d", apiPrefix, productSlug, release.ID)),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, releaseResponse, etagHeader),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, response, etagHeader),
 				),
 			)
+		})
 
-			releaseCommand := commands.ReleaseCommand{
-				ProductSlug:    productSlug,
-				ReleaseVersion: release.Version,
-			}
-
-			err := releaseCommand.Execute(nil)
+		It("shows release for the provided product slug and release version", func() {
+			err := command.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
 
 			var returnedRelease commands.CLIRelease
@@ -156,6 +198,19 @@ var _ = Describe("release commands", func() {
 			Expect(returnedRelease.ID).To(Equal(release.ID))
 			Expect(returnedRelease.Version).To(Equal(release.Version))
 			Expect(returnedRelease.ETag).To(Equal("some-etag"))
+		})
+
+		Context("when there is an error", func() {
+			BeforeEach(func() {
+				responseStatusCode = http.StatusTeapot
+			})
+
+			It("invokes the error handler", func() {
+				err := command.Execute(nil)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+			})
 		})
 
 		Describe("ProductSlug flag", func() {
@@ -196,7 +251,22 @@ var _ = Describe("release commands", func() {
 	})
 
 	Describe("DeleteReleaseCommand", func() {
-		It("deletes release for the provided product slug and release version", func() {
+		var (
+			command commands.DeleteReleaseCommand
+		)
+
+		BeforeEach(func() {
+			responseStatusCode = http.StatusNoContent
+
+			command = commands.DeleteReleaseCommand{
+				ProductSlug:    productSlug,
+				ReleaseVersion: release.Version,
+			}
+
+			response = release
+		})
+
+		JustBeforeEach(func() {
 			releasesResponse := pivnet.ReleasesResponse{
 				Releases: releases,
 			}
@@ -208,22 +278,30 @@ var _ = Describe("release commands", func() {
 				),
 			)
 
-			releaseResponse := release
-
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("DELETE", fmt.Sprintf("%s/products/%s/releases/%d", apiPrefix, productSlug, release.ID)),
-					ghttp.RespondWithJSONEncoded(http.StatusNoContent, releaseResponse),
+					ghttp.RespondWithJSONEncoded(responseStatusCode, response),
 				),
 			)
+		})
 
-			deleteReleaseCommand := commands.DeleteReleaseCommand{
-				ProductSlug:    productSlug,
-				ReleaseVersion: release.Version,
-			}
-
-			err := deleteReleaseCommand.Execute(nil)
+		It("deletes release for the provided product slug and release version", func() {
+			err := command.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Context("when there is an error", func() {
+			BeforeEach(func() {
+				responseStatusCode = http.StatusTeapot
+			})
+
+			It("invokes the error handler", func() {
+				err := command.Execute(nil)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+			})
 		})
 
 		Describe("ProductSlug flag", func() {

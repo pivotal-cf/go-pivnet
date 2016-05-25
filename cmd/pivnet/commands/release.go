@@ -28,7 +28,7 @@ func (command *ReleasesCommand) Execute([]string) error {
 	client := NewClient()
 	releases, err := client.Releases.List(command.ProductSlug)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	switch Pivnet.Format {
@@ -73,7 +73,7 @@ func (command *ReleaseCommand) Execute([]string) error {
 
 	release, err := client.Releases.Get(command.ProductSlug, foundRelease.ID)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	extendedClient := extension.NewExtendedClient(client, Pivnet.Logger)
@@ -127,7 +127,7 @@ func (command *DeleteReleaseCommand) Execute([]string) error {
 
 	err = client.Releases.Delete(release, command.ProductSlug)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	if Pivnet.Format == printer.PrintAsTable {
