@@ -31,6 +31,9 @@ var _ = Describe("release commands", func() {
 		release  pivnet.Release
 		releases []pivnet.Release
 
+		releasesResponseStatusCode int
+		releasesResponse           pivnet.ReleasesResponse
+
 		responseStatusCode int
 		response           interface{}
 	)
@@ -61,6 +64,14 @@ var _ = Describe("release commands", func() {
 				Version: "another-release-version",
 			},
 		}
+
+		releasesResponseStatusCode = http.StatusOK
+
+		releasesResponse = pivnet.ReleasesResponse{
+			Releases: releases,
+		}
+
+		responseStatusCode = http.StatusOK
 	})
 
 	AfterEach(func() {
@@ -73,8 +84,6 @@ var _ = Describe("release commands", func() {
 		)
 
 		BeforeEach(func() {
-			responseStatusCode = http.StatusOK
-
 			command = commands.ReleasesCommand{
 				ProductSlug: productSlug,
 			}
@@ -140,28 +149,26 @@ var _ = Describe("release commands", func() {
 	Describe("ReleaseCommand", func() {
 		var (
 			command commands.ReleaseCommand
+
+			releaseEtagResponseStatusCode int
 		)
 
 		BeforeEach(func() {
-			responseStatusCode = http.StatusOK
-
 			command = commands.ReleaseCommand{
 				ProductSlug:    productSlug,
 				ReleaseVersion: release.Version,
 			}
 
 			response = release
+
+			releaseEtagResponseStatusCode = http.StatusOK
 		})
 
 		JustBeforeEach(func() {
-			releasesResponse := pivnet.ReleasesResponse{
-				Releases: releases,
-			}
-
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/%s/releases", apiPrefix, productSlug)),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, releasesResponse),
+					ghttp.RespondWithJSONEncoded(releasesResponseStatusCode, releasesResponse),
 				),
 			)
 
@@ -181,7 +188,7 @@ var _ = Describe("release commands", func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/%s/releases/%d", apiPrefix, productSlug, release.ID)),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, response, etagHeader),
+					ghttp.RespondWithJSONEncoded(releaseEtagResponseStatusCode, response, etagHeader),
 				),
 			)
 		})
@@ -203,6 +210,32 @@ var _ = Describe("release commands", func() {
 		Context("when there is an error", func() {
 			BeforeEach(func() {
 				responseStatusCode = http.StatusTeapot
+			})
+
+			It("invokes the error handler", func() {
+				err := command.Execute(nil)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+			})
+		})
+
+		Context("when there is an error getting all releases", func() {
+			BeforeEach(func() {
+				releasesResponseStatusCode = http.StatusTeapot
+			})
+
+			It("invokes the error handler", func() {
+				err := command.Execute(nil)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+			})
+		})
+
+		Context("when there is an error getting the release etag", func() {
+			BeforeEach(func() {
+				releaseEtagResponseStatusCode = http.StatusTeapot
 			})
 
 			It("invokes the error handler", func() {
@@ -274,7 +307,7 @@ var _ = Describe("release commands", func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/%s/releases", apiPrefix, productSlug)),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, releasesResponse),
+					ghttp.RespondWithJSONEncoded(releasesResponseStatusCode, releasesResponse),
 				),
 			)
 
@@ -294,6 +327,19 @@ var _ = Describe("release commands", func() {
 		Context("when there is an error", func() {
 			BeforeEach(func() {
 				responseStatusCode = http.StatusTeapot
+			})
+
+			It("invokes the error handler", func() {
+				err := command.Execute(nil)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+			})
+		})
+
+		Context("when there is an error getting all releases", func() {
+			BeforeEach(func() {
+				releasesResponseStatusCode = http.StatusTeapot
 			})
 
 			It("invokes the error handler", func() {

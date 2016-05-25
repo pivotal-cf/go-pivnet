@@ -35,6 +35,9 @@ var _ = Describe("user group commands", func() {
 
 		responseStatusCode int
 		response           interface{}
+
+		releasesResponseStatusCode int
+		releasesResponse           pivnet.ReleasesResponse
 	)
 
 	BeforeEach(func() {
@@ -75,6 +78,14 @@ var _ = Describe("user group commands", func() {
 		}
 
 		productSlug = "some-fake-product-slug"
+
+		releasesResponseStatusCode = http.StatusOK
+
+		releasesResponse = pivnet.ReleasesResponse{
+			Releases: releases,
+		}
+
+		responseStatusCode = http.StatusOK
 	})
 
 	AfterEach(func() {
@@ -165,7 +176,7 @@ var _ = Describe("user group commands", func() {
 							apiPrefix,
 							productSlug,
 						)),
-						ghttp.RespondWithJSONEncoded(http.StatusOK, releasesResponse),
+						ghttp.RespondWithJSONEncoded(releasesResponseStatusCode, releasesResponse),
 					),
 				)
 
@@ -197,6 +208,19 @@ var _ = Describe("user group commands", func() {
 			Context("when there is an error", func() {
 				BeforeEach(func() {
 					responseStatusCode = http.StatusTeapot
+				})
+
+				It("invokes the error handler", func() {
+					err := command.Execute(nil)
+					Expect(err).NotTo(HaveOccurred())
+
+					Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				})
+			})
+
+			Context("when there is an error getting all releases", func() {
+				BeforeEach(func() {
+					releasesResponseStatusCode = http.StatusTeapot
 				})
 
 				It("invokes the error handler", func() {
@@ -427,6 +451,8 @@ var _ = Describe("user group commands", func() {
 			name        *string
 			description *string
 
+			userGroupsResponseStatusCode int
+
 			updatedUserGroup           pivnet.UserGroup
 			updateUserGroupRequestBody string
 
@@ -439,15 +465,6 @@ var _ = Describe("user group commands", func() {
 
 			name = &nameVal
 			description = &descriptionVal
-
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(
-						"GET",
-						fmt.Sprintf("%s/user_groups/%d", apiPrefix, userGroups[0].ID)),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, userGroups[0]),
-				),
-			)
 
 			updateUserGroupRequestBody = fmt.Sprintf(
 				`{"user_group":{"name":"%s","description":"%s"}}`,
@@ -465,13 +482,24 @@ var _ = Describe("user group commands", func() {
 				Description: description,
 			}
 
-			responseStatusCode = http.StatusOK
-		})
+			userGroupsResponseStatusCode = http.StatusOK
 
-		JustBeforeEach(func() {
+			responseStatusCode = http.StatusOK
+
 			response = pivnet.UpdateUserGroupResponse{
 				updatedUserGroup,
 			}
+		})
+
+		JustBeforeEach(func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf("%s/user_groups/%d", apiPrefix, userGroups[0].ID)),
+					ghttp.RespondWithJSONEncoded(userGroupsResponseStatusCode, userGroups[0]),
+				),
+			)
 
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
@@ -497,6 +525,19 @@ var _ = Describe("user group commands", func() {
 		Context("when there is an error", func() {
 			BeforeEach(func() {
 				responseStatusCode = http.StatusTeapot
+			})
+
+			It("invokes the error handler", func() {
+				err := command.Execute(nil)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+			})
+		})
+
+		Context("when there is an error getting all user groups", func() {
+			BeforeEach(func() {
+				userGroupsResponseStatusCode = http.StatusTeapot
 			})
 
 			It("invokes the error handler", func() {
@@ -586,14 +627,10 @@ var _ = Describe("user group commands", func() {
 		})
 
 		JustBeforeEach(func() {
-			releasesResponse := pivnet.ReleasesResponse{
-				Releases: releases,
-			}
-
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/%s/releases", apiPrefix, productSlug)),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, releasesResponse),
+					ghttp.RespondWithJSONEncoded(releasesResponseStatusCode, releasesResponse),
 				),
 			)
 
@@ -621,6 +658,19 @@ var _ = Describe("user group commands", func() {
 		Context("when there is an error", func() {
 			BeforeEach(func() {
 				responseStatusCode = http.StatusTeapot
+			})
+
+			It("invokes the error handler", func() {
+				err := command.Execute(nil)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+			})
+		})
+
+		Context("when there is an error getting all releases", func() {
+			BeforeEach(func() {
+				releasesResponseStatusCode = http.StatusTeapot
 			})
 
 			It("invokes the error handler", func() {
@@ -698,14 +748,10 @@ var _ = Describe("user group commands", func() {
 		})
 
 		JustBeforeEach(func() {
-			releasesResponse := pivnet.ReleasesResponse{
-				Releases: releases,
-			}
-
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/%s/releases", apiPrefix, productSlug)),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, releasesResponse),
+					ghttp.RespondWithJSONEncoded(releasesResponseStatusCode, releasesResponse),
 				),
 			)
 
@@ -733,6 +779,19 @@ var _ = Describe("user group commands", func() {
 		Context("when there is an error", func() {
 			BeforeEach(func() {
 				responseStatusCode = http.StatusTeapot
+			})
+
+			It("invokes the error handler", func() {
+				err := command.Execute(nil)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+			})
+		})
+
+		Context("when there is an error getting all releases", func() {
+			BeforeEach(func() {
+				releasesResponseStatusCode = http.StatusTeapot
 			})
 
 			It("invokes the error handler", func() {

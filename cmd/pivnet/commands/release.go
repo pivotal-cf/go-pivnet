@@ -56,7 +56,7 @@ func (command *ReleaseCommand) Execute([]string) error {
 	client := NewClient()
 	releases, err := client.Releases.List(command.ProductSlug)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	var foundRelease pivnet.Release
@@ -79,7 +79,7 @@ func (command *ReleaseCommand) Execute([]string) error {
 	extendedClient := extension.NewExtendedClient(client, Pivnet.Logger)
 	etag, err := extendedClient.ReleaseETag(command.ProductSlug, foundRelease.ID)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	r := CLIRelease{
@@ -110,7 +110,7 @@ func (command *DeleteReleaseCommand) Execute([]string) error {
 	client := NewClient()
 	releases, err := client.Releases.List(command.ProductSlug)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	var release pivnet.Release

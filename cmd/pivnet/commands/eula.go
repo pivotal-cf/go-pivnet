@@ -117,7 +117,11 @@ func (command *AcceptEULACommand) Execute([]string) error {
 			command.ProductSlug,
 			command.ReleaseVersion,
 		)
+
+		if err != nil {
+			return err
+		}
 	}
 
-	return err
+	return nil
 }

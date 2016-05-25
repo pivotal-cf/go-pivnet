@@ -79,7 +79,7 @@ func (command *UserGroupsCommand) Execute([]string) error {
 
 	releases, err := client.Releases.List(command.ProductSlug)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	var release pivnet.Release
@@ -185,7 +185,7 @@ func (command *UpdateUserGroupCommand) Execute([]string) error {
 
 	userGroup, err := client.UserGroups.Get(command.UserGroupID)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	if command.Name != nil {
@@ -209,7 +209,7 @@ func (command *AddUserGroupCommand) Execute([]string) error {
 
 	releases, err := client.Releases.List(command.ProductSlug)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	var release pivnet.Release
@@ -251,7 +251,7 @@ func (command *RemoveUserGroupCommand) Execute([]string) error {
 
 	releases, err := client.Releases.List(command.ProductSlug)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	var release pivnet.Release

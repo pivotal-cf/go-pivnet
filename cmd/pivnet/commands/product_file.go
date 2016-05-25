@@ -53,7 +53,7 @@ func (command *ProductFilesCommand) Execute([]string) error {
 
 	releases, err := client.Releases.List(command.ProductSlug)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	var release pivnet.Release
@@ -73,7 +73,7 @@ func (command *ProductFilesCommand) Execute([]string) error {
 		release.ID,
 	)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	return printProductFiles(productFiles)
@@ -162,7 +162,7 @@ func (command *ProductFileCommand) Execute([]string) error {
 
 	releases, err := client.Releases.List(command.ProductSlug)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	var release pivnet.Release
@@ -183,7 +183,7 @@ func (command *ProductFileCommand) Execute([]string) error {
 		command.ProductFileID,
 	)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	return printProductFile(productFile)
@@ -194,7 +194,7 @@ func (command *AddProductFileCommand) Execute([]string) error {
 
 	releases, err := client.Releases.List(command.ProductSlug)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	var release pivnet.Release
@@ -236,7 +236,7 @@ func (command *RemoveProductFileCommand) Execute([]string) error {
 
 	releases, err := client.Releases.List(command.ProductSlug)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	var release pivnet.Release
@@ -268,6 +268,10 @@ func (command *RemoveProductFileCommand) Execute([]string) error {
 			command.ProductSlug,
 			command.ReleaseVersion,
 		)
+
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
