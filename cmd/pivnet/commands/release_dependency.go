@@ -36,7 +36,7 @@ func (command *ReleaseDependenciesCommand) Execute([]string) error {
 
 	releaseDependencies, err := client.ReleaseDependencies.List(command.ProductSlug, release.ID)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	switch Pivnet.Format {
