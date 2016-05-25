@@ -19,7 +19,7 @@ func (command *ProductCommand) Execute([]string) error {
 	client := NewClient()
 	product, err := client.Products.Get(command.ProductSlug)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	return printProduct(product)
@@ -74,7 +74,7 @@ func (command *ProductsCommand) Execute([]string) error {
 	client := NewClient()
 	products, err := client.Products.List()
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	return printProducts(products)

@@ -11,6 +11,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/pivotal-cf-experimental/go-pivnet"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands"
+	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errors/errorsfakes"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
 
 	"github.com/onsi/gomega/ghttp"
@@ -20,11 +21,16 @@ var _ = Describe("product commands", func() {
 	var (
 		server *ghttp.Server
 
+		fakeErrorHandler *errorsfakes.FakeErrorHandler
+
 		field     reflect.StructField
 		outBuffer bytes.Buffer
 
 		product  pivnet.Product
 		products []pivnet.Product
+
+		responseStatusCode int
+		response           interface{}
 	)
 
 	BeforeEach(func() {
@@ -35,6 +41,9 @@ var _ = Describe("product commands", func() {
 		outBuffer = bytes.Buffer{}
 		commands.OutputWriter = &outBuffer
 		commands.Printer = printer.NewPrinter(commands.OutputWriter)
+
+		fakeErrorHandler = &errorsfakes.FakeErrorHandler{}
+		commands.ErrorHandler = fakeErrorHandler
 
 		product = pivnet.Product{
 			ID:   1234,
@@ -50,6 +59,8 @@ var _ = Describe("product commands", func() {
 				Name: "another-product-name",
 			},
 		}
+
+		responseStatusCode = http.StatusOK
 	})
 
 	AfterEach(func() {
@@ -57,21 +68,29 @@ var _ = Describe("product commands", func() {
 	})
 
 	Describe("ProductsCommand", func() {
-		It("lists all products", func() {
-			productsResponse := pivnet.ProductsResponse{
+		var (
+			command commands.ProductsCommand
+		)
+
+		BeforeEach(func() {
+			response = pivnet.ProductsResponse{
 				Products: products,
 			}
 
+			command = commands.ProductsCommand{}
+		})
+
+		JustBeforeEach(func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products", apiPrefix)),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, productsResponse),
+					ghttp.RespondWithJSONEncoded(responseStatusCode, response),
 				),
 			)
+		})
 
-			productsCommand := commands.ProductsCommand{}
-
-			err := productsCommand.Execute(nil)
+		It("lists all products", func() {
+			err := command.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
 
 			var returnedProducts []pivnet.Product
@@ -81,24 +100,45 @@ var _ = Describe("product commands", func() {
 
 			Expect(returnedProducts).To(Equal(products))
 		})
+
+		Context("when there is an error", func() {
+			BeforeEach(func() {
+				responseStatusCode = http.StatusTeapot
+			})
+
+			It("invokes the error handler", func() {
+				err := command.Execute(nil)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+			})
+		})
 	})
 
 	Describe("ProductCommand", func() {
-		It("shows product", func() {
-			productResponse := product
+		var (
+			command commands.ProductCommand
+		)
 
+		BeforeEach(func() {
+			response = product
+
+			command = commands.ProductCommand{
+				ProductSlug: product.Slug,
+			}
+		})
+
+		JustBeforeEach(func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/%s", apiPrefix, product.Slug)),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, productResponse),
+					ghttp.RespondWithJSONEncoded(responseStatusCode, response),
 				),
 			)
+		})
 
-			productCommand := commands.ProductCommand{
-				ProductSlug: product.Slug,
-			}
-
-			err := productCommand.Execute(nil)
+		It("shows the product", func() {
+			err := command.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
 
 			var returnedProduct pivnet.Product
@@ -107,6 +147,19 @@ var _ = Describe("product commands", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(returnedProduct).To(Equal(product))
+		})
+
+		Context("when there is an error", func() {
+			BeforeEach(func() {
+				responseStatusCode = http.StatusTeapot
+			})
+
+			It("invokes the error handler", func() {
+				err := command.Execute(nil)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+			})
 		})
 
 		Describe("ProductSlug flag", func() {
