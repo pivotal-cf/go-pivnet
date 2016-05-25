@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/jessevdk/go-flags"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands"
+	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errors"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/version"
 )
 
@@ -41,8 +43,10 @@ func main() {
 			}
 		}
 
-		// We have already printed the error by the time we get here,
-		// do not print it again - just exit
-		os.Exit(1)
+		if err == errors.ErrAlreadyHandled {
+			os.Exit(1)
+		}
+
+		log.Fatal(err)
 	}
 }

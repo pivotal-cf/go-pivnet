@@ -1,9 +1,14 @@
 package errors
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/pivotal-cf-experimental/go-pivnet"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
 )
+
+var ErrAlreadyHandled = errors.New("error already handled")
 
 //go:generate counterfeiter . ErrorHandler
 
@@ -32,9 +37,9 @@ func (h errorHandler) HandleError(err error) error {
 
 	switch err.(type) {
 	case pivnet.ErrUnauthorized:
-		message = "Please log in first"
+		message = fmt.Sprintf("Failed to authenticate - please provide valid API token")
 	case pivnet.ErrNotFound:
-		message = "Not found"
+		message = fmt.Sprintf("Pivnet error: %s", err.Error())
 	default:
 		message = err.Error()
 	}
@@ -45,17 +50,17 @@ func (h errorHandler) HandleError(err error) error {
 		if e != nil {
 			return e
 		}
-		return err
+		return ErrAlreadyHandled
+
 	case printer.PrintAsYAML:
 		e := h.printer.PrintYAML(message)
 		if e != nil {
 			return e
 		}
-		return err
+		return ErrAlreadyHandled
+
 	default:
 		h.printer.Println(message)
-		return err
+		return ErrAlreadyHandled
 	}
-
-	return nil
 }
