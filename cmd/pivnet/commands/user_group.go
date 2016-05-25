@@ -54,7 +54,7 @@ func (command *UserGroupCommand) Execute([]string) error {
 		command.UserGroupID,
 	)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	return printUserGroup(userGroup)
@@ -67,7 +67,7 @@ func (command *UserGroupsCommand) Execute([]string) error {
 		var err error
 		userGroups, err := client.UserGroups.List()
 		if err != nil {
-			return err
+			return ErrorHandler.HandleError(err)
 		}
 
 		return printUserGroups(userGroups)
@@ -96,7 +96,7 @@ func (command *UserGroupsCommand) Execute([]string) error {
 
 	userGroups, err := client.UserGroups.ListForRelease(command.ProductSlug, release.ID)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	return printUserGroups(userGroups)
@@ -131,7 +131,7 @@ func (command *CreateUserGroupCommand) Execute([]string) error {
 
 	userGroup, err := client.UserGroups.Create(command.Name, command.Description, command.Members)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	return printUserGroup(userGroup)
@@ -166,7 +166,7 @@ func (command *DeleteUserGroupCommand) Execute([]string) error {
 
 	err := client.UserGroups.Delete(command.UserGroupID)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	if Pivnet.Format == printer.PrintAsTable {
@@ -198,7 +198,7 @@ func (command *UpdateUserGroupCommand) Execute([]string) error {
 
 	updated, err := client.UserGroups.Update(userGroup)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	return printUserGroup(updated)
@@ -230,7 +230,7 @@ func (command *AddUserGroupCommand) Execute([]string) error {
 		command.UserGroupID,
 	)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	if Pivnet.Format == printer.PrintAsTable {
@@ -272,7 +272,7 @@ func (command *RemoveUserGroupCommand) Execute([]string) error {
 		command.UserGroupID,
 	)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	if Pivnet.Format == printer.PrintAsTable {
