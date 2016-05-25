@@ -27,10 +27,10 @@ var _ = Describe("ErrorHandler", func() {
 		inputErr = fmt.Errorf("some error")
 	})
 
-	It("returns provided error", func() {
+	It("returns ErrAlreadyHandled", func() {
 		err := errorHandler.HandleError(inputErr)
 
-		Expect(err).To(Equal(inputErr))
+		Expect(err).To(Equal(errors.ErrAlreadyHandled))
 	})
 
 	It("writes to printer", func() {
@@ -93,20 +93,23 @@ var _ = Describe("ErrorHandler", func() {
 				_ = errorHandler.HandleError(inputErr)
 
 				Expect(fakePrinter.PrintlnCallCount()).To(Equal(1))
-				Expect(fakePrinter.PrintlnArgsForCall(0)).To(Equal("Please log in first"))
+				Expect(fakePrinter.PrintlnArgsForCall(0)).To(Equal("Failed to authenticate - please provide valid API token"))
 			})
 		})
 
 		Describe("pivnet.ErrNotFound", func() {
 			BeforeEach(func() {
-				inputErr = pivnet.ErrNotFound{}
+				inputErr = pivnet.ErrNotFound{
+					ResponseCode: 404,
+					Message:      "something not found",
+				}
 			})
 
 			It("retuns custom message", func() {
 				_ = errorHandler.HandleError(inputErr)
 
 				Expect(fakePrinter.PrintlnCallCount()).To(Equal(1))
-				Expect(fakePrinter.PrintlnArgsForCall(0)).To(Equal("Not found"))
+				Expect(fakePrinter.PrintlnArgsForCall(0)).To(Equal("Pivnet error: something not found"))
 			})
 		})
 	})
