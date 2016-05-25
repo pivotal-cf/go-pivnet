@@ -10,6 +10,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/pivotal-cf-experimental/go-pivnet"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands"
+	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errors/errorsfakes"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
 
 	"github.com/onsi/gomega/ghttp"
@@ -19,9 +20,14 @@ var _ = Describe("release types commands", func() {
 	var (
 		server *ghttp.Server
 
+		fakeErrorHandler *errorsfakes.FakeErrorHandler
+
 		outBuffer bytes.Buffer
 
 		releaseTypes []string
+
+		responseStatusCode int
+		response           interface{}
 	)
 
 	BeforeEach(func() {
@@ -33,6 +39,9 @@ var _ = Describe("release types commands", func() {
 		commands.OutputWriter = &outBuffer
 		commands.Printer = printer.NewPrinter(commands.OutputWriter)
 
+		fakeErrorHandler = &errorsfakes.FakeErrorHandler{}
+		commands.ErrorHandler = fakeErrorHandler
+
 		releaseTypes = []string{
 			"release type 1",
 			"release type 2",
@@ -43,28 +52,53 @@ var _ = Describe("release types commands", func() {
 		server.Close()
 	})
 
-	It("lists all release types", func() {
-		releaseTypesResponse := pivnet.ReleaseTypesResponse{
-			ReleaseTypes: releaseTypes,
-		}
-
-		server.AppendHandlers(
-			ghttp.CombineHandlers(
-				ghttp.VerifyRequest("GET", fmt.Sprintf("%s/releases/release_types", apiPrefix)),
-				ghttp.RespondWithJSONEncoded(http.StatusOK, releaseTypesResponse),
-			),
+	Describe("ReleaseTypesCommand", func() {
+		var (
+			command commands.ReleaseTypesCommand
 		)
 
-		releaseTypesCommand := commands.ReleaseTypesCommand{}
+		BeforeEach(func() {
+			responseStatusCode = http.StatusOK
 
-		err := releaseTypesCommand.Execute(nil)
-		Expect(err).NotTo(HaveOccurred())
+			command = commands.ReleaseTypesCommand{}
 
-		var returnedReleaseTypes []string
+			response = pivnet.ReleaseTypesResponse{
+				ReleaseTypes: releaseTypes,
+			}
+		})
 
-		err = json.Unmarshal(outBuffer.Bytes(), &returnedReleaseTypes)
-		Expect(err).NotTo(HaveOccurred())
+		JustBeforeEach(func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/releases/release_types", apiPrefix)),
+					ghttp.RespondWithJSONEncoded(responseStatusCode, response),
+				),
+			)
+		})
 
-		Expect(returnedReleaseTypes).To(Equal(releaseTypes))
+		It("lists all release types", func() {
+			err := command.Execute(nil)
+			Expect(err).NotTo(HaveOccurred())
+
+			var returnedReleaseTypes []string
+
+			err = json.Unmarshal(outBuffer.Bytes(), &returnedReleaseTypes)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(returnedReleaseTypes).To(Equal(releaseTypes))
+		})
+
+		Context("when there is an error", func() {
+			BeforeEach(func() {
+				responseStatusCode = http.StatusTeapot
+			})
+
+			It("invokes the error handler", func() {
+				err := command.Execute(nil)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+			})
+		})
 	})
 })

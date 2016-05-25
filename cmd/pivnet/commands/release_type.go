@@ -12,7 +12,7 @@ func (command *ReleaseTypesCommand) Execute([]string) error {
 	client := NewClient()
 	releaseTypes, err := client.ReleaseTypes.Get()
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	switch Pivnet.Format {
