@@ -1,7 +1,6 @@
 package pivnet_test
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -95,8 +94,7 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 				)
 
 				_, err := client.FileGroups.List(productSlug)
-				Expect(err).To(MatchError(errors.New(
-					"Pivnet returned status code: 418 for the request - expected 200")))
+				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
 	})
@@ -169,8 +167,7 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 				)
 				Expect(err).To(HaveOccurred())
 
-				Expect(err).To(MatchError(errors.New(
-					"Pivnet returned status code: 418 for the request - expected 200")))
+				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
 	})
@@ -237,8 +234,7 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 				)
 				Expect(err).To(HaveOccurred())
 
-				Expect(err).To(MatchError(errors.New(
-					"Pivnet returned status code: 418 for the request - expected 200")))
+				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
 	})
@@ -286,8 +282,7 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 				)
 
 				_, err := client.FileGroups.Delete(productSlug, id)
-				Expect(err).To(MatchError(errors.New(
-					"Pivnet returned status code: 418 for the request - expected 200")))
+				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
 	})

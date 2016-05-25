@@ -1,7 +1,6 @@
 package pivnet_test
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -23,6 +22,9 @@ var _ = Describe("PivnetClient - user groups", func() {
 
 		newClientConfig pivnet.ClientConfig
 		fakeLogger      logger.Logger
+
+		response           interface{}
+		responseStatusCode int
 	)
 
 	BeforeEach(func() {
@@ -38,6 +40,8 @@ var _ = Describe("PivnetClient - user groups", func() {
 			UserAgent: userAgent,
 		}
 		client = pivnet.NewClient(newClientConfig, fakeLogger)
+
+		responseStatusCode = http.StatusOK
 	})
 
 	AfterEach(func() {
@@ -81,8 +85,7 @@ var _ = Describe("PivnetClient - user groups", func() {
 				)
 
 				_, err := client.UserGroups.List()
-				Expect(err).To(MatchError(errors.New(
-					"Pivnet returned status code: 418 for the request - expected 200")))
+				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
 	})
@@ -132,8 +135,7 @@ var _ = Describe("PivnetClient - user groups", func() {
 				)
 
 				_, err := client.UserGroups.ListForRelease("banana", releaseID)
-				Expect(err).To(MatchError(errors.New(
-					"Pivnet returned status code: 418 for the request - expected 200")))
+				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
 	})
@@ -190,8 +192,7 @@ var _ = Describe("PivnetClient - user groups", func() {
 				)
 
 				err := client.UserGroups.AddToRelease(productSlug, releaseID, userGroupID)
-				Expect(err).To(MatchError(errors.New(
-					"Pivnet returned status code: 418 for the request - expected 204")))
+				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
 	})
@@ -248,8 +249,7 @@ var _ = Describe("PivnetClient - user groups", func() {
 				)
 
 				err := client.UserGroups.RemoveFromRelease(productSlug, releaseID, userGroupID)
-				Expect(err).To(MatchError(errors.New(
-					"Pivnet returned status code: 418 for the request - expected 204")))
+				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
 	})
@@ -257,9 +257,6 @@ var _ = Describe("PivnetClient - user groups", func() {
 	Describe("Get User Group", func() {
 		var (
 			userGroupID int
-
-			response           pivnet.UserGroup
-			responseStatusCode int
 		)
 
 		BeforeEach(func() {
@@ -269,8 +266,6 @@ var _ = Describe("PivnetClient - user groups", func() {
 				ID:   userGroupID,
 				Name: "something",
 			}
-
-			responseStatusCode = http.StatusOK
 		})
 
 		JustBeforeEach(func() {
@@ -305,7 +300,7 @@ var _ = Describe("PivnetClient - user groups", func() {
 			)
 
 			BeforeEach(func() {
-				body = []byte(`{"message":"foo message"}`)
+				response = pivnetErr{Message: "foo message"}
 				responseStatusCode = http.StatusTeapot
 			})
 
@@ -329,8 +324,7 @@ var _ = Describe("PivnetClient - user groups", func() {
 				)
 				Expect(err).To(HaveOccurred())
 
-				Expect(err).To(MatchError(errors.New(
-					"Pivnet returned status code: 418 for the request - expected 200")))
+				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
 	})
@@ -437,8 +431,7 @@ var _ = Describe("PivnetClient - user groups", func() {
 
 				_, err := client.UserGroups.Create(name, description, members)
 
-				Expect(err).To(MatchError(errors.New(
-					"Pivnet returned status code: 418 for the request - expected 201")))
+				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
 	})
@@ -512,8 +505,7 @@ var _ = Describe("PivnetClient - user groups", func() {
 
 				_, err := client.UserGroups.Update(userGroup)
 
-				Expect(err).To(MatchError(errors.New(
-					"Pivnet returned status code: 418 for the request - expected 200")))
+				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
 	})
@@ -559,8 +551,7 @@ var _ = Describe("PivnetClient - user groups", func() {
 				)
 
 				err := client.UserGroups.Delete(userGroup.ID)
-				Expect(err).To(MatchError(errors.New(
-					"Pivnet returned status code: 418 for the request - expected 204")))
+				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
 	})

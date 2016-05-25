@@ -85,7 +85,7 @@ var _ = Describe("ReleaseETag", func() {
 
 			_, err := client.ReleaseETag(productSlug, release.ID)
 			Expect(err).To(MatchError(errors.New(
-				"Pivnet returned status code: 418 for the request - expected 200")))
+				"Pivnet returned status code: 418 for the request - expected 200. Message: foo message, errors: ")))
 		})
 	})
 

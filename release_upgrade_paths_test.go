@@ -1,7 +1,6 @@
 package pivnet_test
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -113,8 +112,7 @@ var _ = Describe("PivnetClient - release upgrade paths", func() {
 
 			It("returns an error", func() {
 				_, err := client.ReleaseUpgradePaths.Get(productSlug, releaseID)
-				Expect(err).To(MatchError(errors.New(
-					"Pivnet returned status code: 418 for the request - expected 200")))
+				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
 	})

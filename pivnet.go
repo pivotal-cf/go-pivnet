@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strings"
 
 	"github.com/pivotal-cf-experimental/go-pivnet/logger"
 )
@@ -18,8 +19,24 @@ const (
 )
 
 type pivnetErr struct {
-	Status  int    `json:"status"`
-	Message string `json:"message"`
+	Status  int      `json:"status"`
+	Message string   `json:"message"`
+	Errors  []string `json:"errors"`
+}
+
+type ErrPivnetOther struct {
+	ResponseCode int      `json:"response_code" yaml:"response_code"`
+	Message      string   `json:"message" yaml:"message"`
+	Errors       []string `json:"errors" yaml:"errors"`
+}
+
+func (e ErrPivnetOther) Error() string {
+	return fmt.Sprintf(
+		"%d - %s. Errors: %v",
+		e.ResponseCode,
+		e.Message,
+		strings.Join(e.Errors, ","),
+	)
 }
 
 type ErrUnauthorized struct {
@@ -155,11 +172,11 @@ func (c Client) makeRequestWithHTTPResponse(
 			return nil, newErrNotFound(pErr.Message)
 		}
 
-		return nil, fmt.Errorf(
-			"Pivnet returned status code: %d for the request - expected %d",
-			resp.StatusCode,
-			expectedStatusCode,
-		)
+		return nil, ErrPivnetOther{
+			ResponseCode: resp.StatusCode,
+			Message:      pErr.Message,
+			Errors:       pErr.Errors,
+		}
 	}
 
 	if len(b) > 0 && data != nil {

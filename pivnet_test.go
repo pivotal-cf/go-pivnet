@@ -215,8 +215,7 @@ var _ = Describe("PivnetClient", func() {
 
 			_, err := client.Releases.List("my-product-id")
 			Expect(err).To(HaveOccurred())
-			Expect(err).To(MatchError(
-				"Pivnet returned status code: 418 for the request - expected 200"))
+			Expect(err.Error()).To(ContainSubstring("foo message"))
 		})
 
 		Context("when unmarshalling the response from Pivnet returns an error", func() {

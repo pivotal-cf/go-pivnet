@@ -1,7 +1,6 @@
 package pivnet_test
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -84,8 +83,7 @@ var _ = Describe("PivnetClient - EULA", func() {
 				)
 
 				_, err := client.EULA.List()
-				Expect(err).To(MatchError(errors.New(
-					"Pivnet returned status code: 418 for the request - expected 200")))
+				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
 	})
@@ -135,8 +133,7 @@ var _ = Describe("PivnetClient - EULA", func() {
 				)
 
 				_, err := client.EULA.Get(eulaSlug)
-				Expect(err).To(MatchError(errors.New(
-					"Pivnet returned status code: 418 for the request - expected 200")))
+				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
 	})
@@ -188,7 +185,8 @@ var _ = Describe("PivnetClient - EULA", func() {
 					),
 				)
 
-				Expect(client.EULA.Accept(productSlug, releaseID)).To(MatchError("Pivnet returned status code: 418 for the request - expected 200"))
+				err := client.EULA.Accept(productSlug, releaseID)
+				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
 	})

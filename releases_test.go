@@ -1,7 +1,6 @@
 package pivnet_test
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -81,8 +80,7 @@ var _ = Describe("PivnetClient - product files", func() {
 				)
 
 				_, err := client.Releases.List("banana")
-				Expect(err).To(MatchError(errors.New(
-					"Pivnet returned status code: 418 for the request - expected 200")))
+				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
 	})
@@ -121,8 +119,7 @@ var _ = Describe("PivnetClient - product files", func() {
 				)
 
 				_, err := client.Releases.Get("banana", 3)
-				Expect(err).To(MatchError(errors.New(
-					"Pivnet returned status code: 418 for the request - expected 200")))
+				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
 	})
@@ -339,8 +336,7 @@ var _ = Describe("PivnetClient - product files", func() {
 				)
 
 				_, err := client.Releases.Create(createReleaseConfig)
-				Expect(err).To(MatchError(errors.New(
-					"Pivnet returned status code: 418 for the request - expected 201")))
+				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
 	})
@@ -393,8 +389,7 @@ var _ = Describe("PivnetClient - product files", func() {
 				)
 
 				_, err := client.Releases.Update("banana-slug", release)
-				Expect(err).To(MatchError(errors.New(
-					"Pivnet returned status code: 418 for the request - expected 200")))
+				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
 	})
@@ -440,8 +435,7 @@ var _ = Describe("PivnetClient - product files", func() {
 				)
 
 				err := client.Releases.Delete(release, "banana")
-				Expect(err).To(MatchError(errors.New(
-					"Pivnet returned status code: 418 for the request - expected 204")))
+				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
 	})

@@ -1,7 +1,6 @@
 package pivnet_test
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -90,8 +89,7 @@ var _ = Describe("PivnetClient - product", func() {
 				)
 
 				_, err := client.Products.Get(slug)
-				Expect(err).To(MatchError(errors.New(
-					"Pivnet returned status code: 418 for the request - expected 200")))
+				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
 	})
@@ -142,8 +140,7 @@ var _ = Describe("PivnetClient - product", func() {
 				)
 
 				_, err := client.Products.List()
-				Expect(err).To(MatchError(errors.New(
-					"Pivnet returned status code: 418 for the request - expected 200")))
+				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
 	})
