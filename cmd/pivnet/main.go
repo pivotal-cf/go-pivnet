@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/jessevdk/go-flags"
@@ -47,6 +46,8 @@ func main() {
 			os.Exit(1)
 		}
 
-		log.Fatal(err)
+		coloredMessage := fmt.Sprintf(errors.RedFunc(err.Error()))
+		fmt.Fprintln(os.Stderr, coloredMessage)
+		os.Exit(1)
 	}
 }

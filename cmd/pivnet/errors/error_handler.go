@@ -10,7 +10,10 @@ import (
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
 )
 
-var ErrAlreadyHandled = errors.New("error already handled")
+var (
+	ErrAlreadyHandled = errors.New("error already handled")
+	RedFunc           = color.New(color.FgRed).SprintFunc()
+)
 
 //go:generate counterfeiter . ErrorHandler
 
@@ -52,8 +55,7 @@ func (h errorHandler) HandleError(err error) error {
 		message = err.Error()
 	}
 
-	redFunc := color.New(color.FgRed).SprintFunc()
-	coloredMessage := fmt.Sprintf(redFunc(message))
+	coloredMessage := fmt.Sprintf(RedFunc(message))
 
 	switch h.format {
 	case printer.PrintAsJSON:
