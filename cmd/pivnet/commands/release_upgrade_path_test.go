@@ -11,6 +11,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/pivotal-cf-experimental/go-pivnet"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands"
+	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errors/errorsfakes"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
 
 	"github.com/onsi/gomega/ghttp"
@@ -20,6 +21,8 @@ var _ = Describe("release upgrade path commands", func() {
 	var (
 		server *ghttp.Server
 
+		fakeErrorHandler *errorsfakes.FakeErrorHandler
+
 		field     reflect.StructField
 		outBuffer bytes.Buffer
 
@@ -28,6 +31,9 @@ var _ = Describe("release upgrade path commands", func() {
 		release             pivnet.Release
 		releases            []pivnet.Release
 		releaseUpgradePaths []pivnet.ReleaseUpgradePath
+
+		responseStatusCode int
+		response           interface{}
 	)
 
 	BeforeEach(func() {
@@ -38,6 +44,9 @@ var _ = Describe("release upgrade path commands", func() {
 		outBuffer = bytes.Buffer{}
 		commands.OutputWriter = &outBuffer
 		commands.Printer = printer.NewPrinter(commands.OutputWriter)
+
+		fakeErrorHandler = &errorsfakes.FakeErrorHandler{}
+		commands.ErrorHandler = fakeErrorHandler
 
 		productSlug = "some-product-slug"
 
@@ -75,7 +84,24 @@ var _ = Describe("release upgrade path commands", func() {
 	})
 
 	Describe("ReleasesUpgradePathsCommand", func() {
-		It("lists all release dependencies for the provided product slug and release version", func() {
+		var (
+			command commands.ReleaseUpgradePathsCommand
+		)
+
+		BeforeEach(func() {
+			responseStatusCode = http.StatusOK
+
+			command = commands.ReleaseUpgradePathsCommand{
+				ProductSlug:    productSlug,
+				ReleaseVersion: releases[0].Version,
+			}
+
+			response = pivnet.ReleaseUpgradePathsResponse{
+				ReleaseUpgradePaths: releaseUpgradePaths,
+			}
+		})
+
+		JustBeforeEach(func() {
 			releasesResponse := pivnet.ReleasesResponse{
 				Releases: releases,
 			}
@@ -86,10 +112,6 @@ var _ = Describe("release upgrade path commands", func() {
 					ghttp.RespondWithJSONEncoded(http.StatusOK, releasesResponse),
 				),
 			)
-
-			releaseUpgradePathsResponse := pivnet.ReleaseUpgradePathsResponse{
-				ReleaseUpgradePaths: releaseUpgradePaths,
-			}
 
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
@@ -102,16 +124,13 @@ var _ = Describe("release upgrade path commands", func() {
 							releases[0].ID,
 						),
 					),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, releaseUpgradePathsResponse),
+					ghttp.RespondWithJSONEncoded(responseStatusCode, response),
 				),
 			)
+		})
 
-			releaseUpgradePathsCommand := commands.ReleaseUpgradePathsCommand{
-				ProductSlug:    productSlug,
-				ReleaseVersion: releases[0].Version,
-			}
-
-			err := releaseUpgradePathsCommand.Execute(nil)
+		It("lists all release upgrade paths for the provided product slug and release version", func() {
+			err := command.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
 
 			var returned []pivnet.ReleaseUpgradePath
@@ -120,6 +139,19 @@ var _ = Describe("release upgrade path commands", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(returned).To(Equal(releaseUpgradePaths))
+		})
+
+		Context("when there is an error", func() {
+			BeforeEach(func() {
+				responseStatusCode = http.StatusTeapot
+			})
+
+			It("invokes the error handler", func() {
+				err := command.Execute(nil)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+			})
 		})
 
 		Describe("ProductSlug flag", func() {

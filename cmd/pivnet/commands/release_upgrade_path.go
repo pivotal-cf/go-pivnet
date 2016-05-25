@@ -36,7 +36,7 @@ func (command *ReleaseUpgradePathsCommand) Execute([]string) error {
 
 	releaseUpgradePaths, err := client.ReleaseUpgradePaths.Get(command.ProductSlug, release.ID)
 	if err != nil {
-		return err
+		return ErrorHandler.HandleError(err)
 	}
 
 	switch Pivnet.Format {
