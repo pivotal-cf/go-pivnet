@@ -53,7 +53,7 @@ type PivnetCommand struct {
 	RemoveProductFile RemoveProductFileCommand `command:"remove-product-file" description:"Remove product file from release"`
 	DeleteProductFile DeleteProductFileCommand `command:"delete-product-file" description:"Delete product file"`
 
-	Download DownloadCommand `command:"download" description:"download command"`
+	DownloadProductFile DownloadProductFileCommand `command:"download-product-file" description:"Download product file"`
 
 	FileGroups      FileGroupsCommand      `command:"file-groups" description:"List file groups"`
 	FileGroup       FileGroupCommand       `command:"file-group" description:"Show file group"`
