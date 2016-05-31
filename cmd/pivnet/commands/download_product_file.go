@@ -17,17 +17,6 @@ type DownloadProductFileCommand struct {
 func (command *DownloadProductFileCommand) Execute([]string) error {
 	client := NewClient()
 
-	if command.ReleaseVersion == "" {
-		productFiles, err := client.ProductFiles.List(
-			command.ProductSlug,
-		)
-		if err != nil {
-			return ErrorHandler.HandleError(err)
-		}
-
-		return printProductFiles(productFiles)
-	}
-
 	releases, err := client.Releases.List(command.ProductSlug)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
@@ -56,8 +45,7 @@ func (command *DownloadProductFileCommand) Execute([]string) error {
 
 	err = extendedClient.DownloadFile(command.Filepath, downloadLink)
 	if err != nil {
-		return err
-		// return ErrorHandler.HandleError(err)
+		return ErrorHandler.HandleError(err)
 	}
 
 	return nil

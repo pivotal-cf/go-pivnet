@@ -57,7 +57,7 @@ func (c ExtendedClient) ReleaseETag(productSlug string, releaseID int) (string, 
 }
 
 func (c ExtendedClient) DownloadFile(localFilepath string, downloadLink string) error {
-	c.logger.Info("Downloading file", logger.Data{"downloadLink": downloadLink, "localFilepath": localFilepath})
+	c.logger.Debug("Downloading file", logger.Data{"downloadLink": downloadLink, "localFilepath": localFilepath})
 
 	req, err := c.c.CreateRequest(
 		"POST",
@@ -87,14 +87,14 @@ func (c ExtendedClient) DownloadFile(localFilepath string, downloadLink string) 
 		return errors.New(fmt.Sprintf("pivnet returned an error code of %d for the file: %s", resp.StatusCode, localFilepath))
 	}
 
-	c.logger.Info("Creating local file", logger.Data{"downloadLink": downloadLink, "localFilepath": localFilepath})
+	c.logger.Debug("Creating local file", logger.Data{"downloadLink": downloadLink, "localFilepath": localFilepath})
 
 	file, err := os.Create(localFilepath)
 	if err != nil {
 		return err // not tested
 	}
 
-	c.logger.Info("Copying body", logger.Data{"downloadLink": downloadLink, "localFilepath": localFilepath})
+	c.logger.Debug("Copying body", logger.Data{"downloadLink": downloadLink, "localFilepath": localFilepath})
 
 	_, err = io.Copy(file, resp.Body)
 	if err != nil {
