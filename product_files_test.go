@@ -205,10 +205,11 @@ var _ = Describe("PivnetClient - product files", func() {
 			productSlug = "banana"
 			productFileID = 1234
 
-			response = pivnet.ProductFileResponse{pivnet.ProductFile{
-				ID:           productFileID,
-				AWSObjectKey: "something",
-			}}
+			response = pivnet.ProductFileResponse{
+				ProductFile: pivnet.ProductFile{
+					ID:           productFileID,
+					AWSObjectKey: "something",
+				}}
 
 			responseStatusCode = http.StatusOK
 		})
@@ -274,18 +275,19 @@ var _ = Describe("PivnetClient - product files", func() {
 			releaseID = 12
 			productFileID = 1234
 
-			response = pivnet.ProductFileResponse{pivnet.ProductFile{
-				ID:           productFileID,
-				AWSObjectKey: "something",
-				Links: &pivnet.Links{Download: map[string]string{
-					"href": fmt.Sprintf(
-						"/products/%s/releases/%d/product_files/%d/download",
-						productSlug,
-						releaseID,
-						productFileID,
-					)},
-				},
-			}}
+			response = pivnet.ProductFileResponse{
+				ProductFile: pivnet.ProductFile{
+					ID:           productFileID,
+					AWSObjectKey: "something",
+					Links: &pivnet.Links{Download: map[string]string{
+						"href": fmt.Sprintf(
+							"/products/%s/releases/%d/product_files/%d/download",
+							productSlug,
+							releaseID,
+							productFileID,
+						)},
+					},
+				}}
 
 			responseStatusCode = http.StatusOK
 		})
@@ -358,6 +360,7 @@ var _ = Describe("PivnetClient - product files", func() {
 				Name:         "some-file-name",
 				FileVersion:  "some-file-version",
 				AWSObjectKey: "some-aws-object-key",
+				FileType:     "some-file-type",
 			}
 		})
 
@@ -365,10 +368,6 @@ var _ = Describe("PivnetClient - product files", func() {
 			type requestBody struct {
 				ProductFile pivnet.ProductFile `json:"product_file"`
 			}
-
-			const (
-				expectedFileType = "Software"
-			)
 
 			var (
 				expectedRequestBody requestBody
@@ -379,7 +378,7 @@ var _ = Describe("PivnetClient - product files", func() {
 			BeforeEach(func() {
 				expectedRequestBody = requestBody{
 					ProductFile: pivnet.ProductFile{
-						FileType:     expectedFileType,
+						FileType:     "some-file-type",
 						FileVersion:  createProductFileConfig.FileVersion,
 						Name:         createProductFileConfig.Name,
 						MD5:          createProductFileConfig.MD5,
@@ -414,10 +413,11 @@ var _ = Describe("PivnetClient - product files", func() {
 
 					expectedRequestBody.ProductFile.Description = description
 
-					productFileResponse = pivnet.ProductFileResponse{pivnet.ProductFile{
-						ID:          1234,
-						Description: description,
-					}}
+					productFileResponse = pivnet.ProductFileResponse{
+						ProductFile: pivnet.ProductFile{
+							ID:          1234,
+							Description: description,
+						}}
 				})
 
 				It("creates the product file with the description field", func() {
