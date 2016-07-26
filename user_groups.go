@@ -23,6 +23,10 @@ type updateUserGroupBody struct {
 	UserGroup updateUserGroup `json:"user_group"`
 }
 
+type removeMemberBody struct {
+	Member member `json:"member"`
+}
+
 type UserGroupsResponse struct {
 	UserGroups []UserGroup `json:"user_groups,omitempty"`
 }
@@ -50,6 +54,10 @@ type updateUserGroup struct {
 	Name        string   `json:"name,omitempty"`
 	Description string   `json:"description,omitempty"`
 	Members     []string `json:"members,omitempty"`
+}
+
+type member struct {
+	Email string `json:"email,omitempty"`
 }
 
 func (u UserGroupsService) List() ([]UserGroup, error) {
@@ -258,4 +266,35 @@ func (r UserGroupsService) Delete(userGroupID int) error {
 	}
 
 	return nil
+}
+
+func (r UserGroupsService) RemoveMemberFromGroup(userGroupID int, memberEmailAddress string) (UserGroup, error) {
+	url := fmt.Sprintf("/user_groups/%d/remove_member", userGroupID)
+
+	removeMemberBody := removeMemberBody{
+		member{
+			Email: memberEmailAddress,
+		},
+	}
+
+	b, err := json.Marshal(removeMemberBody)
+	if err != nil {
+		return UserGroup{}, err
+	}
+
+	body := bytes.NewReader(b)
+
+	var response UpdateUserGroupResponse
+	_, err = r.client.MakeRequest(
+		"PATCH",
+		url,
+		http.StatusOK,
+		body,
+		&response,
+	)
+	if err != nil {
+		return UserGroup{}, err
+	}
+
+	return response.UserGroup, nil
 }

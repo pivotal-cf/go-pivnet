@@ -368,6 +368,7 @@ var _ = Describe("Pivnet commands", func() {
 			Expect(command(field)).To(Equal("remove-user-group"))
 		})
 	})
+
 	Describe("CreateUserGroup command", func() {
 		BeforeEach(func() {
 			field = fieldFor(commands.Pivnet, "CreateUserGroup")
@@ -395,6 +396,16 @@ var _ = Describe("Pivnet commands", func() {
 
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("delete-user-group"))
+		})
+	})
+
+	Describe("RemoveUserGroupMemberCommand command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "RemoveUserGroupMember")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("remove-user-group-member"))
 		})
 	})
 
