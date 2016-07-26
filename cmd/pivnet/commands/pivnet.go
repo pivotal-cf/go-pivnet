@@ -69,6 +69,7 @@ type PivnetCommand struct {
 	UpdateUserGroup UpdateUserGroupCommand `command:"update-user-group" description:"Update user group"`
 	DeleteUserGroup DeleteUserGroupCommand `command:"delete-user-group" description:"Delete user group"`
 
+	AddUserGroupMember    AddUserGroupMemberCommand    `command:"add-user-group-member" description:"Add user group member to group"`
 	RemoveUserGroupMember RemoveUserGroupMemberCommand `command:"remove-user-group-member" description:"Remove user group member from group"`
 
 	ReleaseDependencies ReleaseDependenciesCommand `command:"release-dependencies" description:"List user groups"`

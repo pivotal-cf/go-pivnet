@@ -556,6 +556,92 @@ var _ = Describe("PivnetClient - user groups", func() {
 		})
 	})
 
+	Describe("AddMemberToGroup", func() {
+		var (
+			memberEmailAddress string
+			admin              bool
+			userGroup          pivnet.UserGroup
+
+			expectedRequestBody string
+
+			response pivnet.UpdateUserGroupResponse
+		)
+
+		BeforeEach(func() {
+			memberEmailAddress = "some email address"
+			admin = true
+
+			userGroup = pivnet.UserGroup{
+				ID:          1234,
+				Name:        "some name",
+				Description: "some description",
+			}
+
+			expectedRequestBody = fmt.Sprintf(
+				`{"member":{"email":"%s","admin":true}}`,
+				memberEmailAddress,
+			)
+
+			response = pivnet.UpdateUserGroupResponse{userGroup}
+		})
+
+		It("returns without error", func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+						"%s/user_groups/%d/add_member",
+						apiPrefix,
+						userGroup.ID,
+					)),
+					ghttp.VerifyJSON(expectedRequestBody),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, response),
+				),
+			)
+
+			returned, err := client.UserGroups.AddMemberToGroup(
+				userGroup.ID,
+				memberEmailAddress,
+				admin,
+			)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(returned.ID).To(Equal(userGroup.ID))
+			Expect(returned.Name).To(Equal(userGroup.Name))
+			Expect(returned.Description).To(Equal(userGroup.Description))
+		})
+
+		Context("when the server responds with a non-200 status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
+			It("returns an error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/user_groups/%d/add_member",
+							apiPrefix,
+							userGroup.ID,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, body),
+					),
+				)
+
+				_, err := client.UserGroups.AddMemberToGroup(
+					userGroup.ID,
+					memberEmailAddress,
+					admin,
+				)
+
+				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+	})
+
 	Describe("RemoveMemberFromGroup", func() {
 		var (
 			memberEmailAddress string

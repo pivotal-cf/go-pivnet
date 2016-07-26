@@ -908,6 +908,183 @@ var _ = Describe("user group commands", func() {
 		})
 	})
 
+	Describe("AddUserGroupMemberCommand", func() {
+		var (
+			command commands.AddUserGroupMemberCommand
+
+			memberEmailAddress string
+			admin              bool
+		)
+
+		BeforeEach(func() {
+			responseStatusCode = http.StatusNoContent
+
+			memberEmailAddress = "some email address"
+			admin = true
+
+			command = commands.AddUserGroupMemberCommand{
+				UserGroupID:        userGroup.ID,
+				MemberEmailAddress: memberEmailAddress,
+				Admin:              admin,
+			}
+		})
+
+		JustBeforeEach(func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"PATCH",
+						fmt.Sprintf(
+							"%s/user_groups/%d/add_member",
+							apiPrefix,
+							userGroup.ID,
+						),
+					),
+					ghttp.RespondWithJSONEncoded(responseStatusCode, nil),
+				),
+			)
+		})
+
+		It("adds member", func() {
+			err := command.Execute(nil)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Context("when there is an error", func() {
+			BeforeEach(func() {
+				responseStatusCode = http.StatusTeapot
+			})
+
+			It("invokes the error handler", func() {
+				err := command.Execute(nil)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+			})
+		})
+
+		Describe("UserGroupID flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(commands.AddUserGroupMemberCommand{}, "UserGroupID")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("user-group-id"))
+			})
+		})
+
+		Describe("MemberEmailAddress flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(commands.AddUserGroupMemberCommand{}, "MemberEmailAddress")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("member-email"))
+			})
+		})
+
+		Describe("Admin flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(commands.AddUserGroupMemberCommand{}, "Admin")
+			})
+
+			It("is not required", func() {
+				Expect(isRequired(field)).To(BeFalse())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("admin"))
+			})
+		})
+	})
+
+	Describe("RemoveUserGroupMemberCommand", func() {
+		var (
+			command commands.RemoveUserGroupMemberCommand
+
+			memberEmailAddress string
+		)
+
+		BeforeEach(func() {
+			responseStatusCode = http.StatusNoContent
+
+			memberEmailAddress = "some email address"
+			command = commands.RemoveUserGroupMemberCommand{
+				UserGroupID:        userGroup.ID,
+				MemberEmailAddress: memberEmailAddress,
+			}
+		})
+
+		JustBeforeEach(func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"PATCH",
+						fmt.Sprintf(
+							"%s/user_groups/%d/remove_member",
+							apiPrefix,
+							userGroup.ID,
+						),
+					),
+					ghttp.RespondWithJSONEncoded(responseStatusCode, nil),
+				),
+			)
+		})
+
+		It("removes member", func() {
+			err := command.Execute(nil)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Context("when there is an error", func() {
+			BeforeEach(func() {
+				responseStatusCode = http.StatusTeapot
+			})
+
+			It("invokes the error handler", func() {
+				err := command.Execute(nil)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+			})
+		})
+
+		Describe("UserGroupID flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(commands.RemoveUserGroupMemberCommand{}, "UserGroupID")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("user-group-id"))
+			})
+		})
+
+		Describe("MemberEmailAddress flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(commands.RemoveUserGroupMemberCommand{}, "MemberEmailAddress")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("member-email"))
+			})
+		})
+	})
 	Describe("RemoveUserGroupMemberCommand", func() {
 		var (
 			command commands.RemoveUserGroupMemberCommand
