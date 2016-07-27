@@ -6,6 +6,7 @@ import (
 
 	"github.com/pivotal-cf-experimental/go-pivnet"
 	"github.com/pivotal-cf-experimental/go-pivnet/extension"
+	"github.com/pivotal-cf-experimental/go-pivnet/logger"
 )
 
 type DownloadProductFileCommand struct {
@@ -44,11 +45,19 @@ func (command *DownloadProductFileCommand) Execute([]string) error {
 		command.ProductFileID,
 	)
 
+	Pivnet.Logger.Debug("Creating local file", logger.Data{"downloadLink": downloadLink, "localFilepath": command.Filepath})
 	file, err := os.Create(command.Filepath)
 	if err != nil {
 		return err // not tested
 	}
 
+	Pivnet.Logger.Debug(
+		"Downloading link to local file",
+		logger.Data{
+			"downloadLink":  downloadLink,
+			"localFilepath": command.Filepath,
+		},
+	)
 	err = extendedClient.DownloadFile(file, downloadLink)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
