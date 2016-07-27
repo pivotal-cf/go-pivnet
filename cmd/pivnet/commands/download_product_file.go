@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/pivotal-cf-experimental/go-pivnet"
 	"github.com/pivotal-cf-experimental/go-pivnet/extension"
@@ -43,7 +44,12 @@ func (command *DownloadProductFileCommand) Execute([]string) error {
 		command.ProductFileID,
 	)
 
-	err = extendedClient.DownloadFile(command.Filepath, downloadLink)
+	file, err := os.Create(command.Filepath)
+	if err != nil {
+		return err // not tested
+	}
+
+	err = extendedClient.DownloadFile(file, downloadLink)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
 	}

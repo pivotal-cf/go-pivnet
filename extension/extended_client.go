@@ -6,12 +6,12 @@ import (
 	"io"
 	"net/http"
 	"net/http/httputil"
-	"os"
 	"strings"
 
 	"github.com/pivotal-cf-experimental/go-pivnet/logger"
 )
 
+//go:generate counterfeiter . Client
 type Client interface {
 	MakeRequest(method string, url string, expectedResponseCode int, body io.Reader, data interface{}) (*http.Response, error)
 	CreateRequest(method string, url string, body io.Reader) (*http.Request, error)
@@ -56,8 +56,8 @@ func (c ExtendedClient) ReleaseETag(productSlug string, releaseID int) (string, 
 	return etag, nil
 }
 
-func (c ExtendedClient) DownloadFile(localFilepath string, downloadLink string) error {
-	c.logger.Debug("Downloading file", logger.Data{"downloadLink": downloadLink, "localFilepath": localFilepath})
+func (c ExtendedClient) DownloadFile(writer io.Writer, downloadLink string) error {
+	c.logger.Debug("Downloading file", logger.Data{"downloadLink": downloadLink})
 
 	req, err := c.c.CreateRequest(
 		"POST",
@@ -80,25 +80,18 @@ func (c ExtendedClient) DownloadFile(localFilepath string, downloadLink string) 
 	}
 
 	if resp.StatusCode == http.StatusUnavailableForLegalReasons {
-		return errors.New(fmt.Sprintf("the EULA has not been accepted for the file: %s", localFilepath))
+		return errors.New(fmt.Sprintf("the EULA has not been accepted for the file: %s", downloadLink))
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return errors.New(fmt.Sprintf("pivnet returned an error code of %d for the file: %s", resp.StatusCode, localFilepath))
+		return errors.New(fmt.Sprintf("pivnet returned an error code of %d for the file: %s", resp.StatusCode, downloadLink))
 	}
 
-	c.logger.Debug("Creating local file", logger.Data{"downloadLink": downloadLink, "localFilepath": localFilepath})
+	c.logger.Debug("Copying body", logger.Data{"downloadLink": downloadLink})
 
-	file, err := os.Create(localFilepath)
+	_, err = io.Copy(writer, resp.Body)
 	if err != nil {
-		return err // not tested
-	}
-
-	c.logger.Debug("Copying body", logger.Data{"downloadLink": downloadLink, "localFilepath": localFilepath})
-
-	_, err = io.Copy(file, resp.Body)
-	if err != nil {
-		return err // not tested
+		return err
 	}
 
 	return nil
