@@ -145,12 +145,12 @@ func (c Client) CreateRequest(
 
 func (c Client) makeRequestWithHTTPResponse(
 	requestType string,
-	url string,
+	endpoint string,
 	expectedStatusCode int,
 	body io.Reader,
 	data interface{},
 ) (*http.Response, error) {
-	req, err := c.CreateRequest(requestType, url, body)
+	req, err := c.CreateRequest(requestType, endpoint, body)
 	if err != nil {
 		return nil, err
 	}
