@@ -64,27 +64,20 @@ var _ = Describe("PivnetClient", func() {
 			ghttp.CombineHandlers(
 				ghttp.VerifyRequest(
 					"GET",
-					fmt.Sprintf("%s/products/%s/releases", apiPrefix, productSlug),
+					fmt.Sprintf("%s/foo", apiPrefix),
 				),
 				ghttp.VerifyHeaderKV("Authorization", fmt.Sprintf("Token %s", token)),
 				ghttp.RespondWithJSONEncoded(http.StatusOK, releases),
 			),
 		)
 
-		for _, r := range releases.Releases {
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(
-						"GET",
-						fmt.Sprintf("%s/products/%s/releases/%d", apiPrefix, productSlug, r.ID),
-					),
-					ghttp.VerifyHeaderKV("Authorization", fmt.Sprintf("Token %s", token)),
-					ghttp.RespondWith(http.StatusOK, nil),
-				),
-			)
-		}
-
-		_, err := client.Releases.List(productSlug)
+		_, err := client.MakeRequest(
+			"GET",
+			"/foo",
+			http.StatusOK,
+			nil,
+			nil,
+		)
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -93,7 +86,7 @@ var _ = Describe("PivnetClient", func() {
 			ghttp.CombineHandlers(
 				ghttp.VerifyRequest(
 					"GET",
-					fmt.Sprintf("%s/products/%s/releases", apiPrefix, productSlug),
+					fmt.Sprintf("%s/foo", apiPrefix),
 				),
 				ghttp.VerifyHeaderKV("Authorization", fmt.Sprintf("Token %s", token)),
 				ghttp.VerifyHeaderKV("User-Agent", userAgent),
@@ -101,21 +94,35 @@ var _ = Describe("PivnetClient", func() {
 			),
 		)
 
-		for _, r := range releases.Releases {
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(
-						"GET",
-						fmt.Sprintf("%s/products/%s/releases/%d", apiPrefix, productSlug, r.ID),
-					),
-					ghttp.VerifyHeaderKV("Authorization", fmt.Sprintf("Token %s", token)),
-					ghttp.VerifyHeaderKV("User-Agent", userAgent),
-					ghttp.RespondWith(http.StatusOK, nil),
-				),
-			)
-		}
+		_, err := client.MakeRequest(
+			"GET",
+			"/foo",
+			http.StatusOK,
+			nil,
+			nil,
+		)
+		Expect(err).NotTo(HaveOccurred())
+	})
 
-		_, err := client.Releases.List(productSlug)
+	It("sets Content-Type application/json", func() {
+		server.AppendHandlers(
+			ghttp.CombineHandlers(
+				ghttp.VerifyRequest(
+					"GET",
+					fmt.Sprintf("%s/foo", apiPrefix),
+				),
+				ghttp.VerifyHeaderKV("Content-Type", "application/json"),
+				ghttp.RespondWithJSONEncoded(http.StatusOK, releases),
+			),
+		)
+
+		_, err := client.MakeRequest(
+			"GET",
+			"/foo",
+			http.StatusOK,
+			nil,
+			nil,
+		)
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -124,7 +131,13 @@ var _ = Describe("PivnetClient", func() {
 			newClientConfig.Host = "%%%"
 			client = pivnet.NewClient(newClientConfig, fakeLogger)
 
-			_, err := client.Releases.List("some product")
+			_, err := client.MakeRequest(
+				"GET",
+				"/foo",
+				http.StatusOK,
+				nil,
+				nil,
+			)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("%%%"))
 		})
@@ -135,7 +148,13 @@ var _ = Describe("PivnetClient", func() {
 			newClientConfig.Host = "https://not-a-real-url.com"
 			client = pivnet.NewClient(newClientConfig, fakeLogger)
 
-			_, err := client.Releases.List("some-product")
+			_, err := client.MakeRequest(
+				"GET",
+				"/foo",
+				http.StatusOK,
+				nil,
+				nil,
+			)
 			Expect(err).To(HaveOccurred())
 		})
 	})
@@ -152,12 +171,21 @@ var _ = Describe("PivnetClient", func() {
 		It("returns an ErrUnauthorized error with message from Pivnet", func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", apiPrefix+"/products/my-product-id/releases"),
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf("%s/foo", apiPrefix),
+					),
 					ghttp.RespondWith(http.StatusUnauthorized, body),
 				),
 			)
 
-			_, err := client.Releases.List("my-product-id")
+			_, err := client.MakeRequest(
+				"GET",
+				"/foo",
+				http.StatusOK,
+				nil,
+				nil,
+			)
 			Expect(err).To(HaveOccurred())
 			Expect(err).To(MatchError(
 				pivnet.ErrUnauthorized{
@@ -180,12 +208,21 @@ var _ = Describe("PivnetClient", func() {
 		It("returns an ErrNotFound error with message from Pivnet", func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", apiPrefix+"/products/my-product-id/releases"),
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf("%s/foo", apiPrefix),
+					),
 					ghttp.RespondWith(http.StatusNotFound, body),
 				),
 			)
 
-			_, err := client.Releases.List("my-product-id")
+			_, err := client.MakeRequest(
+				"GET",
+				"/foo",
+				http.StatusOK,
+				nil,
+				nil,
+			)
 			Expect(err).To(HaveOccurred())
 			Expect(err).To(MatchError(
 				pivnet.ErrNotFound{
@@ -208,12 +245,21 @@ var _ = Describe("PivnetClient", func() {
 		It("returns an error", func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", apiPrefix+"/products/my-product-id/releases"),
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf("%s/foo", apiPrefix),
+					),
 					ghttp.RespondWith(http.StatusTeapot, body),
 				),
 			)
 
-			_, err := client.Releases.List("my-product-id")
+			_, err := client.MakeRequest(
+				"GET",
+				"/foo",
+				http.StatusOK,
+				nil,
+				nil,
+			)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("foo message"))
 		})
@@ -222,12 +268,21 @@ var _ = Describe("PivnetClient", func() {
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
-						ghttp.VerifyRequest("GET", apiPrefix+"/products/my-product-id/releases"),
+						ghttp.VerifyRequest(
+							"GET",
+							fmt.Sprintf("%s/foo", apiPrefix),
+						),
 						ghttp.RespondWith(http.StatusTeapot, nil),
 					),
 				)
 
-				_, err := client.Releases.List("my-product-id")
+				_, err := client.MakeRequest(
+					"GET",
+					"/foo",
+					http.StatusOK,
+					nil,
+					nil,
+				)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("JSON"))
 			})
@@ -238,12 +293,21 @@ var _ = Describe("PivnetClient", func() {
 		It("forwards the error", func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", apiPrefix+"/products/my-product-id/releases"),
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf("%s/foo", apiPrefix),
+					),
 					ghttp.RespondWith(http.StatusOK, "%%%"),
 				),
 			)
 
-			_, err := client.Releases.List("my-product-id")
+			_, err := client.MakeRequest(
+				"GET",
+				"/foo",
+				http.StatusOK,
+				nil,
+				struct{}{},
+			)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("invalid character"))
 		})
