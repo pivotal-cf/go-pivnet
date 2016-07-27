@@ -143,7 +143,7 @@ func (c Client) CreateRequest(
 	return req, nil
 }
 
-func (c Client) makeRequestWithHTTPResponse(
+func (c Client) MakeRequest(
 	requestType string,
 	endpoint string,
 	expectedStatusCode int,
@@ -207,21 +207,4 @@ func (c Client) makeRequestWithHTTPResponse(
 	}
 
 	return resp, nil
-}
-
-func (c Client) MakeRequest(
-	requestType string,
-	endpoint string,
-	expectedStatusCode int,
-	body io.Reader,
-	data interface{},
-) (*http.Response, error) {
-	resp, err := c.makeRequestWithHTTPResponse(
-		requestType,
-		endpoint,
-		expectedStatusCode,
-		body,
-		data,
-	)
-	return resp, err
 }
