@@ -230,7 +230,7 @@ var _ = Describe("download product file commands", func() {
 			))
 		})
 
-		Context("when there is an error", func() {
+		Context("when there is an error before download starts", func() {
 			BeforeEach(func() {
 				responseStatusCode = http.StatusTeapot
 			})
@@ -240,6 +240,16 @@ var _ = Describe("download product file commands", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+			})
+
+			It("does not print anything to stderr (including the progress bar)", func() {
+				err := command.Execute(nil)
+				Expect(err).NotTo(HaveOccurred())
+
+				b, err := ioutil.ReadFile(testStdErrFile.Name())
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(b).To(BeEmpty())
 			})
 		})
 

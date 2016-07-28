@@ -74,10 +74,9 @@ func (command *DownloadProductFileCommand) Execute([]string) error {
 	}
 
 	progress := newProgressBar(productFile.Size, os.Stderr)
-	progress.Start()
-	defer progress.Finish()
+	onDemandProgress := &startOnDemandProgressBar{progress, false}
 
-	multiWriter := io.MultiWriter(file, progress)
+	multiWriter := io.MultiWriter(file, onDemandProgress)
 
 	Pivnet.Logger.Debug(
 		"Downloading link to local file",
@@ -91,7 +90,21 @@ func (command *DownloadProductFileCommand) Execute([]string) error {
 		return ErrorHandler.HandleError(err)
 	}
 
+	progress.Finish()
 	return nil
+}
+
+type startOnDemandProgressBar struct {
+	progressbar *pb.ProgressBar
+	started     bool
+}
+
+func (w *startOnDemandProgressBar) Write(b []byte) (int, error) {
+	if !w.started {
+		w.progressbar.Start()
+		w.started = true
+	}
+	return w.progressbar.Write(b)
 }
 
 func newProgressBar(total int, output io.Writer) *pb.ProgressBar {
