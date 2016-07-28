@@ -116,7 +116,9 @@ func (u UserGroupsService) AddToRelease(productSlug string, releaseID int, userG
 
 	b, err := json.Marshal(body)
 	if err != nil {
-		panic(err)
+		// Untested as we cannot force an error because we are marshalling
+		// a known-good body
+		return err
 	}
 
 	_, err = u.client.MakeRequest(
@@ -148,7 +150,9 @@ func (u UserGroupsService) RemoveFromRelease(productSlug string, releaseID int, 
 
 	b, err := json.Marshal(body)
 	if err != nil {
-		panic(err)
+		// Untested as we cannot force an error because we are marshalling
+		// a known-good body
+		return err
 	}
 
 	_, err = u.client.MakeRequest(
@@ -200,6 +204,8 @@ func (u UserGroupsService) Create(name string, description string, members []str
 
 	b, err := json.Marshal(createBody)
 	if err != nil {
+		// Untested as we cannot force an error because we are marshalling
+		// a known-good body
 		return UserGroup{}, err
 	}
 
@@ -232,6 +238,8 @@ func (u UserGroupsService) Update(userGroup UserGroup) (UserGroup, error) {
 
 	b, err := json.Marshal(createBody)
 	if err != nil {
+		// Untested as we cannot force an error because we are marshalling
+		// a known-good body
 		return UserGroup{}, err
 	}
 
@@ -285,6 +293,8 @@ func (r UserGroupsService) AddMemberToGroup(
 
 	b, err := json.Marshal(addRemoveMemberBody)
 	if err != nil {
+		// Untested as we cannot force an error because we are marshalling
+		// a known-good body
 		return UserGroup{}, err
 	}
 
@@ -316,6 +326,8 @@ func (r UserGroupsService) RemoveMemberFromGroup(userGroupID int, memberEmailAdd
 
 	b, err := json.Marshal(addRemoveMemberBody)
 	if err != nil {
+		// Untested as we cannot force an error because we are marshalling
+		// a known-good body
 		return UserGroup{}, err
 	}
 
