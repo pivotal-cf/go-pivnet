@@ -332,4 +332,17 @@ var _ = Describe("PivnetClient", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 	})
+
+	Describe("CreateRequest", func() {
+		It("strips the host prefix if present", func() {
+			req, err := client.CreateRequest(
+				"GET",
+				fmt.Sprintf("https://example.com/%s/foo/bar", "api/v2"),
+				nil,
+			)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(req.URL.Path).To(Equal("/api/v2/foo/bar"))
+		})
+	})
 })
