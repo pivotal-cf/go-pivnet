@@ -10,11 +10,6 @@ import (
 	"github.com/pivotal-cf-experimental/go-pivnet/logger"
 )
 
-type CombinedClient struct {
-	*Client
-	*ExtendedClient
-}
-
 type Client struct {
 	client pivnet.Client
 }
