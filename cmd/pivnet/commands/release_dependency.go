@@ -17,7 +17,7 @@ type ReleaseDependenciesCommand struct {
 func (command *ReleaseDependenciesCommand) Execute([]string) error {
 	client := NewClient()
 
-	releases, err := client.Releases.List(command.ProductSlug)
+	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
 	}
@@ -34,7 +34,10 @@ func (command *ReleaseDependenciesCommand) Execute([]string) error {
 		return fmt.Errorf("release not found")
 	}
 
-	releaseDependencies, err := client.ReleaseDependencies.List(command.ProductSlug, release.ID)
+	releaseDependencies, err := client.ReleaseDependencies(
+		command.ProductSlug,
+		release.ID,
+	)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
 	}

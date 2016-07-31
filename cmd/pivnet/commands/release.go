@@ -26,7 +26,7 @@ type DeleteReleaseCommand struct {
 
 func (command *ReleasesCommand) Execute([]string) error {
 	client := NewClient()
-	releases, err := client.Releases.List(command.ProductSlug)
+	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
 	}
@@ -54,7 +54,7 @@ func (command *ReleasesCommand) Execute([]string) error {
 
 func (command *ReleaseCommand) Execute([]string) error {
 	client := NewClient()
-	releases, err := client.Releases.List(command.ProductSlug)
+	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
 	}
@@ -71,7 +71,7 @@ func (command *ReleaseCommand) Execute([]string) error {
 		return fmt.Errorf("release not found")
 	}
 
-	release, err := client.Releases.Get(command.ProductSlug, foundRelease.ID)
+	release, err := client.Release(command.ProductSlug, foundRelease.ID)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
 	}
@@ -108,7 +108,7 @@ func (command *ReleaseCommand) Execute([]string) error {
 
 func (command *DeleteReleaseCommand) Execute([]string) error {
 	client := NewClient()
-	releases, err := client.Releases.List(command.ProductSlug)
+	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
 	}
@@ -125,7 +125,7 @@ func (command *DeleteReleaseCommand) Execute([]string) error {
 		return fmt.Errorf("release not found")
 	}
 
-	err = client.Releases.Delete(release, command.ProductSlug)
+	err = client.DeleteRelease(command.ProductSlug, release)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
 	}

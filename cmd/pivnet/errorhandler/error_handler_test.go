@@ -1,4 +1,4 @@
-package errors_test
+package errorhandler_test
 
 import (
 	"bytes"
@@ -8,13 +8,13 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/pivotal-cf-experimental/go-pivnet"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errors"
+	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errorhandler"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
 )
 
 var _ = Describe("ErrorHandler", func() {
 	var (
-		errorHandler errors.ErrorHandler
+		errorHandler errorhandler.ErrorHandler
 
 		format    string
 		outWriter *bytes.Buffer
@@ -33,7 +33,7 @@ var _ = Describe("ErrorHandler", func() {
 	})
 
 	JustBeforeEach(func() {
-		errorHandler = errors.NewErrorHandler(
+		errorHandler = errorhandler.NewErrorHandler(
 			format,
 			outWriter,
 			logWriter,
@@ -43,7 +43,7 @@ var _ = Describe("ErrorHandler", func() {
 	It("returns ErrAlreadyHandled", func() {
 		err := errorHandler.HandleError(inputErr)
 
-		Expect(err).To(Equal(errors.ErrAlreadyHandled))
+		Expect(err).To(Equal(errorhandler.ErrAlreadyHandled))
 	})
 
 	It("writes to outWriter", func() {

@@ -17,7 +17,7 @@ type ProductsCommand struct {
 
 func (command *ProductCommand) Execute([]string) error {
 	client := NewClient()
-	product, err := client.Products.Get(command.ProductSlug)
+	product, err := client.FindProductForSlug(command.ProductSlug)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
 	}
@@ -72,7 +72,7 @@ func printProduct(product pivnet.Product) error {
 
 func (command *ProductsCommand) Execute([]string) error {
 	client := NewClient()
-	products, err := client.Products.List()
+	products, err := client.Products()
 	if err != nil {
 		return ErrorHandler.HandleError(err)
 	}

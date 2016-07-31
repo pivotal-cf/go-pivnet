@@ -11,7 +11,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/pivotal-cf-experimental/go-pivnet"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errors/errorsfakes"
+	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errorhandler/errorhandlerfakes"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
 
 	"github.com/onsi/gomega/ghttp"
@@ -21,7 +21,7 @@ var _ = Describe("user group commands", func() {
 	var (
 		server *ghttp.Server
 
-		fakeErrorHandler *errorsfakes.FakeErrorHandler
+		fakeErrorHandler *errorhandlerfakes.FakeErrorHandler
 
 		field     reflect.StructField
 		outBuffer bytes.Buffer
@@ -49,7 +49,7 @@ var _ = Describe("user group commands", func() {
 		commands.OutputWriter = &outBuffer
 		commands.Printer = printer.NewPrinter(commands.OutputWriter)
 
-		fakeErrorHandler = &errorsfakes.FakeErrorHandler{}
+		fakeErrorHandler = &errorhandlerfakes.FakeErrorHandler{}
 		commands.ErrorHandler = fakeErrorHandler
 
 		userGroups = []pivnet.UserGroup{

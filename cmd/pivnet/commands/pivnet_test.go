@@ -24,7 +24,7 @@ var _ = Describe("Pivnet commands", func() {
 			server *ghttp.Server
 
 			outBuffer bytes.Buffer
-			client    pivnet.Client
+			client    commands.PivnetClient
 		)
 
 		BeforeEach(func() {
@@ -60,7 +60,7 @@ var _ = Describe("Pivnet commands", func() {
 		})
 
 		It("redacts api token", func() {
-			_, err := client.Products.List()
+			_, err := client.Products()
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(outBuffer.String()).Should(ContainSubstring("*** redacted api token ***"))

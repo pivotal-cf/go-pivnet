@@ -29,7 +29,7 @@ func (command *FileGroupsCommand) Execute([]string) error {
 	client := NewClient()
 
 	if command.ReleaseVersion == "" {
-		fileGroups, err := client.FileGroups.List(
+		fileGroups, err := client.FileGroups(
 			command.ProductSlug,
 		)
 		if err != nil {
@@ -38,7 +38,7 @@ func (command *FileGroupsCommand) Execute([]string) error {
 		return printFileGroups(fileGroups)
 	}
 
-	releases, err := client.Releases.List(command.ProductSlug)
+	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
 	}
@@ -55,7 +55,7 @@ func (command *FileGroupsCommand) Execute([]string) error {
 		return fmt.Errorf("release not found")
 	}
 
-	fileGroups, err := client.FileGroups.ListForRelease(
+	fileGroups, err := client.FileGroupsForRelease(
 		command.ProductSlug,
 		release.ID,
 	)
@@ -105,7 +105,7 @@ func printFileGroups(fileGroups []pivnet.FileGroup) error {
 func (command *FileGroupCommand) Execute([]string) error {
 	client := NewClient()
 
-	fileGroup, err := client.FileGroups.Get(
+	fileGroup, err := client.FileGroup(
 		command.ProductSlug,
 		command.FileGroupID,
 	)
@@ -153,7 +153,7 @@ func printFileGroup(fileGroup pivnet.FileGroup) error {
 func (command *DeleteFileGroupCommand) Execute([]string) error {
 	client := NewClient()
 
-	_, err := client.FileGroups.Delete(
+	_, err := client.DeleteFileGroup(
 		command.ProductSlug,
 		command.FileGroupID,
 	)

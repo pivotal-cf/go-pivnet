@@ -41,7 +41,7 @@ func (command *ProductFilesCommand) Execute([]string) error {
 	client := NewClient()
 
 	if command.ReleaseVersion == "" {
-		productFiles, err := client.ProductFiles.List(
+		productFiles, err := client.GetProductFiles(
 			command.ProductSlug,
 		)
 		if err != nil {
@@ -51,7 +51,7 @@ func (command *ProductFilesCommand) Execute([]string) error {
 		return printProductFiles(productFiles)
 	}
 
-	releases, err := client.Releases.List(command.ProductSlug)
+	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
 	}
@@ -68,7 +68,7 @@ func (command *ProductFilesCommand) Execute([]string) error {
 		return fmt.Errorf("release not found")
 	}
 
-	productFiles, err := client.ProductFiles.ListForRelease(
+	productFiles, err := client.GetProductFilesForRelease(
 		command.ProductSlug,
 		release.ID,
 	)
@@ -152,7 +152,7 @@ func (command *ProductFileCommand) Execute([]string) error {
 	client := NewClient()
 
 	if command.ReleaseVersion == "" {
-		productFile, err := client.ProductFiles.Get(
+		productFile, err := client.GetProductFile(
 			command.ProductSlug,
 			command.ProductFileID,
 		)
@@ -162,7 +162,7 @@ func (command *ProductFileCommand) Execute([]string) error {
 		return printProductFile(productFile)
 	}
 
-	releases, err := client.Releases.List(command.ProductSlug)
+	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
 	}
@@ -179,7 +179,7 @@ func (command *ProductFileCommand) Execute([]string) error {
 		return fmt.Errorf("release not found")
 	}
 
-	productFile, err := client.ProductFiles.GetForRelease(
+	productFile, err := client.GetProductFileForRelease(
 		command.ProductSlug,
 		release.ID,
 		command.ProductFileID,
@@ -194,7 +194,7 @@ func (command *ProductFileCommand) Execute([]string) error {
 func (command *AddProductFileCommand) Execute([]string) error {
 	client := NewClient()
 
-	releases, err := client.Releases.List(command.ProductSlug)
+	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
 	}
@@ -211,7 +211,7 @@ func (command *AddProductFileCommand) Execute([]string) error {
 		return fmt.Errorf("release not found")
 	}
 
-	err = client.ProductFiles.AddToRelease(
+	err = client.AddProductFile(
 		command.ProductSlug,
 		release.ID,
 		command.ProductFileID,
@@ -236,7 +236,7 @@ func (command *AddProductFileCommand) Execute([]string) error {
 func (command *RemoveProductFileCommand) Execute([]string) error {
 	client := NewClient()
 
-	releases, err := client.Releases.List(command.ProductSlug)
+	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
 	}
@@ -253,7 +253,7 @@ func (command *RemoveProductFileCommand) Execute([]string) error {
 		return fmt.Errorf("release not found")
 	}
 
-	err = client.ProductFiles.RemoveFromRelease(
+	err = client.RemoveProductFile(
 		command.ProductSlug,
 		release.ID,
 		command.ProductFileID,
@@ -282,7 +282,7 @@ func (command *RemoveProductFileCommand) Execute([]string) error {
 func (command *DeleteProductFileCommand) Execute([]string) error {
 	client := NewClient()
 
-	productFile, err := client.ProductFiles.Delete(
+	productFile, err := client.DeleteProductFile(
 		command.ProductSlug,
 		command.ProductFileID,
 	)

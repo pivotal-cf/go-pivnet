@@ -23,7 +23,7 @@ type DownloadProductFileCommand struct {
 func (command *DownloadProductFileCommand) Execute([]string) error {
 	client := NewClient()
 
-	releases, err := client.Releases.List(command.ProductSlug)
+	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
 	}
@@ -56,7 +56,7 @@ func (command *DownloadProductFileCommand) Execute([]string) error {
 	}
 
 	Pivnet.Logger.Debug("Determining file size", logger.Data{"downloadLink": downloadLink})
-	productFile, err := client.ProductFiles.GetForRelease(
+	productFile, err := client.GetProductFileForRelease(
 		command.ProductSlug,
 		release.ID,
 		command.ProductFileID,
@@ -67,7 +67,7 @@ func (command *DownloadProductFileCommand) Execute([]string) error {
 
 	if command.AcceptEULA {
 		Pivnet.Logger.Debug("Accepting EULA")
-		err = client.EULA.Accept(command.ProductSlug, release.ID)
+		err = client.AcceptEULA(command.ProductSlug, release.ID)
 		if err != nil {
 			return ErrorHandler.HandleError(err)
 		}

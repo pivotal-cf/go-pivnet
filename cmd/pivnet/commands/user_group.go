@@ -61,7 +61,7 @@ type RemoveUserGroupMemberCommand struct {
 func (command *UserGroupCommand) Execute([]string) error {
 	client := NewClient()
 
-	userGroup, err := client.UserGroups.Get(
+	userGroup, err := client.UserGroup(
 		command.UserGroupID,
 	)
 	if err != nil {
@@ -76,7 +76,7 @@ func (command *UserGroupsCommand) Execute([]string) error {
 
 	if command.ProductSlug == "" && command.ReleaseVersion == "" {
 		var err error
-		userGroups, err := client.UserGroups.List()
+		userGroups, err := client.UserGroups()
 		if err != nil {
 			return ErrorHandler.HandleError(err)
 		}
@@ -88,7 +88,7 @@ func (command *UserGroupsCommand) Execute([]string) error {
 		return fmt.Errorf("Both or neither of product slug and release version must be provided")
 	}
 
-	releases, err := client.Releases.List(command.ProductSlug)
+	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
 	}
@@ -105,7 +105,7 @@ func (command *UserGroupsCommand) Execute([]string) error {
 		return fmt.Errorf("release not found")
 	}
 
-	userGroups, err := client.UserGroups.ListForRelease(command.ProductSlug, release.ID)
+	userGroups, err := client.UserGroupsForRelease(command.ProductSlug, release.ID)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
 	}
@@ -140,7 +140,11 @@ func printUserGroups(userGroups []pivnet.UserGroup) error {
 func (command *CreateUserGroupCommand) Execute([]string) error {
 	client := NewClient()
 
-	userGroup, err := client.UserGroups.Create(command.Name, command.Description, command.Members)
+	userGroup, err := client.CreateUserGroup(
+		command.Name,
+		command.Description,
+		command.Members,
+	)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
 	}
@@ -175,7 +179,7 @@ func printUserGroup(userGroup pivnet.UserGroup) error {
 func (command *DeleteUserGroupCommand) Execute([]string) error {
 	client := NewClient()
 
-	err := client.UserGroups.Delete(command.UserGroupID)
+	err := client.DeleteUserGroup(command.UserGroupID)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
 	}
@@ -194,7 +198,7 @@ func (command *DeleteUserGroupCommand) Execute([]string) error {
 func (command *UpdateUserGroupCommand) Execute([]string) error {
 	client := NewClient()
 
-	userGroup, err := client.UserGroups.Get(command.UserGroupID)
+	userGroup, err := client.UserGroup(command.UserGroupID)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
 	}
@@ -207,7 +211,7 @@ func (command *UpdateUserGroupCommand) Execute([]string) error {
 		userGroup.Description = *command.Description
 	}
 
-	updated, err := client.UserGroups.Update(userGroup)
+	updated, err := client.UpdateUserGroup(userGroup)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
 	}
@@ -218,7 +222,7 @@ func (command *UpdateUserGroupCommand) Execute([]string) error {
 func (command *AddUserGroupCommand) Execute([]string) error {
 	client := NewClient()
 
-	releases, err := client.Releases.List(command.ProductSlug)
+	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
 	}
@@ -235,7 +239,7 @@ func (command *AddUserGroupCommand) Execute([]string) error {
 		return fmt.Errorf("release not found")
 	}
 
-	err = client.UserGroups.AddToRelease(
+	err = client.AddUserGroup(
 		command.ProductSlug,
 		release.ID,
 		command.UserGroupID,
@@ -260,7 +264,7 @@ func (command *AddUserGroupCommand) Execute([]string) error {
 func (command *RemoveUserGroupCommand) Execute([]string) error {
 	client := NewClient()
 
-	releases, err := client.Releases.List(command.ProductSlug)
+	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
 	}
@@ -277,7 +281,7 @@ func (command *RemoveUserGroupCommand) Execute([]string) error {
 		return fmt.Errorf("release not found")
 	}
 
-	err = client.UserGroups.RemoveFromRelease(
+	err = client.RemoveUserGroup(
 		command.ProductSlug,
 		release.ID,
 		command.UserGroupID,
@@ -302,7 +306,7 @@ func (command *RemoveUserGroupCommand) Execute([]string) error {
 func (command *AddUserGroupMemberCommand) Execute([]string) error {
 	client := NewClient()
 
-	userGroup, err := client.UserGroups.AddMemberToGroup(
+	userGroup, err := client.AddMemberToGroup(
 		command.UserGroupID,
 		command.MemberEmailAddress,
 		command.Admin,
@@ -317,7 +321,7 @@ func (command *AddUserGroupMemberCommand) Execute([]string) error {
 func (command *RemoveUserGroupMemberCommand) Execute([]string) error {
 	client := NewClient()
 
-	userGroup, err := client.UserGroups.RemoveMemberFromGroup(
+	userGroup, err := client.RemoveMemberFromGroup(
 		command.UserGroupID,
 		command.MemberEmailAddress,
 	)
