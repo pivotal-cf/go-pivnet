@@ -1,37 +1,22 @@
 package commands
 
-import (
-	"github.com/olekukonko/tablewriter"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
-)
+import "github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands/releasetype"
 
 type ReleaseTypesCommand struct {
 }
 
-func (command *ReleaseTypesCommand) Execute([]string) error {
+func initReleasetypePackage() {
 	Init()
-	client := NewPivnetClient()
+	releasetype.Client = NewPivnetClient()
+	releasetype.ErrorHandler = ErrorHandler
+	releasetype.Format = Pivnet.Format
+	releasetype.OutputWriter = OutputWriter
+	releasetype.Printer = Printer
+}
 
-	releaseTypes, err := client.ReleaseTypes()
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
+func (command *ReleaseTypesCommand) Execute(args []string) error {
+	initReleasetypePackage()
 
-	switch Pivnet.Format {
-	case printer.PrintAsTable:
-		table := tablewriter.NewWriter(OutputWriter)
-		table.SetHeader([]string{"ReleaseTypes"})
-
-		for _, r := range releaseTypes {
-			table.Append([]string{r})
-		}
-		table.Render()
-		return nil
-	case printer.PrintAsJSON:
-		return Printer.PrintJSON(releaseTypes)
-	case printer.PrintAsYAML:
-		return Printer.PrintYAML(releaseTypes)
-	}
-
-	return nil
+	c := &releasetype.ReleaseTypesCommand{}
+	return c.Execute(args)
 }

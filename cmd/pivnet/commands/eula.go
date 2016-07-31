@@ -14,7 +14,7 @@ type AcceptEULACommand struct {
 	ReleaseVersion string `long:"release-version" short:"v" description:"Release version e.g. 0.1.2-rc1" required:"true"`
 }
 
-func initPackage() {
+func initEULAPackage() {
 	Init()
 	eula.Client = NewPivnetClient()
 	eula.ErrorHandler = ErrorHandler
@@ -24,19 +24,22 @@ func initPackage() {
 }
 
 func (command *EULAsCommand) Execute(args []string) error {
-	initPackage()
+	initEULAPackage()
+
 	c := &eula.EULAsCommand{}
 	return c.Execute(args)
 }
 
 func (command *EULACommand) Execute(args []string) error {
-	initPackage()
+	initEULAPackage()
+
 	c := &eula.EULACommand{EULASlug: command.EULASlug}
 	return c.Execute(args)
 }
 
 func (command *AcceptEULACommand) Execute(args []string) error {
-	initPackage()
+	initEULAPackage()
+
 	c := &eula.AcceptEULACommand{
 		ProductSlug:    command.ProductSlug,
 		ReleaseVersion: command.ReleaseVersion,
