@@ -37,7 +37,8 @@ var _ = Describe("Pivnet commands", func() {
 			commands.LogWriter = &outBuffer
 			commands.Printer = printer.NewPrinter(commands.OutputWriter)
 
-			client = commands.NewClient()
+			commands.Init()
+			client = commands.NewPivnetClient()
 
 			products := []pivnet.Product{
 				{

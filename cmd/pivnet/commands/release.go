@@ -25,7 +25,9 @@ type DeleteReleaseCommand struct {
 }
 
 func (command *ReleasesCommand) Execute([]string) error {
-	client := NewClient()
+	Init()
+	client := NewPivnetClient()
+
 	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
@@ -53,7 +55,9 @@ func (command *ReleasesCommand) Execute([]string) error {
 }
 
 func (command *ReleaseCommand) Execute([]string) error {
-	client := NewClient()
+	Init()
+	client := NewPivnetClient()
+
 	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
 	if err != nil {
 		return ErrorHandler.HandleError(err)
@@ -107,7 +111,9 @@ func (command *ReleaseCommand) Execute([]string) error {
 }
 
 func (command *DeleteReleaseCommand) Execute([]string) error {
-	client := NewClient()
+	Init()
+	client := NewPivnetClient()
+
 	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
 	if err != nil {
 		return ErrorHandler.HandleError(err)

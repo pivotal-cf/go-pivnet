@@ -15,7 +15,7 @@ type AcceptEULACommand struct {
 }
 
 func initPackage() {
-	NewClient()
+	Init()
 	eula.Client = NewPivnetClient()
 	eula.ErrorHandler = ErrorHandler
 	eula.Format = Pivnet.Format

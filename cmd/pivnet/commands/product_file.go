@@ -38,7 +38,8 @@ type DeleteProductFileCommand struct {
 }
 
 func (command *ProductFilesCommand) Execute([]string) error {
-	client := NewClient()
+	Init()
+	client := NewPivnetClient()
 
 	if command.ReleaseVersion == "" {
 		productFiles, err := client.GetProductFiles(
@@ -149,7 +150,8 @@ func printProductFile(productFile pivnet.ProductFile) error {
 }
 
 func (command *ProductFileCommand) Execute([]string) error {
-	client := NewClient()
+	Init()
+	client := NewPivnetClient()
 
 	if command.ReleaseVersion == "" {
 		productFile, err := client.GetProductFile(
@@ -192,7 +194,8 @@ func (command *ProductFileCommand) Execute([]string) error {
 }
 
 func (command *AddProductFileCommand) Execute([]string) error {
-	client := NewClient()
+	Init()
+	client := NewPivnetClient()
 
 	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
 	if err != nil {
@@ -234,7 +237,8 @@ func (command *AddProductFileCommand) Execute([]string) error {
 }
 
 func (command *RemoveProductFileCommand) Execute([]string) error {
-	client := NewClient()
+	Init()
+	client := NewPivnetClient()
 
 	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
 	if err != nil {
@@ -280,7 +284,8 @@ func (command *RemoveProductFileCommand) Execute([]string) error {
 }
 
 func (command *DeleteProductFileCommand) Execute([]string) error {
-	client := NewClient()
+	Init()
+	client := NewPivnetClient()
 
 	productFile, err := client.DeleteProductFile(
 		command.ProductSlug,

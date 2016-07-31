@@ -26,7 +26,8 @@ type DeleteFileGroupCommand struct {
 }
 
 func (command *FileGroupsCommand) Execute([]string) error {
-	client := NewClient()
+	Init()
+	client := NewPivnetClient()
 
 	if command.ReleaseVersion == "" {
 		fileGroups, err := client.FileGroups(
@@ -103,7 +104,8 @@ func printFileGroups(fileGroups []pivnet.FileGroup) error {
 }
 
 func (command *FileGroupCommand) Execute([]string) error {
-	client := NewClient()
+	Init()
+	client := NewPivnetClient()
 
 	fileGroup, err := client.FileGroup(
 		command.ProductSlug,
@@ -151,7 +153,8 @@ func printFileGroup(fileGroup pivnet.FileGroup) error {
 }
 
 func (command *DeleteFileGroupCommand) Execute([]string) error {
-	client := NewClient()
+	Init()
+	client := NewPivnetClient()
 
 	_, err := client.DeleteFileGroup(
 		command.ProductSlug,

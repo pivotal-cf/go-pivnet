@@ -154,7 +154,7 @@ func NewPivnetClient() *gp.Client {
 	)
 }
 
-func NewClient() PivnetClient {
+func Init() {
 	if OutputWriter == nil {
 		OutputWriter = os.Stdout
 	}
@@ -198,8 +198,4 @@ func NewClient() PivnetClient {
 	)
 
 	Pivnet.Logger = lagershim.NewLagerShim(l)
-
-	pivnetClient := NewPivnetClient()
-
-	return pivnetClient
 }

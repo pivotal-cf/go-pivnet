@@ -59,7 +59,8 @@ type RemoveUserGroupMemberCommand struct {
 }
 
 func (command *UserGroupCommand) Execute([]string) error {
-	client := NewClient()
+	Init()
+	client := NewPivnetClient()
 
 	userGroup, err := client.UserGroup(
 		command.UserGroupID,
@@ -72,7 +73,8 @@ func (command *UserGroupCommand) Execute([]string) error {
 }
 
 func (command *UserGroupsCommand) Execute([]string) error {
-	client := NewClient()
+	Init()
+	client := NewPivnetClient()
 
 	if command.ProductSlug == "" && command.ReleaseVersion == "" {
 		var err error
@@ -138,7 +140,8 @@ func printUserGroups(userGroups []pivnet.UserGroup) error {
 }
 
 func (command *CreateUserGroupCommand) Execute([]string) error {
-	client := NewClient()
+	Init()
+	client := NewPivnetClient()
 
 	userGroup, err := client.CreateUserGroup(
 		command.Name,
@@ -177,7 +180,8 @@ func printUserGroup(userGroup pivnet.UserGroup) error {
 }
 
 func (command *DeleteUserGroupCommand) Execute([]string) error {
-	client := NewClient()
+	Init()
+	client := NewPivnetClient()
 
 	err := client.DeleteUserGroup(command.UserGroupID)
 	if err != nil {
@@ -196,7 +200,8 @@ func (command *DeleteUserGroupCommand) Execute([]string) error {
 }
 
 func (command *UpdateUserGroupCommand) Execute([]string) error {
-	client := NewClient()
+	Init()
+	client := NewPivnetClient()
 
 	userGroup, err := client.UserGroup(command.UserGroupID)
 	if err != nil {
@@ -220,7 +225,8 @@ func (command *UpdateUserGroupCommand) Execute([]string) error {
 }
 
 func (command *AddUserGroupCommand) Execute([]string) error {
-	client := NewClient()
+	Init()
+	client := NewPivnetClient()
 
 	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
 	if err != nil {
@@ -262,7 +268,8 @@ func (command *AddUserGroupCommand) Execute([]string) error {
 }
 
 func (command *RemoveUserGroupCommand) Execute([]string) error {
-	client := NewClient()
+	Init()
+	client := NewPivnetClient()
 
 	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
 	if err != nil {
@@ -304,7 +311,8 @@ func (command *RemoveUserGroupCommand) Execute([]string) error {
 }
 
 func (command *AddUserGroupMemberCommand) Execute([]string) error {
-	client := NewClient()
+	Init()
+	client := NewPivnetClient()
 
 	userGroup, err := client.AddMemberToGroup(
 		command.UserGroupID,
@@ -319,7 +327,8 @@ func (command *AddUserGroupMemberCommand) Execute([]string) error {
 }
 
 func (command *RemoveUserGroupMemberCommand) Execute([]string) error {
-	client := NewClient()
+	Init()
+	client := NewPivnetClient()
 
 	userGroup, err := client.RemoveMemberFromGroup(
 		command.UserGroupID,

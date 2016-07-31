@@ -21,7 +21,8 @@ type DownloadProductFileCommand struct {
 }
 
 func (command *DownloadProductFileCommand) Execute([]string) error {
-	client := NewClient()
+	Init()
+	client := NewPivnetClient()
 
 	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
 	if err != nil {
