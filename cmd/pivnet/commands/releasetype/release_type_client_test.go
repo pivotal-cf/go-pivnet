@@ -23,7 +23,7 @@ var _ = Describe("releasetype commands", func() {
 
 		releasetypes []string
 
-		cmd *releasetype.ReleaseTypeClient
+		client *releasetype.ReleaseTypeClient
 	)
 
 	BeforeEach(func() {
@@ -40,7 +40,7 @@ var _ = Describe("releasetype commands", func() {
 
 		fakePivnetClient.ReleaseTypesReturns(releasetypes, nil)
 
-		cmd = releasetype.NewReleaseTypeClient(
+		client = releasetype.NewReleaseTypeClient(
 			fakePivnetClient,
 			fakeErrorHandler,
 			printer.PrintAsJSON,
@@ -51,7 +51,7 @@ var _ = Describe("releasetype commands", func() {
 
 	Describe("ReleaseTypes", func() {
 		It("lists all ReleaseTypes", func() {
-			err := cmd.List()
+			err := client.List()
 			Expect(err).NotTo(HaveOccurred())
 
 			var returnedReleaseTypes []string
@@ -72,7 +72,7 @@ var _ = Describe("releasetype commands", func() {
 			})
 
 			It("invokes the error handler", func() {
-				err := cmd.List()
+				err := client.List()
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))

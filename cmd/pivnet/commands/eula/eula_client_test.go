@@ -24,7 +24,7 @@ var _ = Describe("eula commands", func() {
 
 		eulas []pivnet.EULA
 
-		cmd *eula.EULAClient
+		client *eula.EULAClient
 	)
 
 	BeforeEach(func() {
@@ -51,7 +51,7 @@ var _ = Describe("eula commands", func() {
 		fakePivnetClient.EULAReturns(eulas[0], nil)
 		fakePivnetClient.AcceptEULAReturns(nil)
 
-		cmd = eula.NewEULAClient(
+		client = eula.NewEULAClient(
 			fakePivnetClient,
 			fakeErrorHandler,
 			printer.PrintAsJSON,
@@ -62,7 +62,7 @@ var _ = Describe("eula commands", func() {
 
 	Describe("EULAs", func() {
 		It("lists all EULAs", func() {
-			err := cmd.List()
+			err := client.List()
 			Expect(err).NotTo(HaveOccurred())
 
 			var returnedEULAs []pivnet.EULA
@@ -83,7 +83,7 @@ var _ = Describe("eula commands", func() {
 			})
 
 			It("invokes the error handler", func() {
-				err := cmd.List()
+				err := client.List()
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
@@ -94,7 +94,7 @@ var _ = Describe("eula commands", func() {
 
 	Describe("EULACommand", func() {
 		It("gets EULA", func() {
-			err := cmd.Get(eulas[0].Slug)
+			err := client.Get(eulas[0].Slug)
 			Expect(err).NotTo(HaveOccurred())
 
 			var returnedEULA pivnet.EULA
@@ -115,7 +115,7 @@ var _ = Describe("eula commands", func() {
 			})
 
 			It("invokes the error handler", func() {
-				err := cmd.Get(eulas[0].Slug)
+				err := client.Get(eulas[0].Slug)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
@@ -142,7 +142,7 @@ var _ = Describe("eula commands", func() {
 		})
 
 		It("accepts EULA", func() {
-			err := cmd.AcceptEULA(productSlug, release.Version)
+			err := client.AcceptEULA(productSlug, release.Version)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
@@ -157,7 +157,7 @@ var _ = Describe("eula commands", func() {
 			})
 
 			It("invokes the error handler", func() {
-				err := cmd.AcceptEULA(productSlug, release.Version)
+				err := client.AcceptEULA(productSlug, release.Version)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
@@ -176,7 +176,7 @@ var _ = Describe("eula commands", func() {
 			})
 
 			It("invokes the error handler", func() {
-				err := cmd.AcceptEULA(productSlug, release.Version)
+				err := client.AcceptEULA(productSlug, release.Version)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
