@@ -22,13 +22,13 @@ type EULAClient interface {
 }
 
 var NewEULAClient = func() EULAClient {
-	return &eula.EULAs{
-		Client:       NewPivnetClient(),
-		ErrorHandler: ErrorHandler,
-		Format:       Pivnet.Format,
-		OutputWriter: OutputWriter,
-		Printer:      Printer,
-	}
+	return eula.NewEULAClient(
+		NewPivnetClient(),
+		ErrorHandler,
+		Pivnet.Format,
+		OutputWriter,
+		Printer,
+	)
 }
 
 func (command *EULAsCommand) Execute(args []string) error {

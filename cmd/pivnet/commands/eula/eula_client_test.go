@@ -24,7 +24,7 @@ var _ = Describe("eula commands", func() {
 
 		eulas []pivnet.EULA
 
-		cmd *eula.EULAs
+		cmd *eula.EULAClient
 	)
 
 	BeforeEach(func() {
@@ -51,13 +51,13 @@ var _ = Describe("eula commands", func() {
 		fakePivnetClient.EULAReturns(eulas[0], nil)
 		fakePivnetClient.AcceptEULAReturns(nil)
 
-		cmd = &eula.EULAs{
-			OutputWriter: &outBuffer,
-			Printer:      printer.NewPrinter(&outBuffer),
-			ErrorHandler: fakeErrorHandler,
-			Client:       fakePivnetClient,
-			Format:       printer.PrintAsJSON,
-		}
+		cmd = eula.NewEULAClient(
+			fakePivnetClient,
+			fakeErrorHandler,
+			printer.PrintAsJSON,
+			&outBuffer,
+			printer.NewPrinter(&outBuffer),
+		)
 	})
 
 	Describe("EULAs", func() {
