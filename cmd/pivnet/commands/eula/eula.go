@@ -11,14 +11,6 @@ import (
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
 )
 
-var (
-	Client       PivnetClient
-	ErrorHandler errorhandler.ErrorHandler
-	Format       string
-	OutputWriter io.Writer
-	Printer      printer.Printer
-)
-
 //go:generate counterfeiter . PivnetClient
 type PivnetClient interface {
 	AcceptEULA(productSlug string, releaseID int) error
@@ -27,31 +19,27 @@ type PivnetClient interface {
 	ReleaseForProductVersion(productSlug string, releaseVersion string) (pivnet.Release, error)
 }
 
-type EULAsCommand struct {
+type EULAs struct {
+	Client       PivnetClient
+	ErrorHandler errorhandler.ErrorHandler
+	Format       string
+	OutputWriter io.Writer
+	Printer      printer.Printer
 }
 
-type EULACommand struct {
-	EULASlug string
-}
-
-type AcceptEULACommand struct {
-	ProductSlug    string
-	ReleaseVersion string
-}
-
-func (command *EULAsCommand) Execute([]string) error {
-	eulas, err := Client.EULAs()
+func (c *EULAs) List([]string) error {
+	eulas, err := c.Client.EULAs()
 	if err != nil {
-		return ErrorHandler.HandleError(err)
+		return c.ErrorHandler.HandleError(err)
 	}
 
-	return printEULAs(eulas)
+	return c.printEULAs(eulas)
 }
 
-func printEULA(eula pivnet.EULA) error {
-	switch Format {
+func (c *EULAs) printEULA(eula pivnet.EULA) error {
+	switch c.Format {
 	case printer.PrintAsTable:
-		table := tablewriter.NewWriter(OutputWriter)
+		table := tablewriter.NewWriter(c.OutputWriter)
 		table.SetHeader([]string{"ID", "Slug", "Name"})
 
 		eulaAsString := []string{
@@ -61,27 +49,27 @@ func printEULA(eula pivnet.EULA) error {
 		table.Render()
 		return nil
 	case printer.PrintAsJSON:
-		return Printer.PrintJSON(eula)
+		return c.Printer.PrintJSON(eula)
 	case printer.PrintAsYAML:
-		return Printer.PrintYAML(eula)
+		return c.Printer.PrintYAML(eula)
 	}
 
 	return nil
 }
 
-func (command *EULACommand) Execute([]string) error {
-	eula, err := Client.EULA(command.EULASlug)
+func (c *EULAs) Get(eulaSlug string) error {
+	eula, err := c.Client.EULA(eulaSlug)
 	if err != nil {
-		return ErrorHandler.HandleError(err)
+		return c.ErrorHandler.HandleError(err)
 	}
 
-	return printEULA(eula)
+	return c.printEULA(eula)
 }
 
-func printEULAs(eulas []pivnet.EULA) error {
-	switch Format {
+func (c *EULAs) printEULAs(eulas []pivnet.EULA) error {
+	switch c.Format {
 	case printer.PrintAsTable:
-		table := tablewriter.NewWriter(OutputWriter)
+		table := tablewriter.NewWriter(c.OutputWriter)
 		table.SetHeader([]string{"ID", "Slug", "Name"})
 
 		for _, e := range eulas {
@@ -93,32 +81,32 @@ func printEULAs(eulas []pivnet.EULA) error {
 		table.Render()
 		return nil
 	case printer.PrintAsJSON:
-		return Printer.PrintJSON(eulas)
+		return c.Printer.PrintJSON(eulas)
 	case printer.PrintAsYAML:
-		return Printer.PrintYAML(eulas)
+		return c.Printer.PrintYAML(eulas)
 	}
 
 	return nil
 }
 
-func (command *AcceptEULACommand) Execute([]string) error {
-	release, err := Client.ReleaseForProductVersion(command.ProductSlug, command.ReleaseVersion)
+func (c *EULAs) AcceptEULA(productSlug string, releaseVersion string) error {
+	release, err := c.Client.ReleaseForProductVersion(productSlug, releaseVersion)
 	if err != nil {
-		return ErrorHandler.HandleError(err)
+		return c.ErrorHandler.HandleError(err)
 	}
 
-	err = Client.AcceptEULA(command.ProductSlug, release.ID)
+	err = c.Client.AcceptEULA(productSlug, release.ID)
 
 	if err != nil {
-		return ErrorHandler.HandleError(err)
+		return c.ErrorHandler.HandleError(err)
 	}
 
-	if Format == printer.PrintAsTable {
+	if c.Format == printer.PrintAsTable {
 		_, err = fmt.Fprintf(
-			OutputWriter,
+			c.OutputWriter,
 			"eula acccepted successfully for %s/%s\n",
-			command.ProductSlug,
-			command.ReleaseVersion,
+			productSlug,
+			releaseVersion,
 		)
 
 		if err != nil {

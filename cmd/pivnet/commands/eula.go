@@ -14,35 +14,37 @@ type AcceptEULACommand struct {
 	ReleaseVersion string `long:"release-version" short:"v" description:"Release version e.g. 0.1.2-rc1" required:"true"`
 }
 
-func initEULAPackage() {
-	Init()
-	eula.Client = NewPivnetClient()
-	eula.ErrorHandler = ErrorHandler
-	eula.Format = Pivnet.Format
-	eula.OutputWriter = OutputWriter
-	eula.Printer = Printer
+//go:generate counterfeiter . EULAClient
+type EULAClient interface {
+	List([]string) error
+	Get(eulaSlug string) error
+	AcceptEULA(productSlug string, releaseVersion string) error
+}
+
+var NewEULAClient = func() EULAClient {
+	return &eula.EULAs{
+		Client:       NewPivnetClient(),
+		ErrorHandler: ErrorHandler,
+		Format:       Pivnet.Format,
+		OutputWriter: OutputWriter,
+		Printer:      Printer,
+	}
 }
 
 func (command *EULAsCommand) Execute(args []string) error {
-	initEULAPackage()
+	Init()
 
-	c := &eula.EULAsCommand{}
-	return c.Execute(args)
+	return NewEULAClient().List(args)
 }
 
 func (command *EULACommand) Execute(args []string) error {
-	initEULAPackage()
+	Init()
 
-	c := &eula.EULACommand{EULASlug: command.EULASlug}
-	return c.Execute(args)
+	return NewEULAClient().Get(command.EULASlug)
 }
 
 func (command *AcceptEULACommand) Execute(args []string) error {
-	initEULAPackage()
+	Init()
 
-	c := &eula.AcceptEULACommand{
-		ProductSlug:    command.ProductSlug,
-		ReleaseVersion: command.ReleaseVersion,
-	}
-	return c.Execute(args)
+	return NewEULAClient().AcceptEULA(command.ProductSlug, command.ReleaseVersion)
 }

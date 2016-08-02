@@ -23,17 +23,16 @@ var _ = Describe("eula commands", func() {
 		outBuffer bytes.Buffer
 
 		eulas []pivnet.EULA
+
+		cmd *eula.EULAs
 	)
 
 	BeforeEach(func() {
 		fakePivnetClient = &eulafakes.FakePivnetClient{}
 
 		outBuffer = bytes.Buffer{}
-		eula.OutputWriter = &outBuffer
-		eula.Printer = printer.NewPrinter(&outBuffer)
 
 		fakeErrorHandler = &errorhandlerfakes.FakeErrorHandler{}
-		eula.ErrorHandler = fakeErrorHandler
 
 		eulas = []pivnet.EULA{
 			{
@@ -51,20 +50,19 @@ var _ = Describe("eula commands", func() {
 		fakePivnetClient.EULAsReturns(eulas, nil)
 		fakePivnetClient.EULAReturns(eulas[0], nil)
 		fakePivnetClient.AcceptEULAReturns(nil)
-		eula.Client = fakePivnetClient
+
+		cmd = &eula.EULAs{
+			OutputWriter: &outBuffer,
+			Printer:      printer.NewPrinter(&outBuffer),
+			ErrorHandler: fakeErrorHandler,
+			Client:       fakePivnetClient,
+			Format:       printer.PrintAsJSON,
+		}
 	})
 
-	Describe("EULAsCommand", func() {
-		var (
-			cmd eula.EULAsCommand
-		)
-
-		BeforeEach(func() {
-			cmd = eula.EULAsCommand{}
-		})
-
+	Describe("EULAs", func() {
 		It("lists all EULAs", func() {
-			err := cmd.Execute(nil)
+			err := cmd.List(nil)
 			Expect(err).NotTo(HaveOccurred())
 
 			var returnedEULAs []pivnet.EULA
@@ -85,7 +83,7 @@ var _ = Describe("eula commands", func() {
 			})
 
 			It("invokes the error handler", func() {
-				err := cmd.Execute(nil)
+				err := cmd.List(nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
@@ -95,18 +93,8 @@ var _ = Describe("eula commands", func() {
 	})
 
 	Describe("EULACommand", func() {
-		var (
-			cmd eula.EULACommand
-		)
-
-		BeforeEach(func() {
-			cmd = eula.EULACommand{
-				EULASlug: eulas[0].Slug,
-			}
-		})
-
-		It("shows EULA", func() {
-			err := cmd.Execute(nil)
+		It("gets EULA", func() {
+			err := cmd.Get(eulas[0].Slug)
 			Expect(err).NotTo(HaveOccurred())
 
 			var returnedEULA pivnet.EULA
@@ -127,7 +115,7 @@ var _ = Describe("eula commands", func() {
 			})
 
 			It("invokes the error handler", func() {
-				err := cmd.Execute(nil)
+				err := cmd.Get(eulas[0].Slug)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
@@ -143,7 +131,6 @@ var _ = Describe("eula commands", func() {
 
 		var (
 			release pivnet.Release
-			command eula.AcceptEULACommand
 		)
 
 		BeforeEach(func() {
@@ -152,15 +139,10 @@ var _ = Describe("eula commands", func() {
 				Version:     "version 0.2.3",
 				Description: "Some release with some description.",
 			}
-
-			command = eula.AcceptEULACommand{
-				ProductSlug:    productSlug,
-				ReleaseVersion: release.Version,
-			}
 		})
 
 		It("accepts EULA", func() {
-			err := command.Execute(nil)
+			err := cmd.AcceptEULA(productSlug, release.Version)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
@@ -175,7 +157,7 @@ var _ = Describe("eula commands", func() {
 			})
 
 			It("invokes the error handler", func() {
-				err := command.Execute(nil)
+				err := cmd.AcceptEULA(productSlug, release.Version)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
@@ -194,7 +176,7 @@ var _ = Describe("eula commands", func() {
 			})
 
 			It("invokes the error handler", func() {
-				err := command.Execute(nil)
+				err := cmd.AcceptEULA(productSlug, release.Version)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
