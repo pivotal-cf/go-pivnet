@@ -62,7 +62,7 @@ var _ = Describe("eula commands", func() {
 
 	Describe("EULAs", func() {
 		It("lists all EULAs", func() {
-			err := cmd.List(nil)
+			err := cmd.List()
 			Expect(err).NotTo(HaveOccurred())
 
 			var returnedEULAs []pivnet.EULA
@@ -83,7 +83,7 @@ var _ = Describe("eula commands", func() {
 			})
 
 			It("invokes the error handler", func() {
-				err := cmd.List(nil)
+				err := cmd.List()
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))

@@ -43,7 +43,7 @@ func NewEULAClient(
 	}
 }
 
-func (c *EULAClient) List([]string) error {
+func (c *EULAClient) List() error {
 	eulas, err := c.pivnetClient.EULAs()
 	if err != nil {
 		return c.eh.HandleError(err)

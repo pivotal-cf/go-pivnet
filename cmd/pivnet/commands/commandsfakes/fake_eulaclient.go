@@ -8,12 +8,10 @@ import (
 )
 
 type FakeEULAClient struct {
-	ListStub        func([]string) error
+	ListStub        func() error
 	listMutex       sync.RWMutex
-	listArgsForCall []struct {
-		arg1 []string
-	}
-	listReturns struct {
+	listArgsForCall []struct{}
+	listReturns     struct {
 		result1 error
 	}
 	GetStub        func(eulaSlug string) error
@@ -37,20 +35,13 @@ type FakeEULAClient struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeEULAClient) List(arg1 []string) error {
-	var arg1Copy []string
-	if arg1 != nil {
-		arg1Copy = make([]string, len(arg1))
-		copy(arg1Copy, arg1)
-	}
+func (fake *FakeEULAClient) List() error {
 	fake.listMutex.Lock()
-	fake.listArgsForCall = append(fake.listArgsForCall, struct {
-		arg1 []string
-	}{arg1Copy})
-	fake.recordInvocation("List", []interface{}{arg1Copy})
+	fake.listArgsForCall = append(fake.listArgsForCall, struct{}{})
+	fake.recordInvocation("List", []interface{}{})
 	fake.listMutex.Unlock()
 	if fake.ListStub != nil {
-		return fake.ListStub(arg1)
+		return fake.ListStub()
 	} else {
 		return fake.listReturns.result1
 	}
@@ -60,12 +51,6 @@ func (fake *FakeEULAClient) ListCallCount() int {
 	fake.listMutex.RLock()
 	defer fake.listMutex.RUnlock()
 	return len(fake.listArgsForCall)
-}
-
-func (fake *FakeEULAClient) ListArgsForCall(i int) []string {
-	fake.listMutex.RLock()
-	defer fake.listMutex.RUnlock()
-	return fake.listArgsForCall[i].arg1
 }
 
 func (fake *FakeEULAClient) ListReturns(result1 error) {

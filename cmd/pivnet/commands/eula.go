@@ -16,7 +16,7 @@ type AcceptEULACommand struct {
 
 //go:generate counterfeiter . EULAClient
 type EULAClient interface {
-	List([]string) error
+	List() error
 	Get(eulaSlug string) error
 	AcceptEULA(productSlug string, releaseVersion string) error
 }
@@ -34,7 +34,7 @@ var NewEULAClient = func() EULAClient {
 func (command *EULAsCommand) Execute(args []string) error {
 	Init()
 
-	return NewEULAClient().List(args)
+	return NewEULAClient().List()
 }
 
 func (command *EULACommand) Execute(args []string) error {

@@ -5,18 +5,23 @@ import "github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands/release
 type ReleaseTypesCommand struct {
 }
 
-func initReleasetypePackage() {
-	Init()
-	releasetype.Client = NewPivnetClient()
-	releasetype.ErrorHandler = ErrorHandler
-	releasetype.Format = Pivnet.Format
-	releasetype.OutputWriter = OutputWriter
-	releasetype.Printer = Printer
+//go:generate counterfeiter . ReleaseTypeClient
+type ReleaseTypeClient interface {
+	List() error
+}
+
+var NewReleaseTypeClient = func() ReleaseTypeClient {
+	return releasetype.NewReleaseTypeClient(
+		NewPivnetClient(),
+		ErrorHandler,
+		Pivnet.Format,
+		OutputWriter,
+		Printer,
+	)
 }
 
 func (command *ReleaseTypesCommand) Execute(args []string) error {
-	initReleasetypePackage()
+	Init()
 
-	c := &releasetype.ReleaseTypesCommand{}
-	return c.Execute(args)
+	return NewReleaseTypeClient().List()
 }

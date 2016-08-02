@@ -22,17 +22,16 @@ var _ = Describe("releasetype commands", func() {
 		outBuffer bytes.Buffer
 
 		releasetypes []string
+
+		cmd *releasetype.ReleaseTypeClient
 	)
 
 	BeforeEach(func() {
 		fakePivnetClient = &releasetypefakes.FakePivnetClient{}
 
 		outBuffer = bytes.Buffer{}
-		releasetype.OutputWriter = &outBuffer
-		releasetype.Printer = printer.NewPrinter(&outBuffer)
 
 		fakeErrorHandler = &errorhandlerfakes.FakeErrorHandler{}
-		releasetype.ErrorHandler = fakeErrorHandler
 
 		releasetypes = []string{
 			"release-type-A",
@@ -40,20 +39,19 @@ var _ = Describe("releasetype commands", func() {
 		}
 
 		fakePivnetClient.ReleaseTypesReturns(releasetypes, nil)
-		releasetype.Client = fakePivnetClient
+
+		cmd = releasetype.NewReleaseTypeClient(
+			fakePivnetClient,
+			fakeErrorHandler,
+			printer.PrintAsJSON,
+			&outBuffer,
+			printer.NewPrinter(&outBuffer),
+		)
 	})
 
-	Describe("ReleaseTypesCommand", func() {
-		var (
-			cmd releasetype.ReleaseTypesCommand
-		)
-
-		BeforeEach(func() {
-			cmd = releasetype.ReleaseTypesCommand{}
-		})
-
+	Describe("ReleaseTypes", func() {
 		It("lists all ReleaseTypes", func() {
-			err := cmd.Execute(nil)
+			err := cmd.List()
 			Expect(err).NotTo(HaveOccurred())
 
 			var returnedReleaseTypes []string
@@ -74,7 +72,7 @@ var _ = Describe("releasetype commands", func() {
 			})
 
 			It("invokes the error handler", func() {
-				err := cmd.Execute(nil)
+				err := cmd.List()
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
