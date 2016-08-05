@@ -1,14 +1,6 @@
 package commands
 
-import (
-	"fmt"
-	"strconv"
-	"strings"
-
-	"github.com/olekukonko/tablewriter"
-	"github.com/pivotal-cf-experimental/go-pivnet"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
-)
+import "github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands/filegroup"
 
 type FileGroupsCommand struct {
 	ProductSlug    string `long:"product-slug" short:"p" description:"Product slug e.g. p-mysql" required:"true"`
@@ -25,153 +17,34 @@ type DeleteFileGroupCommand struct {
 	FileGroupID int    `long:"file-group-id" description:"File group ID e.g. 1234" required:"true"`
 }
 
-func (command *FileGroupsCommand) Execute([]string) error {
-	Init()
-	client := NewPivnetClient()
-
-	if command.ReleaseVersion == "" {
-		fileGroups, err := client.FileGroups(
-			command.ProductSlug,
-		)
-		if err != nil {
-			return ErrorHandler.HandleError(err)
-		}
-		return printFileGroups(fileGroups)
-	}
-
-	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	var release pivnet.Release
-	for _, r := range releases {
-		if r.Version == command.ReleaseVersion {
-			release = r
-			break
-		}
-	}
-
-	if release.Version != command.ReleaseVersion {
-		return fmt.Errorf("release not found")
-	}
-
-	fileGroups, err := client.FileGroupsForRelease(
-		command.ProductSlug,
-		release.ID,
-	)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	return printFileGroups(fileGroups)
+//go:generate counterfeiter . FileGroupClient
+type FileGroupClient interface {
+	List(productSlug string, releaseVersion string) error
+	Get(productSlug string, productFileID int) error
+	Delete(productSlug string, productFileID int) error
 }
 
-func printFileGroups(fileGroups []pivnet.FileGroup) error {
-	switch Pivnet.Format {
+var NewFileGroupClient = func() FileGroupClient {
+	return filegroup.NewFileGroupClient(
+		NewPivnetClient(),
+		ErrorHandler,
+		Pivnet.Format,
+		OutputWriter,
+		Printer,
+	)
+}
 
-	case printer.PrintAsTable:
-		table := tablewriter.NewWriter(OutputWriter)
-		table.SetHeader([]string{
-			"ID",
-			"Name",
-			"Product File Names",
-		})
-
-		for _, fileGroup := range fileGroups {
-			var productFileNames []string
-
-			for _, productFile := range fileGroup.ProductFiles {
-				productFileNames = append(productFileNames, productFile.Name)
-			}
-
-			fileGroupAsString := []string{
-				strconv.Itoa(fileGroup.ID),
-				fileGroup.Name,
-				strings.Join(productFileNames, ", "),
-			}
-			table.Append(fileGroupAsString)
-		}
-		table.Render()
-		return nil
-	case printer.PrintAsJSON:
-		return Printer.PrintJSON(fileGroups)
-	case printer.PrintAsYAML:
-		return Printer.PrintYAML(fileGroups)
-	}
-
-	return nil
+func (command *FileGroupsCommand) Execute([]string) error {
+	Init()
+	return NewFileGroupClient().List(command.ProductSlug, command.ReleaseVersion)
 }
 
 func (command *FileGroupCommand) Execute([]string) error {
 	Init()
-	client := NewPivnetClient()
-
-	fileGroup, err := client.FileGroup(
-		command.ProductSlug,
-		command.FileGroupID,
-	)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	return printFileGroup(fileGroup)
-}
-
-func printFileGroup(fileGroup pivnet.FileGroup) error {
-	switch Pivnet.Format {
-
-	case printer.PrintAsTable:
-		table := tablewriter.NewWriter(OutputWriter)
-		table.SetHeader([]string{
-			"ID",
-			"Name",
-			"Product File Names",
-		})
-
-		var productFileNames []string
-
-		for _, productFile := range fileGroup.ProductFiles {
-			productFileNames = append(productFileNames, productFile.Name)
-		}
-
-		fileGroupAsString := []string{
-			strconv.Itoa(fileGroup.ID),
-			fileGroup.Name,
-			strings.Join(productFileNames, ", "),
-		}
-		table.Append(fileGroupAsString)
-		table.Render()
-		return nil
-	case printer.PrintAsJSON:
-		return Printer.PrintJSON(fileGroup)
-	case printer.PrintAsYAML:
-		return Printer.PrintYAML(fileGroup)
-	}
-
-	return nil
+	return NewFileGroupClient().Get(command.ProductSlug, command.FileGroupID)
 }
 
 func (command *DeleteFileGroupCommand) Execute([]string) error {
 	Init()
-	client := NewPivnetClient()
-
-	_, err := client.DeleteFileGroup(
-		command.ProductSlug,
-		command.FileGroupID,
-	)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	if Pivnet.Format == printer.PrintAsTable {
-		_, err = fmt.Fprintf(
-			OutputWriter,
-			"file group %d deleted successfully for %s\n",
-			command.FileGroupID,
-			command.ProductSlug,
-		)
-	}
-
-	return ErrorHandler.HandleError(err)
+	return NewFileGroupClient().Delete(command.ProductSlug, command.FileGroupID)
 }
