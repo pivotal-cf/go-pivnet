@@ -1,164 +1,102 @@
 package commands_test
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"net/http"
+	"errors"
 	"reflect"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/pivotal-cf-experimental/go-pivnet"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errorhandler/errorhandlerfakes"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
-
-	"github.com/onsi/gomega/ghttp"
+	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands/commandsfakes"
 )
 
 var _ = Describe("product commands", func() {
 	var (
-		server *ghttp.Server
+		field reflect.StructField
 
-		fakeErrorHandler *errorhandlerfakes.FakeErrorHandler
-
-		field     reflect.StructField
-		outBuffer bytes.Buffer
-
-		product  pivnet.Product
-		products []pivnet.Product
-
-		responseStatusCode int
-		response           interface{}
+		fakeProductClient *commandsfakes.FakeProductClient
 	)
 
 	BeforeEach(func() {
-		server = ghttp.NewServer()
+		fakeProductClient = &commandsfakes.FakeProductClient{}
 
-		commands.Pivnet.Host = server.URL()
-
-		outBuffer = bytes.Buffer{}
-		commands.OutputWriter = &outBuffer
-		commands.Printer = printer.NewPrinter(commands.OutputWriter)
-
-		fakeErrorHandler = &errorhandlerfakes.FakeErrorHandler{}
-		commands.ErrorHandler = fakeErrorHandler
-
-		product = pivnet.Product{
-			ID:   1234,
-			Slug: "some-product-slug",
-			Name: "some-product-name",
+		commands.NewProductClient = func() commands.ProductClient {
+			return fakeProductClient
 		}
-
-		products = []pivnet.Product{
-			product,
-			{
-				ID:   2345,
-				Slug: "another-product-slug",
-				Name: "another-product-name",
-			},
-		}
-
-		responseStatusCode = http.StatusOK
-	})
-
-	AfterEach(func() {
-		server.Close()
 	})
 
 	Describe("ProductsCommand", func() {
 		var (
-			command commands.ProductsCommand
+			cmd commands.ProductsCommand
 		)
 
 		BeforeEach(func() {
-			response = pivnet.ProductsResponse{
-				Products: products,
-			}
-
-			command = commands.ProductsCommand{}
+			cmd = commands.ProductsCommand{}
 		})
 
-		JustBeforeEach(func() {
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products", apiPrefix)),
-					ghttp.RespondWithJSONEncoded(responseStatusCode, response),
-				),
+		It("invokes the Product client", func() {
+			err := cmd.Execute(nil)
+
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(fakeProductClient.ListCallCount()).To(Equal(1))
+		})
+
+		Context("when the Product client returns an error", func() {
+			var (
+				expectedErr error
 			)
-		})
 
-		It("lists all products", func() {
-			err := command.Execute(nil)
-			Expect(err).NotTo(HaveOccurred())
-
-			var returnedProducts []pivnet.Product
-
-			err = json.Unmarshal(outBuffer.Bytes(), &returnedProducts)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(returnedProducts).To(Equal(products))
-		})
-
-		Context("when there is an error", func() {
 			BeforeEach(func() {
-				responseStatusCode = http.StatusTeapot
+				expectedErr = errors.New("expected error")
+				fakeProductClient.ListReturns(expectedErr)
 			})
 
-			It("invokes the error handler", func() {
-				err := command.Execute(nil)
-				Expect(err).NotTo(HaveOccurred())
+			It("forwards the error", func() {
+				err := cmd.Execute(nil)
 
-				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(err).To(Equal(expectedErr))
 			})
 		})
 	})
 
 	Describe("ProductCommand", func() {
 		var (
-			command commands.ProductCommand
+			cmd commands.ProductCommand
+
+			productSlug string
 		)
 
 		BeforeEach(func() {
-			response = product
+			productSlug = "some product slug"
 
-			command = commands.ProductCommand{
-				ProductSlug: product.Slug,
+			cmd = commands.ProductCommand{
+				ProductSlug: productSlug,
 			}
 		})
 
-		JustBeforeEach(func() {
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/%s", apiPrefix, product.Slug)),
-					ghttp.RespondWithJSONEncoded(responseStatusCode, response),
-				),
+		It("invokes the Product client", func() {
+			err := cmd.Execute(nil)
+
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(fakeProductClient.GetCallCount()).To(Equal(1))
+		})
+
+		Context("when the Product client returns an error", func() {
+			var (
+				expectedErr error
 			)
-		})
 
-		It("shows the product", func() {
-			err := command.Execute(nil)
-			Expect(err).NotTo(HaveOccurred())
-
-			var returnedProduct pivnet.Product
-
-			err = json.Unmarshal(outBuffer.Bytes(), &returnedProduct)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(returnedProduct).To(Equal(product))
-		})
-
-		Context("when there is an error", func() {
 			BeforeEach(func() {
-				responseStatusCode = http.StatusTeapot
+				expectedErr = errors.New("expected error")
+				fakeProductClient.GetReturns(expectedErr)
 			})
 
-			It("invokes the error handler", func() {
-				err := command.Execute(nil)
-				Expect(err).NotTo(HaveOccurred())
+			It("forwards the error", func() {
+				err := cmd.Execute(nil)
 
-				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(err).To(Equal(expectedErr))
 			})
 		})
 
