@@ -1,176 +1,61 @@
 package commands_test
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"net/http"
+	"errors"
 	"reflect"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/pivotal-cf-experimental/go-pivnet"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errorhandler/errorhandlerfakes"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
-
-	"github.com/onsi/gomega/ghttp"
+	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands/commandsfakes"
 )
 
 var _ = Describe("release upgrade path commands", func() {
 	var (
-		server *ghttp.Server
+		field reflect.StructField
 
-		fakeErrorHandler *errorhandlerfakes.FakeErrorHandler
-
-		field     reflect.StructField
-		outBuffer bytes.Buffer
-
-		productSlug string
-
-		release             pivnet.Release
-		releases            []pivnet.Release
-		releaseUpgradePaths []pivnet.ReleaseUpgradePath
-
-		responseStatusCode int
-		response           interface{}
-
-		releasesResponseStatusCode int
-		releasesResponse           pivnet.ReleasesResponse
+		fakeReleaseUpgradePathClient *commandsfakes.FakeReleaseUpgradePathClient
 	)
 
 	BeforeEach(func() {
-		server = ghttp.NewServer()
+		fakeReleaseUpgradePathClient = &commandsfakes.FakeReleaseUpgradePathClient{}
 
-		commands.Pivnet.Host = server.URL()
-
-		outBuffer = bytes.Buffer{}
-		commands.OutputWriter = &outBuffer
-		commands.Printer = printer.NewPrinter(commands.OutputWriter)
-
-		fakeErrorHandler = &errorhandlerfakes.FakeErrorHandler{}
-		commands.ErrorHandler = fakeErrorHandler
-
-		productSlug = "some-product-slug"
-
-		release = pivnet.Release{
-			ID:      1234,
-			Version: "some-release-version",
+		commands.NewReleaseUpgradePathClient = func() commands.ReleaseUpgradePathClient {
+			return fakeReleaseUpgradePathClient
 		}
-
-		releases = []pivnet.Release{
-			release,
-			{
-				ID:      2345,
-				Version: "another-release-version",
-			},
-		}
-
-		releaseUpgradePaths = []pivnet.ReleaseUpgradePath{
-			{
-				Release: pivnet.UpgradePathRelease{
-					ID:      1234,
-					Version: "Some version",
-				},
-			},
-			{
-				Release: pivnet.UpgradePathRelease{
-					ID:      2345,
-					Version: "Another version",
-				},
-			},
-		}
-
-		releasesResponseStatusCode = http.StatusOK
-
-		releasesResponse = pivnet.ReleasesResponse{
-			Releases: releases,
-		}
-
-		responseStatusCode = http.StatusOK
-	})
-
-	AfterEach(func() {
-		server.Close()
 	})
 
 	Describe("ReleasesUpgradePathsCommand", func() {
 		var (
-			command commands.ReleaseUpgradePathsCommand
+			cmd commands.ReleaseUpgradePathsCommand
 		)
 
 		BeforeEach(func() {
-			responseStatusCode = http.StatusOK
-
-			command = commands.ReleaseUpgradePathsCommand{
-				ProductSlug:    productSlug,
-				ReleaseVersion: releases[0].Version,
-			}
-
-			response = pivnet.ReleaseUpgradePathsResponse{
-				ReleaseUpgradePaths: releaseUpgradePaths,
-			}
+			cmd = commands.ReleaseUpgradePathsCommand{}
 		})
 
-		JustBeforeEach(func() {
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/%s/releases", apiPrefix, productSlug)),
-					ghttp.RespondWithJSONEncoded(releasesResponseStatusCode, releasesResponse),
-				),
-			)
+		It("invokes the ReleaseUpgradePath client", func() {
+			err := cmd.Execute(nil)
 
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(
-						"GET",
-						fmt.Sprintf(
-							"%s/products/%s/releases/%d/upgrade_paths",
-							apiPrefix,
-							productSlug,
-							releases[0].ID,
-						),
-					),
-					ghttp.RespondWithJSONEncoded(responseStatusCode, response),
-				),
-			)
-		})
-
-		It("lists all release upgrade paths for the provided product slug and release version", func() {
-			err := command.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
 
-			var returned []pivnet.ReleaseUpgradePath
-
-			err = json.Unmarshal(outBuffer.Bytes(), &returned)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(returned).To(Equal(releaseUpgradePaths))
+			Expect(fakeReleaseUpgradePathClient.ListCallCount()).To(Equal(1))
 		})
 
-		Context("when there is an error", func() {
+		Context("when the ReleaseUpgradePath client returns an error", func() {
+			var (
+				expectedErr error
+			)
+
 			BeforeEach(func() {
-				responseStatusCode = http.StatusTeapot
+				expectedErr = errors.New("expected error")
+				fakeReleaseUpgradePathClient.ListReturns(expectedErr)
 			})
 
-			It("invokes the error handler", func() {
-				err := command.Execute(nil)
-				Expect(err).NotTo(HaveOccurred())
+			It("forwards the error", func() {
+				err := cmd.Execute(nil)
 
-				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
-			})
-		})
-
-		Context("when there is an error getting all releases", func() {
-			BeforeEach(func() {
-				releasesResponseStatusCode = http.StatusTeapot
-			})
-
-			It("invokes the error handler", func() {
-				err := command.Execute(nil)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(err).To(Equal(expectedErr))
 			})
 		})
 
