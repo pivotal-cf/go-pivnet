@@ -1,13 +1,6 @@
 package commands
 
-import (
-	"fmt"
-	"strconv"
-
-	"github.com/olekukonko/tablewriter"
-	"github.com/pivotal-cf-experimental/go-pivnet"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
-)
+import "github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands/productfile"
 
 type ProductFilesCommand struct {
 	ProductSlug    string `long:"product-slug" short:"p" description:"Product slug e.g. p-mysql" required:"true"`
@@ -37,272 +30,46 @@ type DeleteProductFileCommand struct {
 	ProductFileID int    `long:"product-file-id" description:"Product file ID e.g. 1234" required:"true"`
 }
 
+//go:generate counterfeiter . ProductFileClient
+type ProductFileClient interface {
+	List(productSlug string, releaseVersion string) error
+	Get(productSlug string, releaseVersion string, productFileID int) error
+	AddToRelease(productSlug string, releaseVersion string, productFileID int) error
+	RemoveFromRelease(productSlug string, releaseVersion string, productFileID int) error
+	Delete(productSlug string, productFileID int) error
+}
+
+var NewProductFileClient = func() ProductFileClient {
+	return productfile.NewProductFileClient(
+		NewPivnetClient(),
+		ErrorHandler,
+		Pivnet.Format,
+		OutputWriter,
+		Printer,
+	)
+}
+
 func (command *ProductFilesCommand) Execute([]string) error {
 	Init()
-	client := NewPivnetClient()
-
-	if command.ReleaseVersion == "" {
-		productFiles, err := client.GetProductFiles(
-			command.ProductSlug,
-		)
-		if err != nil {
-			return ErrorHandler.HandleError(err)
-		}
-
-		return printProductFiles(productFiles)
-	}
-
-	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	var release pivnet.Release
-	for _, r := range releases {
-		if r.Version == command.ReleaseVersion {
-			release = r
-			break
-		}
-	}
-
-	if release.Version != command.ReleaseVersion {
-		return fmt.Errorf("release not found")
-	}
-
-	productFiles, err := client.GetProductFilesForRelease(
-		command.ProductSlug,
-		release.ID,
-	)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	return printProductFiles(productFiles)
-}
-
-func printProductFiles(productFiles []pivnet.ProductFile) error {
-	switch Pivnet.Format {
-
-	case printer.PrintAsTable:
-		table := tablewriter.NewWriter(OutputWriter)
-		table.SetHeader([]string{
-			"ID",
-			"Name",
-			"File Version",
-			"AWS Object Key",
-		})
-
-		for _, productFile := range productFiles {
-			productFileAsString := []string{
-				strconv.Itoa(productFile.ID),
-				productFile.Name,
-				productFile.FileVersion,
-				productFile.AWSObjectKey,
-			}
-			table.Append(productFileAsString)
-		}
-		table.Render()
-		return nil
-	case printer.PrintAsJSON:
-		return Printer.PrintJSON(productFiles)
-	case printer.PrintAsYAML:
-		return Printer.PrintYAML(productFiles)
-	}
-
-	return nil
-}
-
-func printProductFile(productFile pivnet.ProductFile) error {
-	switch Pivnet.Format {
-	case printer.PrintAsTable:
-		table := tablewriter.NewWriter(OutputWriter)
-		table.SetHeader([]string{
-			"ID",
-			"Name",
-			"File Version",
-			"File Type",
-			"Description",
-			"MD5",
-			"AWS Object Key",
-			"Size (Bytes)",
-		})
-
-		productFileAsString := []string{
-			strconv.Itoa(productFile.ID),
-			productFile.Name,
-			productFile.FileVersion,
-			productFile.FileType,
-			productFile.Description,
-			productFile.MD5,
-			productFile.AWSObjectKey,
-			fmt.Sprintf("%d", productFile.Size),
-		}
-		table.Append(productFileAsString)
-		table.Render()
-		return nil
-	case printer.PrintAsJSON:
-		return Printer.PrintJSON(productFile)
-	case printer.PrintAsYAML:
-		return Printer.PrintYAML(productFile)
-	}
-
-	return nil
+	return NewProductFileClient().List(command.ProductSlug, command.ReleaseVersion)
 }
 
 func (command *ProductFileCommand) Execute([]string) error {
 	Init()
-	client := NewPivnetClient()
-
-	if command.ReleaseVersion == "" {
-		productFile, err := client.GetProductFile(
-			command.ProductSlug,
-			command.ProductFileID,
-		)
-		if err != nil {
-			return ErrorHandler.HandleError(err)
-		}
-		return printProductFile(productFile)
-	}
-
-	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	var release pivnet.Release
-	for _, r := range releases {
-		if r.Version == command.ReleaseVersion {
-			release = r
-			break
-		}
-	}
-
-	if release.Version != command.ReleaseVersion {
-		return fmt.Errorf("release not found")
-	}
-
-	productFile, err := client.GetProductFileForRelease(
-		command.ProductSlug,
-		release.ID,
-		command.ProductFileID,
-	)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	return printProductFile(productFile)
+	return NewProductFileClient().Get(command.ProductSlug, command.ReleaseVersion, command.ProductFileID)
 }
 
 func (command *AddProductFileCommand) Execute([]string) error {
 	Init()
-	client := NewPivnetClient()
-
-	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	var release pivnet.Release
-	for _, r := range releases {
-		if r.Version == command.ReleaseVersion {
-			release = r
-			break
-		}
-	}
-
-	if release.Version != command.ReleaseVersion {
-		return fmt.Errorf("release not found")
-	}
-
-	err = client.AddProductFile(
-		command.ProductSlug,
-		release.ID,
-		command.ProductFileID,
-	)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	if Pivnet.Format == printer.PrintAsTable {
-		_, err = fmt.Fprintf(
-			OutputWriter,
-			"product file %d added successfully to %s/%s\n",
-			command.ProductFileID,
-			command.ProductSlug,
-			command.ReleaseVersion,
-		)
-	}
-
-	return nil
+	return NewProductFileClient().AddToRelease(command.ProductSlug, command.ReleaseVersion, command.ProductFileID)
 }
 
 func (command *RemoveProductFileCommand) Execute([]string) error {
 	Init()
-	client := NewPivnetClient()
-
-	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	var release pivnet.Release
-	for _, r := range releases {
-		if r.Version == command.ReleaseVersion {
-			release = r
-			break
-		}
-	}
-
-	if release.Version != command.ReleaseVersion {
-		return fmt.Errorf("release not found")
-	}
-
-	err = client.RemoveProductFile(
-		command.ProductSlug,
-		release.ID,
-		command.ProductFileID,
-	)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	if Pivnet.Format == printer.PrintAsTable {
-		_, err = fmt.Fprintf(
-			OutputWriter,
-			"product file %d removed successfully from %s/%s\n",
-			command.ProductFileID,
-			command.ProductSlug,
-			command.ReleaseVersion,
-		)
-
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return NewProductFileClient().RemoveFromRelease(command.ProductSlug, command.ReleaseVersion, command.ProductFileID)
 }
 
 func (command *DeleteProductFileCommand) Execute([]string) error {
 	Init()
-	client := NewPivnetClient()
-
-	productFile, err := client.DeleteProductFile(
-		command.ProductSlug,
-		command.ProductFileID,
-	)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	if Pivnet.Format == printer.PrintAsTable {
-		_, err = fmt.Fprintf(
-			OutputWriter,
-			"product file %d deleted successfully for %s\n",
-			command.ProductFileID,
-			command.ProductSlug,
-		)
-	}
-
-	return printProductFile(productFile)
+	return NewProductFileClient().Delete(command.ProductSlug, command.ProductFileID)
 }

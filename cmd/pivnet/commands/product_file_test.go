@@ -1,226 +1,62 @@
 package commands_test
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"net/http"
+	"errors"
 	"reflect"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/pivotal-cf-experimental/go-pivnet"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errorhandler/errorhandlerfakes"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
-
-	"github.com/onsi/gomega/ghttp"
+	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands/commandsfakes"
 )
 
 var _ = Describe("product file commands", func() {
 	var (
-		server *ghttp.Server
+		field reflect.StructField
 
-		fakeErrorHandler *errorhandlerfakes.FakeErrorHandler
-
-		field     reflect.StructField
-		outBuffer bytes.Buffer
-
-		productSlug string
-
-		releases     []pivnet.Release
-		productFile  pivnet.ProductFile
-		productFiles []pivnet.ProductFile
-
-		responseStatusCode int
-		response           interface{}
-
-		releasesResponseStatusCode int
-		releasesResponse           pivnet.ReleasesResponse
+		fakeProductFileClient *commandsfakes.FakeProductFileClient
 	)
 
 	BeforeEach(func() {
-		server = ghttp.NewServer()
+		fakeProductFileClient = &commandsfakes.FakeProductFileClient{}
 
-		commands.Pivnet.Host = server.URL()
-
-		outBuffer = bytes.Buffer{}
-		commands.OutputWriter = &outBuffer
-		commands.Printer = printer.NewPrinter(commands.OutputWriter)
-
-		fakeErrorHandler = &errorhandlerfakes.FakeErrorHandler{}
-		commands.ErrorHandler = fakeErrorHandler
-
-		productSlug = "some-product-slug"
-
-		productFile = pivnet.ProductFile{
-			ID:   1234,
-			Name: "some product file",
+		commands.NewProductFileClient = func() commands.ProductFileClient {
+			return fakeProductFileClient
 		}
-
-		releases = []pivnet.Release{
-			{
-				ID:      1234,
-				Version: "some-release-version",
-			},
-			{
-				ID:      2345,
-				Version: "another-release-version",
-			},
-		}
-
-		productFiles = []pivnet.ProductFile{
-			{
-				ID:   1234,
-				Name: "Some name",
-			},
-			{
-				ID:   2345,
-				Name: "Another name",
-			},
-		}
-
-		releasesResponseStatusCode = http.StatusOK
-
-		releasesResponse = pivnet.ReleasesResponse{
-			Releases: releases,
-		}
-
-		responseStatusCode = http.StatusOK
-	})
-
-	AfterEach(func() {
-		server.Close()
 	})
 
 	Describe("ProductFilesCommand", func() {
 		var (
-			command commands.ProductFilesCommand
+			cmd commands.ProductFilesCommand
 		)
 
 		BeforeEach(func() {
-			response = pivnet.ProductFilesResponse{
-				ProductFiles: productFiles,
-			}
-
-			command = commands.ProductFilesCommand{
-				ProductSlug: productSlug,
-			}
+			cmd = commands.ProductFilesCommand{}
 		})
 
-		Describe("when only product-slug is provided", func() {
-			JustBeforeEach(func() {
-				server.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest(
-							"GET",
-							fmt.Sprintf(
-								"%s/products/%s/product_files",
-								apiPrefix,
-								productSlug,
-							),
-						),
-						ghttp.RespondWithJSONEncoded(responseStatusCode, response),
-					),
-				)
-			})
+		It("invokes the ProductFile client", func() {
+			err := cmd.Execute(nil)
 
-			It("lists all product files for the provided product slug", func() {
-				err := command.Execute(nil)
-				Expect(err).NotTo(HaveOccurred())
+			Expect(err).NotTo(HaveOccurred())
 
-				var returned []pivnet.ProductFile
-
-				err = json.Unmarshal(outBuffer.Bytes(), &returned)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(returned).To(Equal(productFiles))
-			})
-
-			Context("when there is an error", func() {
-				BeforeEach(func() {
-					responseStatusCode = http.StatusTeapot
-				})
-
-				It("invokes the error handler", func() {
-					err := command.Execute(nil)
-					Expect(err).NotTo(HaveOccurred())
-
-					Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
-				})
-			})
+			Expect(fakeProductFileClient.ListCallCount()).To(Equal(1))
 		})
 
-		Describe("when the release version is provided", func() {
+		Context("when the ProductFile client returns an error", func() {
+			var (
+				expectedErr error
+			)
+
 			BeforeEach(func() {
-				command = commands.ProductFilesCommand{
-					ProductSlug:    productSlug,
-					ReleaseVersion: releases[0].Version,
-				}
+				expectedErr = errors.New("expected error")
+				fakeProductFileClient.ListReturns(expectedErr)
 			})
 
-			JustBeforeEach(func() {
-				server.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/%s/releases", apiPrefix, productSlug)),
-						ghttp.RespondWithJSONEncoded(releasesResponseStatusCode, releasesResponse),
-					),
-				)
+			It("forwards the error", func() {
+				err := cmd.Execute(nil)
 
-				server.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest(
-							"GET",
-							fmt.Sprintf(
-								"%s/products/%s/releases/%d/product_files",
-								apiPrefix,
-								productSlug,
-								releases[0].ID,
-							),
-						),
-						ghttp.RespondWithJSONEncoded(responseStatusCode, response),
-					),
-				)
+				Expect(err).To(Equal(expectedErr))
 			})
-
-			It("lists all product files for the provided product slug and release version", func() {
-				err := command.Execute(nil)
-				Expect(err).NotTo(HaveOccurred())
-
-				var returned []pivnet.ProductFile
-
-				err = json.Unmarshal(outBuffer.Bytes(), &returned)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(returned).To(Equal(productFiles))
-			})
-
-			Context("when there is an error getting all releases", func() {
-				BeforeEach(func() {
-					releasesResponseStatusCode = http.StatusTeapot
-				})
-
-				It("invokes the error handler", func() {
-					err := command.Execute(nil)
-					Expect(err).NotTo(HaveOccurred())
-
-					Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
-				})
-			})
-
-			Context("when there is an error", func() {
-				BeforeEach(func() {
-					responseStatusCode = http.StatusTeapot
-				})
-
-				It("invokes the error handler", func() {
-					err := command.Execute(nil)
-					Expect(err).NotTo(HaveOccurred())
-
-					Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
-				})
-			})
-
 		})
 
 		Describe("ProductSlug flag", func() {
@@ -262,134 +98,35 @@ var _ = Describe("product file commands", func() {
 
 	Describe("ProductFileCommand", func() {
 		var (
-			command commands.ProductFileCommand
+			cmd commands.ProductFileCommand
 		)
 
 		BeforeEach(func() {
-			response = pivnet.ProductFileResponse{
-				ProductFile: productFile,
-			}
-
-			command = commands.ProductFileCommand{
-				ProductSlug:   productSlug,
-				ProductFileID: productFile.ID,
-			}
+			cmd = commands.ProductFileCommand{}
 		})
 
-		Describe("when only product-slug is provided", func() {
-			JustBeforeEach(func() {
-				server.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest(
-							"GET",
-							fmt.Sprintf(
-								"%s/products/%s/product_files/%d",
-								apiPrefix,
-								productSlug,
-								productFile.ID,
-							),
-						),
-						ghttp.RespondWithJSONEncoded(responseStatusCode, response),
-					),
-				)
-			})
+		It("invokes the ProductFile client", func() {
+			err := cmd.Execute(nil)
 
-			It("shows the product file for the provided product slug and product file id", func() {
-				err := command.Execute(nil)
-				Expect(err).NotTo(HaveOccurred())
+			Expect(err).NotTo(HaveOccurred())
 
-				var returned pivnet.ProductFile
-
-				err = json.Unmarshal(outBuffer.Bytes(), &returned)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(returned).To(Equal(productFile))
-			})
-
-			Context("when there is an error", func() {
-				BeforeEach(func() {
-					responseStatusCode = http.StatusTeapot
-				})
-
-				It("invokes the error handler", func() {
-					err := command.Execute(nil)
-					Expect(err).NotTo(HaveOccurred())
-
-					Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
-				})
-			})
+			Expect(fakeProductFileClient.GetCallCount()).To(Equal(1))
 		})
 
-		Describe("when the release version is provided", func() {
+		Context("when the ProductFile client returns an error", func() {
+			var (
+				expectedErr error
+			)
+
 			BeforeEach(func() {
-				command = commands.ProductFileCommand{
-					ProductSlug:    productSlug,
-					ReleaseVersion: releases[0].Version,
-					ProductFileID:  productFile.ID,
-				}
+				expectedErr = errors.New("expected error")
+				fakeProductFileClient.GetReturns(expectedErr)
 			})
 
-			JustBeforeEach(func() {
-				server.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/%s/releases", apiPrefix, productSlug)),
-						ghttp.RespondWithJSONEncoded(releasesResponseStatusCode, releasesResponse),
-					),
-				)
+			It("forwards the error", func() {
+				err := cmd.Execute(nil)
 
-				server.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest(
-							"GET",
-							fmt.Sprintf(
-								"%s/products/%s/releases/%d/product_files/%d",
-								apiPrefix,
-								productSlug,
-								releases[0].ID,
-								productFile.ID,
-							),
-						),
-						ghttp.RespondWithJSONEncoded(responseStatusCode, response),
-					),
-				)
-			})
-
-			It("lists all product file for the provided product slug and release version", func() {
-				err := command.Execute(nil)
-				Expect(err).NotTo(HaveOccurred())
-
-				var returned pivnet.ProductFile
-
-				err = json.Unmarshal(outBuffer.Bytes(), &returned)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(returned).To(Equal(productFile))
-			})
-
-			Context("when there is an error getting all releases", func() {
-				BeforeEach(func() {
-					releasesResponseStatusCode = http.StatusTeapot
-				})
-
-				It("invokes the error handler", func() {
-					err := command.Execute(nil)
-					Expect(err).NotTo(HaveOccurred())
-
-					Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
-				})
-			})
-
-			Context("when there is an error", func() {
-				BeforeEach(func() {
-					responseStatusCode = http.StatusTeapot
-				})
-
-				It("invokes the error handler", func() {
-					err := command.Execute(nil)
-					Expect(err).NotTo(HaveOccurred())
-
-					Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
-				})
+				Expect(err).To(Equal(expectedErr))
 			})
 		})
 
@@ -446,71 +183,35 @@ var _ = Describe("product file commands", func() {
 
 	Describe("AddProductFileCommand", func() {
 		var (
-			command commands.AddProductFileCommand
+			cmd commands.AddProductFileCommand
 		)
 
 		BeforeEach(func() {
-			responseStatusCode = http.StatusNoContent
-
-			command = commands.AddProductFileCommand{
-				ProductSlug:    productSlug,
-				ProductFileID:  productFile.ID,
-				ReleaseVersion: releases[0].Version,
-			}
+			cmd = commands.AddProductFileCommand{}
 		})
 
-		JustBeforeEach(func() {
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/%s/releases", apiPrefix, productSlug)),
-					ghttp.RespondWithJSONEncoded(releasesResponseStatusCode, releasesResponse),
-				),
-			)
+		It("invokes the ProductFile client", func() {
+			err := cmd.Execute(nil)
 
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(
-						"PATCH",
-						fmt.Sprintf(
-							"%s/products/%s/releases/%d/add_product_file",
-							apiPrefix,
-							productSlug,
-							releases[0].ID,
-						),
-					),
-					ghttp.RespondWithJSONEncoded(responseStatusCode, nil),
-				),
-			)
-		})
-
-		It("adds the product file for the provided product slug and product file id to the specified release", func() {
-			err := command.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
+
+			Expect(fakeProductFileClient.AddToReleaseCallCount()).To(Equal(1))
 		})
 
-		Context("when there is an error", func() {
+		Context("when the ProductFile client returns an error", func() {
+			var (
+				expectedErr error
+			)
+
 			BeforeEach(func() {
-				responseStatusCode = http.StatusTeapot
+				expectedErr = errors.New("expected error")
+				fakeProductFileClient.AddToReleaseReturns(expectedErr)
 			})
 
-			It("invokes the error handler", func() {
-				err := command.Execute(nil)
-				Expect(err).NotTo(HaveOccurred())
+			It("forwards the error", func() {
+				err := cmd.Execute(nil)
 
-				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
-			})
-		})
-
-		Context("when there is an error getting all releases", func() {
-			BeforeEach(func() {
-				releasesResponseStatusCode = http.StatusTeapot
-			})
-
-			It("invokes the error handler", func() {
-				err := command.Execute(nil)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(err).To(Equal(expectedErr))
 			})
 		})
 
@@ -567,71 +268,35 @@ var _ = Describe("product file commands", func() {
 
 	Describe("RemoveProductFileCommand", func() {
 		var (
-			command commands.RemoveProductFileCommand
+			cmd commands.RemoveProductFileCommand
 		)
 
 		BeforeEach(func() {
-			responseStatusCode = http.StatusNoContent
-
-			command = commands.RemoveProductFileCommand{
-				ProductSlug:    productSlug,
-				ProductFileID:  productFile.ID,
-				ReleaseVersion: releases[0].Version,
-			}
+			cmd = commands.RemoveProductFileCommand{}
 		})
 
-		JustBeforeEach(func() {
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/%s/releases", apiPrefix, productSlug)),
-					ghttp.RespondWithJSONEncoded(releasesResponseStatusCode, releasesResponse),
-				),
-			)
+		It("invokes the ProductFile client", func() {
+			err := cmd.Execute(nil)
 
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(
-						"PATCH",
-						fmt.Sprintf(
-							"%s/products/%s/releases/%d/remove_product_file",
-							apiPrefix,
-							productSlug,
-							releases[0].ID,
-						),
-					),
-					ghttp.RespondWithJSONEncoded(responseStatusCode, nil),
-				),
-			)
-		})
-
-		It("removes the product file for the provided product slug and product file id from the specified release", func() {
-			err := command.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
+
+			Expect(fakeProductFileClient.RemoveFromReleaseCallCount()).To(Equal(1))
 		})
 
-		Context("when there is an error", func() {
+		Context("when the ProductFile client returns an error", func() {
+			var (
+				expectedErr error
+			)
+
 			BeforeEach(func() {
-				responseStatusCode = http.StatusTeapot
+				expectedErr = errors.New("expected error")
+				fakeProductFileClient.RemoveFromReleaseReturns(expectedErr)
 			})
 
-			It("invokes the error handler", func() {
-				err := command.Execute(nil)
-				Expect(err).NotTo(HaveOccurred())
+			It("forwards the error", func() {
+				err := cmd.Execute(nil)
 
-				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
-			})
-		})
-
-		Context("when there is an error getting all releases", func() {
-			BeforeEach(func() {
-				releasesResponseStatusCode = http.StatusTeapot
-			})
-
-			It("invokes the error handler", func() {
-				err := command.Execute(nil)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(err).To(Equal(expectedErr))
 			})
 		})
 
@@ -688,53 +353,35 @@ var _ = Describe("product file commands", func() {
 
 	Describe("DeleteProductFileCommand", func() {
 		var (
-			command commands.DeleteProductFileCommand
+			cmd commands.DeleteProductFileCommand
 		)
 
 		BeforeEach(func() {
-			responseStatusCode = http.StatusNoContent
-			response = pivnet.ProductFileResponse{
-				ProductFile: productFile,
-			}
-
-			command = commands.DeleteProductFileCommand{
-				ProductSlug:   productSlug,
-				ProductFileID: productFile.ID,
-			}
+			cmd = commands.DeleteProductFileCommand{}
 		})
 
-		JustBeforeEach(func() {
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(
-						"DELETE",
-						fmt.Sprintf(
-							"%s/products/%s/product_files/%d",
-							apiPrefix,
-							productSlug,
-							productFile.ID,
-						),
-					),
-					ghttp.RespondWithJSONEncoded(responseStatusCode, response),
-				),
-			)
-		})
+		It("invokes the ProductFile client", func() {
+			err := cmd.Execute(nil)
 
-		It("deletes the product file for the provided product slug and product file id", func() {
-			err := command.Execute(nil)
 			Expect(err).NotTo(HaveOccurred())
+
+			Expect(fakeProductFileClient.DeleteCallCount()).To(Equal(1))
 		})
 
-		Context("when there is an error", func() {
+		Context("when the ProductFile client returns an error", func() {
+			var (
+				expectedErr error
+			)
+
 			BeforeEach(func() {
-				responseStatusCode = http.StatusTeapot
+				expectedErr = errors.New("expected error")
+				fakeProductFileClient.DeleteReturns(expectedErr)
 			})
 
-			It("invokes the error handler", func() {
-				err := command.Execute(nil)
-				Expect(err).NotTo(HaveOccurred())
+			It("forwards the error", func() {
+				err := cmd.Execute(nil)
 
-				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(err).To(Equal(expectedErr))
 			})
 		})
 
