@@ -101,6 +101,17 @@ var _ = Describe("filegroup commands", func() {
 				fakePivnetClient.FileGroupsForReleaseReturns(filegroups, nil)
 			})
 
+			It("lists all FileGroups", func() {
+				err := client.List(productSlug, releaseVersion)
+				Expect(err).NotTo(HaveOccurred())
+
+				var returnedFileGroups []pivnet.FileGroup
+				err = json.Unmarshal(outBuffer.Bytes(), &returnedFileGroups)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(returnedFileGroups).To(Equal(filegroups))
+			})
+
 			Context("when there is an error getting release", func() {
 				var (
 					expectedErr error
