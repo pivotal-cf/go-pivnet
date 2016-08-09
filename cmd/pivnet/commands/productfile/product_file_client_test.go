@@ -269,7 +269,7 @@ var _ = Describe("productfile commands", func() {
 			fakePivnetClient.AddProductFileReturns(nil)
 		})
 
-		It("deletes ProductFile", func() {
+		It("adds ProductFile", func() {
 			err := client.AddToRelease(productSlug, releaseVersion, productFileID)
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -328,7 +328,7 @@ var _ = Describe("productfile commands", func() {
 			fakePivnetClient.RemoveProductFileReturns(nil)
 		})
 
-		It("deletes ProductFile", func() {
+		It("removes ProductFile", func() {
 			err := client.RemoveFromRelease(productSlug, releaseVersion, productFileID)
 			Expect(err).NotTo(HaveOccurred())
 		})
