@@ -161,6 +161,7 @@ var _ = Describe("productfile commands", func() {
 
 		BeforeEach(func() {
 			productSlug = "some-product-slug"
+			releaseVersion = ""
 			productFileID = productfiles[0].ID
 
 			fakePivnetClient.GetProductFileReturns(productfiles[0], nil)
