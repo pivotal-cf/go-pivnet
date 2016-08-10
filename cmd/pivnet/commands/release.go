@@ -1,14 +1,6 @@
 package commands
 
-import (
-	"fmt"
-	"strconv"
-
-	"github.com/olekukonko/tablewriter"
-	"github.com/pivotal-cf-experimental/go-pivnet"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
-	"github.com/pivotal-cf-experimental/go-pivnet/extension"
-)
+import "github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands/release"
 
 type ReleasesCommand struct {
 	ProductSlug string `long:"product-slug" short:"p" description:"Product slug e.g. p-mysql" required:"true"`
@@ -24,131 +16,37 @@ type DeleteReleaseCommand struct {
 	ReleaseVersion string `long:"release-version" short:"v" description:"Release version e.g. 0.1.2-rc1" required:"true"`
 }
 
+//go:generate counterfeiter . ReleaseClient
+type ReleaseClient interface {
+	List(productSlug string) error
+	Get(productSlug string, releaseVersion string) error
+	Delete(productSlug string, releaseVersion string) error
+}
+
+var NewReleaseClient = func() ReleaseClient {
+	return release.NewReleaseClient(
+		NewPivnetClient(),
+		ErrorHandler,
+		Pivnet.Format,
+		OutputWriter,
+		Printer,
+	)
+}
+
 func (command *ReleasesCommand) Execute([]string) error {
 	Init()
-	client := NewPivnetClient()
 
-	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	switch Pivnet.Format {
-	case printer.PrintAsTable:
-		table := tablewriter.NewWriter(OutputWriter)
-		table.SetHeader([]string{"ID", "Version", "Description"})
-
-		for _, r := range releases {
-			table.Append([]string{
-				strconv.Itoa(r.ID), r.Version, r.Description,
-			})
-		}
-		table.Render()
-		return nil
-	case printer.PrintAsJSON:
-		return Printer.PrintJSON(releases)
-	case printer.PrintAsYAML:
-		return Printer.PrintYAML(releases)
-	}
-
-	return nil
+	return NewReleaseClient().List(command.ProductSlug)
 }
 
 func (command *ReleaseCommand) Execute([]string) error {
 	Init()
-	client := NewPivnetClient()
 
-	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	var foundRelease pivnet.Release
-	for _, r := range releases {
-		if r.Version == command.ReleaseVersion {
-			foundRelease = r
-			break
-		}
-	}
-
-	if foundRelease.Version != command.ReleaseVersion {
-		return fmt.Errorf("release not found")
-	}
-
-	release, err := client.Release(command.ProductSlug, foundRelease.ID)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	extendedClient := extension.NewExtendedClient(client, Pivnet.Logger)
-	etag, err := extendedClient.ReleaseETag(command.ProductSlug, foundRelease.ID)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	r := CLIRelease{
-		release,
-		etag,
-	}
-
-	switch Pivnet.Format {
-	case printer.PrintAsTable:
-		table := tablewriter.NewWriter(OutputWriter)
-		table.SetHeader([]string{"ID", "Version", "Description", "ETag"})
-
-		table.Append([]string{
-			strconv.Itoa(release.ID), release.Version, release.Description, etag,
-		})
-		table.Render()
-		return nil
-	case printer.PrintAsJSON:
-		return Printer.PrintJSON(r)
-	case printer.PrintAsYAML:
-		return Printer.PrintYAML(r)
-	}
-
-	return nil
+	return NewReleaseClient().Get(command.ProductSlug, command.ReleaseVersion)
 }
 
 func (command *DeleteReleaseCommand) Execute([]string) error {
 	Init()
-	client := NewPivnetClient()
 
-	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	var release pivnet.Release
-	for _, r := range releases {
-		if r.Version == command.ReleaseVersion {
-			release = r
-			break
-		}
-	}
-
-	if release.Version != command.ReleaseVersion {
-		return fmt.Errorf("release not found")
-	}
-
-	err = client.DeleteRelease(command.ProductSlug, release)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	if Pivnet.Format == printer.PrintAsTable {
-		_, err = fmt.Fprintf(
-			OutputWriter,
-			"release %s deleted successfully for %s\n",
-			command.ReleaseVersion,
-			command.ProductSlug,
-		)
-	}
-
-	return nil
-}
-
-type CLIRelease struct {
-	pivnet.Release `yaml:",inline"`
-	ETag           string `json:"etag,omitempty"`
+	return NewReleaseClient().Delete(command.ProductSlug, command.ReleaseVersion)
 }

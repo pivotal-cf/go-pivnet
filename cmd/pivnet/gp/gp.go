@@ -30,6 +30,20 @@ func NewExtendedClient(c Client, logger logger.Logger) *ExtendedClient {
 	}
 }
 
+type CompositeClient struct {
+	Client
+	ExtendedClient
+}
+
+func NewCompositeClient(config pivnet.ClientConfig, logger logger.Logger) *CompositeClient {
+	c := NewClient(config, logger)
+	e := NewExtendedClient(*c, logger)
+	return &CompositeClient{
+		*c,
+		*e,
+	}
+}
+
 func (c Client) ReleaseTypes() ([]string, error) {
 	return c.client.ReleaseTypes.Get()
 }
