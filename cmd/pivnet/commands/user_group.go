@@ -1,14 +1,6 @@
 package commands
 
-import (
-	"fmt"
-	"strconv"
-	"strings"
-
-	"github.com/olekukonko/tablewriter"
-	"github.com/pivotal-cf-experimental/go-pivnet"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
-)
+import "github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands/usergroup"
 
 type UserGroupsCommand struct {
 	ProductSlug    string `long:"product-slug" short:"p" description:"Product slug e.g. p-mysql"`
@@ -58,285 +50,102 @@ type RemoveUserGroupMemberCommand struct {
 	MemberEmailAddress string `long:"member-email" description:"Member email address e.g. 1234" required:"true"`
 }
 
+//go:generate counterfeiter . UserGroupClient
+type UserGroupClient interface {
+	List(productSlug string, releaseVersion string) error
+	Get(userGroupID int) error
+	Create(name string, description string, members []string) error
+	Update(userGroupID int, name *string, description *string) error
+	AddToRelease(productSlug string, releaseVersion string, userGroupID int) error
+	Delete(userGroupID int) error
+	RemoveFromRelease(productSlug string, releaseVersion string, userGroupID int) error
+	AddUserGroupMember(userGroupID int, memberEmailAddress string, admin bool) error
+	RemoveUserGroupMember(userGroupID int, memberEmailAddress string) error
+}
+
+var NewUserGroupClient = func() UserGroupClient {
+	return usergroup.NewUserGroupClient(
+		NewPivnetClient(),
+		ErrorHandler,
+		Pivnet.Format,
+		OutputWriter,
+		Printer,
+	)
+}
+
 func (command *UserGroupCommand) Execute([]string) error {
 	Init()
-	client := NewPivnetClient()
 
-	userGroup, err := client.UserGroup(
-		command.UserGroupID,
-	)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	return printUserGroup(userGroup)
+	return NewUserGroupClient().Get(command.UserGroupID)
 }
 
 func (command *UserGroupsCommand) Execute([]string) error {
 	Init()
-	client := NewPivnetClient()
 
-	if command.ProductSlug == "" && command.ReleaseVersion == "" {
-		var err error
-		userGroups, err := client.UserGroups()
-		if err != nil {
-			return ErrorHandler.HandleError(err)
-		}
-
-		return printUserGroups(userGroups)
-	}
-
-	if command.ProductSlug == "" || command.ReleaseVersion == "" {
-		return fmt.Errorf("Both or neither of product slug and release version must be provided")
-	}
-
-	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	var release pivnet.Release
-	for _, r := range releases {
-		if r.Version == command.ReleaseVersion {
-			release = r
-			break
-		}
-	}
-
-	if release.Version != command.ReleaseVersion {
-		return fmt.Errorf("release not found")
-	}
-
-	userGroups, err := client.UserGroupsForRelease(command.ProductSlug, release.ID)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	return printUserGroups(userGroups)
-}
-
-func printUserGroups(userGroups []pivnet.UserGroup) error {
-	switch Pivnet.Format {
-	case printer.PrintAsTable:
-		table := tablewriter.NewWriter(OutputWriter)
-		table.SetHeader([]string{"ID", "Name", "Description"})
-
-		for _, u := range userGroups {
-			table.Append([]string{
-				strconv.Itoa(u.ID),
-				u.Name,
-				u.Description,
-			})
-		}
-		table.Render()
-		return nil
-	case printer.PrintAsJSON:
-		return Printer.PrintJSON(userGroups)
-	case printer.PrintAsYAML:
-		return Printer.PrintYAML(userGroups)
-	}
-
-	return nil
+	return NewUserGroupClient().List(command.ProductSlug, command.ReleaseVersion)
 }
 
 func (command *CreateUserGroupCommand) Execute([]string) error {
 	Init()
-	client := NewPivnetClient()
 
-	userGroup, err := client.CreateUserGroup(
+	return NewUserGroupClient().Create(
 		command.Name,
 		command.Description,
 		command.Members,
 	)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	return printUserGroup(userGroup)
-}
-
-func printUserGroup(userGroup pivnet.UserGroup) error {
-	switch Pivnet.Format {
-	case printer.PrintAsTable:
-		table := tablewriter.NewWriter(OutputWriter)
-		table.SetHeader([]string{"ID", "Name", "Description", "Members"})
-
-		table.Append([]string{
-			strconv.Itoa(userGroup.ID),
-			userGroup.Name,
-			userGroup.Description,
-			strings.Join(userGroup.Members, ", "),
-		})
-
-		table.Render()
-		return nil
-	case printer.PrintAsJSON:
-		return Printer.PrintJSON(userGroup)
-	case printer.PrintAsYAML:
-		return Printer.PrintYAML(userGroup)
-	}
-
-	return nil
 }
 
 func (command *DeleteUserGroupCommand) Execute([]string) error {
 	Init()
-	client := NewPivnetClient()
 
-	err := client.DeleteUserGroup(command.UserGroupID)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	if Pivnet.Format == printer.PrintAsTable {
-		_, err = fmt.Fprintf(
-			OutputWriter,
-			"user group %d deleted successfully\n",
-			command.UserGroupID,
-		)
-	}
-
-	return nil
+	return NewUserGroupClient().Delete(command.UserGroupID)
 }
 
 func (command *UpdateUserGroupCommand) Execute([]string) error {
 	Init()
-	client := NewPivnetClient()
 
-	userGroup, err := client.UserGroup(command.UserGroupID)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	if command.Name != nil {
-		userGroup.Name = *command.Name
-	}
-
-	if command.Description != nil {
-		userGroup.Description = *command.Description
-	}
-
-	updated, err := client.UpdateUserGroup(userGroup)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	return printUserGroup(updated)
+	return NewUserGroupClient().Update(
+		command.UserGroupID,
+		command.Name,
+		command.Description,
+	)
 }
 
 func (command *AddUserGroupCommand) Execute([]string) error {
 	Init()
-	client := NewPivnetClient()
 
-	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	var release pivnet.Release
-	for _, r := range releases {
-		if r.Version == command.ReleaseVersion {
-			release = r
-			break
-		}
-	}
-
-	if release.Version != command.ReleaseVersion {
-		return fmt.Errorf("release not found")
-	}
-
-	err = client.AddUserGroup(
+	return NewUserGroupClient().AddToRelease(
 		command.ProductSlug,
-		release.ID,
+		command.ReleaseVersion,
 		command.UserGroupID,
 	)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	if Pivnet.Format == printer.PrintAsTable {
-		_, err = fmt.Fprintf(
-			OutputWriter,
-			"user group %d added successfully to %s/%s\n",
-			command.UserGroupID,
-			command.ProductSlug,
-			command.ReleaseVersion,
-		)
-	}
-
-	return nil
 }
 
 func (command *RemoveUserGroupCommand) Execute([]string) error {
 	Init()
-	client := NewPivnetClient()
 
-	releases, err := client.ReleasesForProductSlug(command.ProductSlug)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	var release pivnet.Release
-	for _, r := range releases {
-		if r.Version == command.ReleaseVersion {
-			release = r
-			break
-		}
-	}
-
-	if release.Version != command.ReleaseVersion {
-		return fmt.Errorf("release not found")
-	}
-
-	err = client.RemoveUserGroup(
+	return NewUserGroupClient().RemoveFromRelease(
 		command.ProductSlug,
-		release.ID,
+		command.ReleaseVersion,
 		command.UserGroupID,
 	)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	if Pivnet.Format == printer.PrintAsTable {
-		_, err = fmt.Fprintf(
-			OutputWriter,
-			"user group %d removed successfully from %s/%s\n",
-			command.UserGroupID,
-			command.ProductSlug,
-			command.ReleaseVersion,
-		)
-	}
-
-	return nil
 }
 
 func (command *AddUserGroupMemberCommand) Execute([]string) error {
 	Init()
-	client := NewPivnetClient()
 
-	userGroup, err := client.AddMemberToGroup(
+	return NewUserGroupClient().AddUserGroupMember(
 		command.UserGroupID,
 		command.MemberEmailAddress,
 		command.Admin,
 	)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	return printUserGroup(userGroup)
 }
 
 func (command *RemoveUserGroupMemberCommand) Execute([]string) error {
 	Init()
-	client := NewPivnetClient()
 
-	userGroup, err := client.RemoveMemberFromGroup(
+	return NewUserGroupClient().RemoveUserGroupMember(
 		command.UserGroupID,
 		command.MemberEmailAddress,
 	)
-	if err != nil {
-		return ErrorHandler.HandleError(err)
-	}
-
-	return printUserGroup(userGroup)
 }
