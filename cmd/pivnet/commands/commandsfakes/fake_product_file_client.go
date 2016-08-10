@@ -56,6 +56,18 @@ type FakeProductFileClient struct {
 	deleteReturns struct {
 		result1 error
 	}
+	DownloadStub        func(productSlug string, releaseVersion string, productFileID int, filepath string, acceptEULA bool) error
+	downloadMutex       sync.RWMutex
+	downloadArgsForCall []struct {
+		productSlug    string
+		releaseVersion string
+		productFileID  int
+		filepath       string
+		acceptEULA     bool
+	}
+	downloadReturns struct {
+		result1 error
+	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
@@ -233,6 +245,43 @@ func (fake *FakeProductFileClient) DeleteReturns(result1 error) {
 	}{result1}
 }
 
+func (fake *FakeProductFileClient) Download(productSlug string, releaseVersion string, productFileID int, filepath string, acceptEULA bool) error {
+	fake.downloadMutex.Lock()
+	fake.downloadArgsForCall = append(fake.downloadArgsForCall, struct {
+		productSlug    string
+		releaseVersion string
+		productFileID  int
+		filepath       string
+		acceptEULA     bool
+	}{productSlug, releaseVersion, productFileID, filepath, acceptEULA})
+	fake.recordInvocation("Download", []interface{}{productSlug, releaseVersion, productFileID, filepath, acceptEULA})
+	fake.downloadMutex.Unlock()
+	if fake.DownloadStub != nil {
+		return fake.DownloadStub(productSlug, releaseVersion, productFileID, filepath, acceptEULA)
+	} else {
+		return fake.downloadReturns.result1
+	}
+}
+
+func (fake *FakeProductFileClient) DownloadCallCount() int {
+	fake.downloadMutex.RLock()
+	defer fake.downloadMutex.RUnlock()
+	return len(fake.downloadArgsForCall)
+}
+
+func (fake *FakeProductFileClient) DownloadArgsForCall(i int) (string, string, int, string, bool) {
+	fake.downloadMutex.RLock()
+	defer fake.downloadMutex.RUnlock()
+	return fake.downloadArgsForCall[i].productSlug, fake.downloadArgsForCall[i].releaseVersion, fake.downloadArgsForCall[i].productFileID, fake.downloadArgsForCall[i].filepath, fake.downloadArgsForCall[i].acceptEULA
+}
+
+func (fake *FakeProductFileClient) DownloadReturns(result1 error) {
+	fake.DownloadStub = nil
+	fake.downloadReturns = struct {
+		result1 error
+	}{result1}
+}
+
 func (fake *FakeProductFileClient) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -246,6 +295,8 @@ func (fake *FakeProductFileClient) Invocations() map[string][][]interface{} {
 	defer fake.removeFromReleaseMutex.RUnlock()
 	fake.deleteMutex.RLock()
 	defer fake.deleteMutex.RUnlock()
+	fake.downloadMutex.RLock()
+	defer fake.downloadMutex.RUnlock()
 	return fake.invocations
 }
 

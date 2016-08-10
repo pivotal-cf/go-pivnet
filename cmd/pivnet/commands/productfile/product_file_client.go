@@ -3,12 +3,15 @@ package productfile
 import (
 	"fmt"
 	"io"
+	"os"
 	"strconv"
 
 	"github.com/olekukonko/tablewriter"
 	pivnet "github.com/pivotal-cf-experimental/go-pivnet"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errorhandler"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
+	"github.com/pivotal-cf-experimental/go-pivnet/logger"
+	"gopkg.in/cheggaaa/pb.v1"
 )
 
 //go:generate counterfeiter . PivnetClient
@@ -21,6 +24,8 @@ type PivnetClient interface {
 	AddProductFile(productSlug string, releaseID int, productFileID int) error
 	RemoveProductFile(productSlug string, releaseID int, productFileID int) error
 	DeleteProductFile(productSlug string, releaseID int) (pivnet.ProductFile, error)
+	AcceptEULA(productSlug string, releaseID int) error
+	DownloadFile(writer io.Writer, downloadLink string) error
 }
 
 type ProductFileClient struct {
@@ -28,7 +33,9 @@ type ProductFileClient struct {
 	eh           errorhandler.ErrorHandler
 	format       string
 	outputWriter io.Writer
+	logWriter    io.Writer
 	printer      printer.Printer
+	l            logger.Logger
 }
 
 func NewProductFileClient(
@@ -36,14 +43,18 @@ func NewProductFileClient(
 	eh errorhandler.ErrorHandler,
 	format string,
 	outputWriter io.Writer,
+	logWriter io.Writer,
 	printer printer.Printer,
+	l logger.Logger,
 ) *ProductFileClient {
 	return &ProductFileClient{
 		pivnetClient: pivnetClient,
 		eh:           eh,
 		format:       format,
 		outputWriter: outputWriter,
+		logWriter:    logWriter,
 		printer:      printer,
+		l:            l,
 	}
 }
 
@@ -262,4 +273,95 @@ func (c *ProductFileClient) Delete(productSlug string, productFileID int) error 
 	}
 
 	return c.printProductFile(productFile)
+}
+
+func (c *ProductFileClient) Download(
+	productSlug string,
+	releaseVersion string,
+	productFileID int,
+	filepath string,
+	acceptEULA bool,
+) error {
+	release, err := c.pivnetClient.ReleaseForProductVersion(productSlug, releaseVersion)
+	if err != nil {
+		return c.eh.HandleError(err)
+	}
+
+	downloadLink := fmt.Sprintf(
+		"/products/%s/releases/%d/product_files/%d/download",
+		productSlug,
+		release.ID,
+		productFileID,
+	)
+
+	c.l.Debug(
+		"Creating local file",
+		logger.Data{"downloadLink": downloadLink, "localFilepath": filepath},
+	)
+	file, err := os.Create(filepath)
+	if err != nil {
+		return c.eh.HandleError(err)
+	}
+
+	c.l.Debug("Determining file size", logger.Data{"downloadLink": downloadLink})
+	productFile, err := c.pivnetClient.GetProductFileForRelease(
+		productSlug,
+		release.ID,
+		productFileID,
+	)
+	if err != nil {
+		return c.eh.HandleError(err)
+	}
+
+	if acceptEULA {
+		c.l.Debug("Accepting EULA")
+		err = c.pivnetClient.AcceptEULA(productSlug, release.ID)
+		if err != nil {
+			return c.eh.HandleError(err)
+		}
+	}
+
+	progress := newProgressBar(productFile.Size, c.logWriter)
+	onDemandProgress := &startOnDemandProgressBar{progress, false}
+
+	multiWriter := io.MultiWriter(file, onDemandProgress)
+
+	c.l.Debug(
+		"Downloading link to local file",
+		logger.Data{
+			"downloadLink":  downloadLink,
+			"localFilepath": filepath,
+		},
+	)
+	err = c.pivnetClient.DownloadFile(multiWriter, downloadLink)
+	if err != nil {
+		return c.eh.HandleError(err)
+	}
+
+	progress.Finish()
+	return nil
+}
+
+type startOnDemandProgressBar struct {
+	progressbar *pb.ProgressBar
+	started     bool
+}
+
+func (w *startOnDemandProgressBar) Write(b []byte) (int, error) {
+	if !w.started {
+		w.progressbar.Start()
+		w.started = true
+	}
+	return w.progressbar.Write(b)
+}
+
+func newProgressBar(total int, output io.Writer) *pb.ProgressBar {
+	progress := pb.New(total)
+
+	progress.Output = output
+	progress.ShowSpeed = true
+	progress.Units = pb.U_BYTES
+	progress.NotPrint = true
+
+	return progress.SetWidth(80)
 }

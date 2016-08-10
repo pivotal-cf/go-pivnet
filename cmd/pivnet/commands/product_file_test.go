@@ -416,10 +416,81 @@ var _ = Describe("product file commands", func() {
 				Expect(longTag(field)).To(Equal("product-file-id"))
 			})
 		})
+	})
+
+	Describe("DownloadProductFileCommand", func() {
+		var (
+			cmd commands.DownloadProductFileCommand
+		)
+
+		BeforeEach(func() {
+			cmd = commands.DownloadProductFileCommand{}
+		})
+
+		It("invokes the ProductFile client", func() {
+			err := cmd.Execute(nil)
+
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(fakeProductFileClient.DownloadCallCount()).To(Equal(1))
+		})
+
+		Context("when the ProductFile client returns an error", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("expected error")
+				fakeProductFileClient.DownloadReturns(expectedErr)
+			})
+
+			It("forwards the error", func() {
+				err := cmd.Execute(nil)
+
+				Expect(err).To(Equal(expectedErr))
+			})
+		})
+
+		Describe("ProductSlug flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(commands.DownloadProductFileCommand{}, "ProductSlug")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("p"))
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("product-slug"))
+			})
+		})
+
+		Describe("ReleaseVersion flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(commands.DownloadProductFileCommand{}, "ReleaseVersion")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("release-version"))
+			})
+
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("v"))
+			})
+		})
 
 		Describe("ProductFileID flag", func() {
 			BeforeEach(func() {
-				field = fieldFor(commands.DeleteProductFileCommand{}, "ProductFileID")
+				field = fieldFor(commands.DownloadProductFileCommand{}, "ProductFileID")
 			})
 
 			It("is required", func() {
@@ -428,6 +499,34 @@ var _ = Describe("product file commands", func() {
 
 			It("contains long name", func() {
 				Expect(longTag(field)).To(Equal("product-file-id"))
+			})
+		})
+
+		Describe("Filepath flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(commands.DownloadProductFileCommand{}, "Filepath")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("filepath"))
+			})
+		})
+
+		Describe("AcceptEULA flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(commands.DownloadProductFileCommand{}, "AcceptEULA")
+			})
+
+			It("is not required", func() {
+				Expect(isRequired(field)).To(BeFalse())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("accept-eula"))
 			})
 		})
 	})

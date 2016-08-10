@@ -2,6 +2,7 @@
 package productfilefakes
 
 import (
+	"io"
 	"sync"
 
 	pivnet "github.com/pivotal-cf-experimental/go-pivnet"
@@ -88,6 +89,24 @@ type FakePivnetClient struct {
 	deleteProductFileReturns struct {
 		result1 pivnet.ProductFile
 		result2 error
+	}
+	AcceptEULAStub        func(productSlug string, releaseID int) error
+	acceptEULAMutex       sync.RWMutex
+	acceptEULAArgsForCall []struct {
+		productSlug string
+		releaseID   int
+	}
+	acceptEULAReturns struct {
+		result1 error
+	}
+	DownloadFileStub        func(writer io.Writer, downloadLink string) error
+	downloadFileMutex       sync.RWMutex
+	downloadFileArgsForCall []struct {
+		writer       io.Writer
+		downloadLink string
+	}
+	downloadFileReturns struct {
+		result1 error
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
@@ -373,6 +392,74 @@ func (fake *FakePivnetClient) DeleteProductFileReturns(result1 pivnet.ProductFil
 	}{result1, result2}
 }
 
+func (fake *FakePivnetClient) AcceptEULA(productSlug string, releaseID int) error {
+	fake.acceptEULAMutex.Lock()
+	fake.acceptEULAArgsForCall = append(fake.acceptEULAArgsForCall, struct {
+		productSlug string
+		releaseID   int
+	}{productSlug, releaseID})
+	fake.recordInvocation("AcceptEULA", []interface{}{productSlug, releaseID})
+	fake.acceptEULAMutex.Unlock()
+	if fake.AcceptEULAStub != nil {
+		return fake.AcceptEULAStub(productSlug, releaseID)
+	} else {
+		return fake.acceptEULAReturns.result1
+	}
+}
+
+func (fake *FakePivnetClient) AcceptEULACallCount() int {
+	fake.acceptEULAMutex.RLock()
+	defer fake.acceptEULAMutex.RUnlock()
+	return len(fake.acceptEULAArgsForCall)
+}
+
+func (fake *FakePivnetClient) AcceptEULAArgsForCall(i int) (string, int) {
+	fake.acceptEULAMutex.RLock()
+	defer fake.acceptEULAMutex.RUnlock()
+	return fake.acceptEULAArgsForCall[i].productSlug, fake.acceptEULAArgsForCall[i].releaseID
+}
+
+func (fake *FakePivnetClient) AcceptEULAReturns(result1 error) {
+	fake.AcceptEULAStub = nil
+	fake.acceptEULAReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakePivnetClient) DownloadFile(writer io.Writer, downloadLink string) error {
+	fake.downloadFileMutex.Lock()
+	fake.downloadFileArgsForCall = append(fake.downloadFileArgsForCall, struct {
+		writer       io.Writer
+		downloadLink string
+	}{writer, downloadLink})
+	fake.recordInvocation("DownloadFile", []interface{}{writer, downloadLink})
+	fake.downloadFileMutex.Unlock()
+	if fake.DownloadFileStub != nil {
+		return fake.DownloadFileStub(writer, downloadLink)
+	} else {
+		return fake.downloadFileReturns.result1
+	}
+}
+
+func (fake *FakePivnetClient) DownloadFileCallCount() int {
+	fake.downloadFileMutex.RLock()
+	defer fake.downloadFileMutex.RUnlock()
+	return len(fake.downloadFileArgsForCall)
+}
+
+func (fake *FakePivnetClient) DownloadFileArgsForCall(i int) (io.Writer, string) {
+	fake.downloadFileMutex.RLock()
+	defer fake.downloadFileMutex.RUnlock()
+	return fake.downloadFileArgsForCall[i].writer, fake.downloadFileArgsForCall[i].downloadLink
+}
+
+func (fake *FakePivnetClient) DownloadFileReturns(result1 error) {
+	fake.DownloadFileStub = nil
+	fake.downloadFileReturns = struct {
+		result1 error
+	}{result1}
+}
+
 func (fake *FakePivnetClient) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -392,6 +479,10 @@ func (fake *FakePivnetClient) Invocations() map[string][][]interface{} {
 	defer fake.removeProductFileMutex.RUnlock()
 	fake.deleteProductFileMutex.RLock()
 	defer fake.deleteProductFileMutex.RUnlock()
+	fake.acceptEULAMutex.RLock()
+	defer fake.acceptEULAMutex.RUnlock()
+	fake.downloadFileMutex.RLock()
+	defer fake.downloadFileMutex.RUnlock()
 	return fake.invocations
 }
 
