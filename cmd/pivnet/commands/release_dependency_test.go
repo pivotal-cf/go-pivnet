@@ -87,7 +87,7 @@ var _ = Describe("release dependency commands", func() {
 			})
 
 			It("contains short name", func() {
-				Expect(shortTag(field)).To(Equal("v"))
+				Expect(shortTag(field)).To(Equal("r"))
 			})
 
 			It("contains long name", func() {

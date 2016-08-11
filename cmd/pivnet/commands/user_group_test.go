@@ -87,7 +87,7 @@ var _ = Describe("user group commands", func() {
 			})
 
 			It("contains short name", func() {
-				Expect(shortTag(field)).To(Equal("v"))
+				Expect(shortTag(field)).To(Equal("r"))
 			})
 
 			It("contains long name", func() {
@@ -347,7 +347,7 @@ var _ = Describe("user group commands", func() {
 			})
 
 			It("contains short name", func() {
-				Expect(shortTag(field)).To(Equal("v"))
+				Expect(shortTag(field)).To(Equal("r"))
 			})
 
 			It("contains long name", func() {
@@ -432,7 +432,7 @@ var _ = Describe("user group commands", func() {
 			})
 
 			It("contains short name", func() {
-				Expect(shortTag(field)).To(Equal("v"))
+				Expect(shortTag(field)).To(Equal("r"))
 			})
 
 			It("contains long name", func() {

@@ -4,24 +4,24 @@ import "github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands/product
 
 type ProductFilesCommand struct {
 	ProductSlug    string `long:"product-slug" short:"p" description:"Product slug e.g. p-mysql" required:"true"`
-	ReleaseVersion string `long:"release-version" short:"v" description:"Release version e.g. 0.1.2-rc1"`
+	ReleaseVersion string `long:"release-version" short:"r" description:"Release version e.g. 0.1.2-rc1"`
 }
 
 type ProductFileCommand struct {
 	ProductSlug    string `long:"product-slug" short:"p" description:"Product slug e.g. p-mysql" required:"true"`
-	ReleaseVersion string `long:"release-version" short:"v" description:"Release version e.g. 0.1.2-rc1"`
+	ReleaseVersion string `long:"release-version" short:"r" description:"Release version e.g. 0.1.2-rc1"`
 	ProductFileID  int    `long:"product-file-id" description:"Product file ID e.g. 1234" required:"true"`
 }
 
 type AddProductFileCommand struct {
 	ProductSlug    string `long:"product-slug" short:"p" description:"Product slug e.g. p-mysql" required:"true"`
-	ReleaseVersion string `long:"release-version" short:"v" description:"Release version e.g. 0.1.2-rc1" required:"true"`
+	ReleaseVersion string `long:"release-version" short:"r" description:"Release version e.g. 0.1.2-rc1" required:"true"`
 	ProductFileID  int    `long:"product-file-id" description:"Product file ID e.g. 1234" required:"true"`
 }
 
 type RemoveProductFileCommand struct {
 	ProductSlug    string `long:"product-slug" short:"p" description:"Product slug e.g. p-mysql" required:"true"`
-	ReleaseVersion string `long:"release-version" short:"v" description:"Release version e.g. 0.1.2-rc1" required:"true"`
+	ReleaseVersion string `long:"release-version" short:"r" description:"Release version e.g. 0.1.2-rc1" required:"true"`
 	ProductFileID  int    `long:"product-file-id" description:"Product file ID e.g. 1234" required:"true"`
 }
 
@@ -32,7 +32,7 @@ type DeleteProductFileCommand struct {
 
 type DownloadProductFileCommand struct {
 	ProductSlug    string `long:"product-slug" short:"p" description:"Product slug e.g. p-mysql" required:"true"`
-	ReleaseVersion string `long:"release-version" short:"v" description:"Release version e.g. 0.1.2-rc1" required:"true"`
+	ReleaseVersion string `long:"release-version" short:"r" description:"Release version e.g. 0.1.2-rc1" required:"true"`
 	ProductFileID  int    `long:"product-file-id" description:"Product file ID e.g. 1234" required:"true"`
 	Filepath       string `long:"filepath" description:"Local filepath to download file to e.g. /tmp/my-file" required:"true"`
 	AcceptEULA     bool   `long:"accept-eula" description:"Automatically accept EULA if necessary"`
