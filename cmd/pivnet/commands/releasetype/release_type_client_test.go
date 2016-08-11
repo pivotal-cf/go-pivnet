@@ -7,6 +7,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	pivnet "github.com/pivotal-cf-experimental/go-pivnet"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands/releasetype"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands/releasetype/releasetypefakes"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errorhandler/errorhandlerfakes"
@@ -21,7 +22,7 @@ var _ = Describe("releasetype commands", func() {
 
 		outBuffer bytes.Buffer
 
-		releasetypes []string
+		releasetypes []pivnet.ReleaseType
 
 		client *releasetype.ReleaseTypeClient
 	)
@@ -33,9 +34,9 @@ var _ = Describe("releasetype commands", func() {
 
 		fakeErrorHandler = &errorhandlerfakes.FakeErrorHandler{}
 
-		releasetypes = []string{
-			"release-type-A",
-			"release-type-B",
+		releasetypes = []pivnet.ReleaseType{
+			pivnet.ReleaseType("release-type-A"),
+			pivnet.ReleaseType("release-type-B"),
 		}
 
 		fakePivnetClient.ReleaseTypesReturns(releasetypes, nil)
@@ -54,7 +55,7 @@ var _ = Describe("releasetype commands", func() {
 			err := client.List()
 			Expect(err).NotTo(HaveOccurred())
 
-			var returnedReleaseTypes []string
+			var returnedReleaseTypes []pivnet.ReleaseType
 			err = json.Unmarshal(outBuffer.Bytes(), &returnedReleaseTypes)
 			Expect(err).NotTo(HaveOccurred())
 

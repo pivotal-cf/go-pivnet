@@ -21,7 +21,7 @@ type PivnetClient interface {
 	Products() ([]pivnet.Product, error)
 	FindProductForSlug(slug string) (pivnet.Product, error)
 
-	ReleaseTypes() ([]string, error)
+	ReleaseTypes() ([]pivnet.ReleaseType, error)
 
 	ReleasesForProductSlug(productSlug string) ([]pivnet.Release, error)
 	Release(productSlug string, releaseID int) (pivnet.Release, error)

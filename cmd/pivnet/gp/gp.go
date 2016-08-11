@@ -44,7 +44,7 @@ func NewCompositeClient(config pivnet.ClientConfig, logger logger.Logger) *Compo
 	}
 }
 
-func (c Client) ReleaseTypes() ([]string, error) {
+func (c Client) ReleaseTypes() ([]pivnet.ReleaseType, error) {
 	return c.client.ReleaseTypes.Get()
 }
 

@@ -4,13 +4,14 @@ import (
 	"io"
 
 	"github.com/olekukonko/tablewriter"
+	pivnet "github.com/pivotal-cf-experimental/go-pivnet"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errorhandler"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
 )
 
 //go:generate counterfeiter . PivnetClient
 type PivnetClient interface {
-	ReleaseTypes() ([]string, error)
+	ReleaseTypes() ([]pivnet.ReleaseType, error)
 }
 
 type ReleaseTypeClient struct {
@@ -49,7 +50,7 @@ func (c *ReleaseTypeClient) List() error {
 		table.SetHeader([]string{"ReleaseTypes"})
 
 		for _, r := range releaseTypes {
-			table.Append([]string{r})
+			table.Append([]string{string(r)})
 		}
 		table.Render()
 		return nil

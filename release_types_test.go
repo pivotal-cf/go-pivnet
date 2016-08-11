@@ -58,8 +58,8 @@ var _ = Describe("PivnetClient - release types", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(releaseTypes).To(HaveLen(2))
-			Expect(releaseTypes[0]).To(Equal("foo"))
-			Expect(releaseTypes[1]).To(Equal("bar"))
+			Expect(releaseTypes[0]).To(Equal(pivnet.ReleaseType("foo")))
+			Expect(releaseTypes[1]).To(Equal(pivnet.ReleaseType("bar")))
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
