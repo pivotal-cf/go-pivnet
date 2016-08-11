@@ -161,7 +161,7 @@ var _ = Describe("PivnetClient - product files", func() {
 						Availability: "Admins Only",
 						OSSCompliant: "confirm",
 						ReleaseDate:  expectedReleaseDate,
-						ReleaseType:  createReleaseConfig.ReleaseType,
+						ReleaseType:  pivnet.ReleaseType(createReleaseConfig.ReleaseType),
 						EULA: &pivnet.EULA{
 							Slug: createReleaseConfig.EULASlug,
 						},
