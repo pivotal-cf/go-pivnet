@@ -290,6 +290,16 @@ var _ = Describe("Pivnet commands", func() {
 		})
 	})
 
+	Describe("CreateFileGroup command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "CreateFileGroup")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("create-file-group"))
+		})
+	})
+
 	Describe("DeleteFileGroup command", func() {
 		BeforeEach(func() {
 			field = fieldFor(commands.Pivnet, "DeleteFileGroup")

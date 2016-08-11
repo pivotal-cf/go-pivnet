@@ -239,6 +239,79 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 		})
 	})
 
+	Describe("Create", func() {
+		var (
+			name string
+
+			expectedRequestBody string
+
+			returnedFileGroup pivnet.FileGroup
+		)
+
+		BeforeEach(func() {
+			name = "some name"
+
+			expectedRequestBody = fmt.Sprintf(
+				`{"file_group":{"name":"%s"}}`,
+				name,
+			)
+		})
+
+		JustBeforeEach(func() {
+			returnedFileGroup = pivnet.FileGroup{
+				ID:   1234,
+				Name: name,
+			}
+		})
+
+		It("creates new user group without error", func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("POST", fmt.Sprintf(
+						"%s/products/%s/file_groups",
+						apiPrefix,
+						productSlug,
+					)),
+					ghttp.VerifyJSON(expectedRequestBody),
+					ghttp.RespondWithJSONEncoded(http.StatusCreated, returnedFileGroup),
+				),
+			)
+
+			userGroup, err := client.FileGroups.Create(productSlug, name)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(userGroup.ID).To(Equal(returnedFileGroup.ID))
+			Expect(userGroup.Name).To(Equal(name))
+		})
+
+		Context("when the server responds with a non-201 status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
+			It("returns an error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("POST", fmt.Sprintf(
+							"%s/products/%s/file_groups",
+							apiPrefix,
+							productSlug,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, body),
+					),
+				)
+
+				_, err := client.FileGroups.Create(productSlug, name)
+
+				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+	})
+
 	Describe("Delete File Group", func() {
 		var (
 			id = 1234

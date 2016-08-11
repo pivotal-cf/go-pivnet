@@ -207,6 +207,10 @@ func (c Client) FileGroup(productSlug string, fileGroupID int) (pivnet.FileGroup
 	return c.client.FileGroups.Get(productSlug, fileGroupID)
 }
 
+func (c Client) CreateFileGroup(productSlug string, name string) (pivnet.FileGroup, error) {
+	return c.client.FileGroups.Create(productSlug, name)
+}
+
 func (c Client) DeleteFileGroup(productSlug string, fileGroupID int) (pivnet.FileGroup, error) {
 	return c.client.FileGroups.Delete(productSlug, fileGroupID)
 }

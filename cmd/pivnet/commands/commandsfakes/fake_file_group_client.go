@@ -26,6 +26,15 @@ type FakeFileGroupClient struct {
 	getReturns struct {
 		result1 error
 	}
+	CreateStub        func(productSlug string, name string) error
+	createMutex       sync.RWMutex
+	createArgsForCall []struct {
+		productSlug string
+		name        string
+	}
+	createReturns struct {
+		result1 error
+	}
 	DeleteStub        func(productSlug string, productFileID int) error
 	deleteMutex       sync.RWMutex
 	deleteArgsForCall []struct {
@@ -107,6 +116,40 @@ func (fake *FakeFileGroupClient) GetReturns(result1 error) {
 	}{result1}
 }
 
+func (fake *FakeFileGroupClient) Create(productSlug string, name string) error {
+	fake.createMutex.Lock()
+	fake.createArgsForCall = append(fake.createArgsForCall, struct {
+		productSlug string
+		name        string
+	}{productSlug, name})
+	fake.recordInvocation("Create", []interface{}{productSlug, name})
+	fake.createMutex.Unlock()
+	if fake.CreateStub != nil {
+		return fake.CreateStub(productSlug, name)
+	} else {
+		return fake.createReturns.result1
+	}
+}
+
+func (fake *FakeFileGroupClient) CreateCallCount() int {
+	fake.createMutex.RLock()
+	defer fake.createMutex.RUnlock()
+	return len(fake.createArgsForCall)
+}
+
+func (fake *FakeFileGroupClient) CreateArgsForCall(i int) (string, string) {
+	fake.createMutex.RLock()
+	defer fake.createMutex.RUnlock()
+	return fake.createArgsForCall[i].productSlug, fake.createArgsForCall[i].name
+}
+
+func (fake *FakeFileGroupClient) CreateReturns(result1 error) {
+	fake.CreateStub = nil
+	fake.createReturns = struct {
+		result1 error
+	}{result1}
+}
+
 func (fake *FakeFileGroupClient) Delete(productSlug string, productFileID int) error {
 	fake.deleteMutex.Lock()
 	fake.deleteArgsForCall = append(fake.deleteArgsForCall, struct {
@@ -148,6 +191,8 @@ func (fake *FakeFileGroupClient) Invocations() map[string][][]interface{} {
 	defer fake.listMutex.RUnlock()
 	fake.getMutex.RLock()
 	defer fake.getMutex.RUnlock()
+	fake.createMutex.RLock()
+	defer fake.createMutex.RUnlock()
 	fake.deleteMutex.RLock()
 	defer fake.deleteMutex.RUnlock()
 	return fake.invocations

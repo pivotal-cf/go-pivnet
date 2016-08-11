@@ -1,12 +1,22 @@
 package pivnet
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/http"
 )
 
 type FileGroupsService struct {
 	client Client
+}
+
+type createFileGroupBody struct {
+	FileGroup createFileGroup `json:"file_group"`
+}
+
+type createFileGroup struct {
+	Name string `json:"name,omitempty"`
 }
 
 type FileGroup struct {
@@ -55,6 +65,42 @@ func (p FileGroupsService) Get(productSlug string, fileGroupID int) (FileGroup, 
 		url,
 		http.StatusOK,
 		nil,
+		&response,
+	)
+	if err != nil {
+		return FileGroup{}, err
+	}
+
+	return response, nil
+}
+
+func (p FileGroupsService) Create(productSlug string, name string) (FileGroup, error) {
+	url := fmt.Sprintf(
+		"/products/%s/file_groups",
+		productSlug,
+	)
+
+	createBody := createFileGroupBody{
+		createFileGroup{
+			Name: name,
+		},
+	}
+
+	b, err := json.Marshal(createBody)
+	if err != nil {
+		// Untested as we cannot force an error because we are marshalling
+		// a known-good body
+		return FileGroup{}, err
+	}
+
+	body := bytes.NewReader(b)
+
+	var response FileGroup
+	_, err = p.client.MakeRequest(
+		"POST",
+		url,
+		http.StatusCreated,
+		body,
 		&response,
 	)
 	if err != nil {

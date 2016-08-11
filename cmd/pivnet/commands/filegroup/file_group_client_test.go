@@ -196,6 +196,44 @@ var _ = Describe("filegroup commands", func() {
 		})
 	})
 
+	Describe("Create", func() {
+		var (
+			productSlug string
+			name        string
+		)
+
+		BeforeEach(func() {
+			productSlug = "some-product-slug"
+			name = "new-name"
+
+			fakePivnetClient.CreateFileGroupReturns(filegroups[0], nil)
+		})
+
+		It("creates FileGroup", func() {
+			err := client.Create(productSlug, name)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Context("when there is an error", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("filegroup error")
+				fakePivnetClient.CreateFileGroupReturns(pivnet.FileGroup{}, expectedErr)
+			})
+
+			It("invokes the error handler", func() {
+				err := client.Create(productSlug, name)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(fakeErrorHandler.HandleErrorArgsForCall(0)).To(Equal(expectedErr))
+			})
+		})
+	})
+
 	Describe("Delete", func() {
 		var (
 			productSlug string

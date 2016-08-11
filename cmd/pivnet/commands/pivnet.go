@@ -46,6 +46,7 @@ type PivnetClient interface {
 	FileGroups(productSlug string) ([]pivnet.FileGroup, error)
 	FileGroupsForRelease(productSlug string, releaseID int) ([]pivnet.FileGroup, error)
 	FileGroup(productSlug string, fileGroupID int) (pivnet.FileGroup, error)
+	CreateFileGroup(productSlug string, name string) (pivnet.FileGroup, error)
 	DeleteFileGroup(productSlug string, fileGroupID int) (pivnet.FileGroup, error)
 
 	UserGroups() ([]pivnet.UserGroup, error)
@@ -105,6 +106,7 @@ type PivnetCommand struct {
 
 	FileGroups      FileGroupsCommand      `command:"file-groups" description:"List file groups"`
 	FileGroup       FileGroupCommand       `command:"file-group" description:"Show file group"`
+	CreateFileGroup CreateFileGroupCommand `command:"create-file-group" description:"Create file group"`
 	DeleteFileGroup DeleteFileGroupCommand `command:"delete-file-group" description:"Delete file group"`
 
 	Releases      ReleasesCommand      `command:"releases" description:"List releases"`
