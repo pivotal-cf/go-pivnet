@@ -35,6 +35,16 @@ type FakeFileGroupClient struct {
 	createReturns struct {
 		result1 error
 	}
+	UpdateStub        func(productSlug string, productFileID int, name *string) error
+	updateMutex       sync.RWMutex
+	updateArgsForCall []struct {
+		productSlug   string
+		productFileID int
+		name          *string
+	}
+	updateReturns struct {
+		result1 error
+	}
 	DeleteStub        func(productSlug string, productFileID int) error
 	deleteMutex       sync.RWMutex
 	deleteArgsForCall []struct {
@@ -150,6 +160,41 @@ func (fake *FakeFileGroupClient) CreateReturns(result1 error) {
 	}{result1}
 }
 
+func (fake *FakeFileGroupClient) Update(productSlug string, productFileID int, name *string) error {
+	fake.updateMutex.Lock()
+	fake.updateArgsForCall = append(fake.updateArgsForCall, struct {
+		productSlug   string
+		productFileID int
+		name          *string
+	}{productSlug, productFileID, name})
+	fake.recordInvocation("Update", []interface{}{productSlug, productFileID, name})
+	fake.updateMutex.Unlock()
+	if fake.UpdateStub != nil {
+		return fake.UpdateStub(productSlug, productFileID, name)
+	} else {
+		return fake.updateReturns.result1
+	}
+}
+
+func (fake *FakeFileGroupClient) UpdateCallCount() int {
+	fake.updateMutex.RLock()
+	defer fake.updateMutex.RUnlock()
+	return len(fake.updateArgsForCall)
+}
+
+func (fake *FakeFileGroupClient) UpdateArgsForCall(i int) (string, int, *string) {
+	fake.updateMutex.RLock()
+	defer fake.updateMutex.RUnlock()
+	return fake.updateArgsForCall[i].productSlug, fake.updateArgsForCall[i].productFileID, fake.updateArgsForCall[i].name
+}
+
+func (fake *FakeFileGroupClient) UpdateReturns(result1 error) {
+	fake.UpdateStub = nil
+	fake.updateReturns = struct {
+		result1 error
+	}{result1}
+}
+
 func (fake *FakeFileGroupClient) Delete(productSlug string, productFileID int) error {
 	fake.deleteMutex.Lock()
 	fake.deleteArgsForCall = append(fake.deleteArgsForCall, struct {
@@ -193,6 +238,8 @@ func (fake *FakeFileGroupClient) Invocations() map[string][][]interface{} {
 	defer fake.getMutex.RUnlock()
 	fake.createMutex.RLock()
 	defer fake.createMutex.RUnlock()
+	fake.updateMutex.RLock()
+	defer fake.updateMutex.RUnlock()
 	fake.deleteMutex.RLock()
 	defer fake.deleteMutex.RUnlock()
 	return fake.invocations

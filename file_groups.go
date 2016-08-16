@@ -15,7 +15,15 @@ type createFileGroupBody struct {
 	FileGroup createFileGroup `json:"file_group"`
 }
 
+type updateFileGroupBody struct {
+	FileGroup updateFileGroup `json:"file_group"`
+}
+
 type createFileGroup struct {
+	Name string `json:"name,omitempty"`
+}
+
+type updateFileGroup struct {
 	Name string `json:"name,omitempty"`
 }
 
@@ -100,6 +108,43 @@ func (p FileGroupsService) Create(productSlug string, name string) (FileGroup, e
 		"POST",
 		url,
 		http.StatusCreated,
+		body,
+		&response,
+	)
+	if err != nil {
+		return FileGroup{}, err
+	}
+
+	return response, nil
+}
+
+func (p FileGroupsService) Update(productSlug string, fileGroup FileGroup) (FileGroup, error) {
+	url := fmt.Sprintf(
+		"/products/%s/file_groups/%d",
+		productSlug,
+		fileGroup.ID,
+	)
+
+	updateBody := updateFileGroupBody{
+		updateFileGroup{
+			Name: fileGroup.Name,
+		},
+	}
+
+	b, err := json.Marshal(updateBody)
+	if err != nil {
+		// Untested as we cannot force an error because we are marshalling
+		// a known-good body
+		return FileGroup{}, err
+	}
+
+	body := bytes.NewReader(b)
+
+	var response FileGroup
+	_, err = p.client.MakeRequest(
+		"PATCH",
+		url,
+		http.StatusOK,
 		body,
 		&response,
 	)

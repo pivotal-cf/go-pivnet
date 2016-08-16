@@ -58,6 +58,16 @@ type FakePivnetClient struct {
 		result1 pivnet.FileGroup
 		result2 error
 	}
+	UpdateFileGroupStub        func(productSlug string, fileGroup pivnet.FileGroup) (pivnet.FileGroup, error)
+	updateFileGroupMutex       sync.RWMutex
+	updateFileGroupArgsForCall []struct {
+		productSlug string
+		fileGroup   pivnet.FileGroup
+	}
+	updateFileGroupReturns struct {
+		result1 pivnet.FileGroup
+		result2 error
+	}
 	DeleteFileGroupStub        func(productSlug string, fileGroupID int) (pivnet.FileGroup, error)
 	deleteFileGroupMutex       sync.RWMutex
 	deleteFileGroupArgsForCall []struct {
@@ -246,6 +256,41 @@ func (fake *FakePivnetClient) CreateFileGroupReturns(result1 pivnet.FileGroup, r
 	}{result1, result2}
 }
 
+func (fake *FakePivnetClient) UpdateFileGroup(productSlug string, fileGroup pivnet.FileGroup) (pivnet.FileGroup, error) {
+	fake.updateFileGroupMutex.Lock()
+	fake.updateFileGroupArgsForCall = append(fake.updateFileGroupArgsForCall, struct {
+		productSlug string
+		fileGroup   pivnet.FileGroup
+	}{productSlug, fileGroup})
+	fake.recordInvocation("UpdateFileGroup", []interface{}{productSlug, fileGroup})
+	fake.updateFileGroupMutex.Unlock()
+	if fake.UpdateFileGroupStub != nil {
+		return fake.UpdateFileGroupStub(productSlug, fileGroup)
+	} else {
+		return fake.updateFileGroupReturns.result1, fake.updateFileGroupReturns.result2
+	}
+}
+
+func (fake *FakePivnetClient) UpdateFileGroupCallCount() int {
+	fake.updateFileGroupMutex.RLock()
+	defer fake.updateFileGroupMutex.RUnlock()
+	return len(fake.updateFileGroupArgsForCall)
+}
+
+func (fake *FakePivnetClient) UpdateFileGroupArgsForCall(i int) (string, pivnet.FileGroup) {
+	fake.updateFileGroupMutex.RLock()
+	defer fake.updateFileGroupMutex.RUnlock()
+	return fake.updateFileGroupArgsForCall[i].productSlug, fake.updateFileGroupArgsForCall[i].fileGroup
+}
+
+func (fake *FakePivnetClient) UpdateFileGroupReturns(result1 pivnet.FileGroup, result2 error) {
+	fake.UpdateFileGroupStub = nil
+	fake.updateFileGroupReturns = struct {
+		result1 pivnet.FileGroup
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *FakePivnetClient) DeleteFileGroup(productSlug string, fileGroupID int) (pivnet.FileGroup, error) {
 	fake.deleteFileGroupMutex.Lock()
 	fake.deleteFileGroupArgsForCall = append(fake.deleteFileGroupArgsForCall, struct {
@@ -294,6 +339,8 @@ func (fake *FakePivnetClient) Invocations() map[string][][]interface{} {
 	defer fake.fileGroupMutex.RUnlock()
 	fake.createFileGroupMutex.RLock()
 	defer fake.createFileGroupMutex.RUnlock()
+	fake.updateFileGroupMutex.RLock()
+	defer fake.updateFileGroupMutex.RUnlock()
 	fake.deleteFileGroupMutex.RLock()
 	defer fake.deleteFileGroupMutex.RUnlock()
 	return fake.invocations

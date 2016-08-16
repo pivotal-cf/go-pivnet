@@ -230,6 +230,41 @@ var _ = Describe("file group commands", func() {
 		})
 	})
 
+	Describe("UpdateFileGroupCommand", func() {
+		var (
+			cmd commands.UpdateFileGroupCommand
+		)
+
+		BeforeEach(func() {
+			cmd = commands.UpdateFileGroupCommand{}
+		})
+
+		It("invokes the FileGroup client", func() {
+			err := cmd.Execute(nil)
+
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(fakeFileGroupClient.UpdateCallCount()).To(Equal(1))
+		})
+
+		Context("when the FileGroup client returns an error", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("expected error")
+				fakeFileGroupClient.UpdateReturns(expectedErr)
+			})
+
+			It("forwards the error", func() {
+				err := cmd.Execute(nil)
+
+				Expect(err).To(Equal(expectedErr))
+			})
+		})
+	})
+
 	Describe("DeleteFileGroupCommand", func() {
 		var (
 			cmd *commands.DeleteFileGroupCommand

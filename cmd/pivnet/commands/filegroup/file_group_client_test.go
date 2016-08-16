@@ -234,6 +234,68 @@ var _ = Describe("filegroup commands", func() {
 		})
 	})
 
+	Describe("Update", func() {
+		var (
+			productSlug string
+			fileGroupID int
+			name        *string
+		)
+
+		BeforeEach(func() {
+			productSlug = "some-product-slug"
+			fileGroupID = filegroups[0].ID
+
+			fakePivnetClient.FileGroupReturns(filegroups[0], nil)
+			fakePivnetClient.UpdateFileGroupReturns(filegroups[0], nil)
+		})
+
+		It("updates FileGroup", func() {
+			err := client.Update(productSlug, fileGroupID, name)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Context("when there is an error", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("filegroup error")
+				fakePivnetClient.UpdateFileGroupReturns(pivnet.FileGroup{}, expectedErr)
+			})
+
+			It("invokes the error handler", func() {
+				err := client.Update(productSlug, fileGroupID, name)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(fakeErrorHandler.HandleErrorArgsForCall(0)).To(Equal(expectedErr))
+			})
+		})
+
+		Context("when the name is non-nil", func() {
+			var (
+				nameVal string
+			)
+
+			BeforeEach(func() {
+				nameVal = "some-name"
+				name = &nameVal
+			})
+
+			It("updates FileGroup with the provided name", func() {
+				err := client.Update(productSlug, fileGroupID, name)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakePivnetClient.UpdateFileGroupCallCount()).To(Equal(1))
+				_, invokedFileGroup := fakePivnetClient.UpdateFileGroupArgsForCall(0)
+
+				Expect(invokedFileGroup.ID).To(Equal(fileGroupID))
+				Expect(invokedFileGroup.Name).To(Equal(nameVal))
+			})
+		})
+	})
+
 	Describe("Delete", func() {
 		var (
 			productSlug string

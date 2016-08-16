@@ -264,7 +264,7 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 			}
 		})
 
-		It("creates new user group without error", func() {
+		It("creates new file group without error", func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("POST", fmt.Sprintf(
@@ -277,11 +277,11 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 				),
 			)
 
-			userGroup, err := client.FileGroups.Create(productSlug, name)
+			fileGroup, err := client.FileGroups.Create(productSlug, name)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(userGroup.ID).To(Equal(returnedFileGroup.ID))
-			Expect(userGroup.Name).To(Equal(name))
+			Expect(fileGroup.ID).To(Equal(returnedFileGroup.ID))
+			Expect(fileGroup.Name).To(Equal(name))
 		})
 
 		Context("when the server responds with a non-201 status code", func() {
@@ -306,6 +306,79 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 				)
 
 				_, err := client.FileGroups.Create(productSlug, name)
+
+				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+	})
+
+	Describe("Update", func() {
+		var (
+			fileGroup pivnet.FileGroup
+
+			expectedRequestBody string
+
+			response pivnet.FileGroup
+		)
+
+		BeforeEach(func() {
+			fileGroup = pivnet.FileGroup{
+				ID:   1234,
+				Name: "some name",
+			}
+
+			expectedRequestBody = fmt.Sprintf(
+				`{"file_group":{"name":"%s"}}`,
+				fileGroup.Name,
+			)
+
+			response = fileGroup
+		})
+
+		It("returns without error", func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+						"%s/products/%s/file_groups/%d",
+						apiPrefix,
+						productSlug,
+						fileGroup.ID,
+					)),
+					ghttp.VerifyJSON(expectedRequestBody),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, response),
+				),
+			)
+
+			returned, err := client.FileGroups.Update(productSlug, fileGroup)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(returned.ID).To(Equal(fileGroup.ID))
+			Expect(returned.Name).To(Equal(fileGroup.Name))
+		})
+
+		Context("when the server responds with a non-200 status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
+			It("returns an error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/file_groups/%d",
+							apiPrefix,
+							productSlug,
+							fileGroup.ID,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, body),
+					),
+				)
+
+				_, err := client.FileGroups.Update(productSlug, fileGroup)
 
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})

@@ -19,6 +19,7 @@ type PivnetClient interface {
 	ReleaseForProductVersion(productSlug string, releaseVersion string) (pivnet.Release, error)
 	FileGroup(productSlug string, fileGroupID int) (pivnet.FileGroup, error)
 	CreateFileGroup(productSlug string, name string) (pivnet.FileGroup, error)
+	UpdateFileGroup(productSlug string, fileGroup pivnet.FileGroup) (pivnet.FileGroup, error)
 	DeleteFileGroup(productSlug string, fileGroupID int) (pivnet.FileGroup, error)
 }
 
@@ -158,6 +159,28 @@ func (c *FileGroupClient) Create(productSlug string, name string) error {
 	}
 
 	return c.printFileGroup(fileGroup)
+}
+
+func (c *FileGroupClient) Update(
+	productSlug string,
+	fileGroupID int,
+	name *string,
+) error {
+	fileGroup, err := c.pivnetClient.FileGroup(productSlug, fileGroupID)
+	if err != nil {
+		return c.eh.HandleError(err)
+	}
+
+	if name != nil {
+		fileGroup.Name = *name
+	}
+
+	updatedFileGroup, err := c.pivnetClient.UpdateFileGroup(productSlug, fileGroup)
+	if err != nil {
+		return c.eh.HandleError(err)
+	}
+
+	return c.printFileGroup(updatedFileGroup)
 }
 
 func (c *FileGroupClient) Delete(productSlug string, fileGroupID int) error {
