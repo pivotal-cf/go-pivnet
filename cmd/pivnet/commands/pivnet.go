@@ -3,17 +3,17 @@ package commands
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 
 	"github.com/pivotal-cf-experimental/go-pivnet"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errorhandler"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/gp"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/lagershim"
+	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/logshim"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
 	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/version"
 	"github.com/pivotal-cf-experimental/go-pivnet/logger"
-	"github.com/pivotal-golang/lager"
 	"github.com/robdimsdale/sanitizer"
 )
 
@@ -180,8 +180,6 @@ func Init() {
 		Printer = printer.NewPrinter(OutputWriter)
 	}
 
-	l := lager.NewLogger("pivnet CLI")
-
 	sanitized := map[string]string{
 		Pivnet.APIToken: "*** redacted api token ***",
 	}
@@ -189,16 +187,13 @@ func Init() {
 	OutputWriter = sanitizer.NewSanitizer(sanitized, OutputWriter)
 	LogWriter = sanitizer.NewSanitizer(sanitized, LogWriter)
 
-	if Pivnet.Verbose {
-		l.RegisterSink(lager.NewWriterSink(LogWriter, lager.DEBUG))
-	} else {
-		l.RegisterSink(lager.NewWriterSink(LogWriter, lager.INFO))
-	}
+	infoLogger := log.New(LogWriter, "", log.LstdFlags)
+	debugLogger := log.New(LogWriter, "", log.LstdFlags)
 
 	Pivnet.userAgent = fmt.Sprintf(
 		"go-pivnet/%s",
 		version.Version,
 	)
 
-	Pivnet.Logger = lagershim.NewLagerShim(l)
+	Pivnet.Logger = logshim.NewLogShim(infoLogger, debugLogger, Pivnet.Verbose)
 }

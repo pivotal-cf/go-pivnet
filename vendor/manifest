@@ -84,14 +84,6 @@
 			"notests": true
 		},
 		{
-			"importpath": "github.com/pivotal-golang/lager",
-			"repository": "https://github.com/pivotal-golang/lager",
-			"vcs": "git",
-			"revision": "7639e31ce6622c55c15aa64144b85d5f4873d127",
-			"branch": "master",
-			"notests": true
-		},
-		{
 			"importpath": "github.com/robdimsdale/sanitizer",
 			"repository": "https://github.com/robdimsdale/sanitizer",
 			"vcs": "git",
