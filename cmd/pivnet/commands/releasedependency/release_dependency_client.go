@@ -61,7 +61,7 @@ func (c *ReleaseDependencyClient) List(productSlug string, releaseVersion string
 			"ID",
 			"Version",
 			"Product ID",
-			"Product Slug",
+			"Product Name",
 		})
 
 		for _, r := range releaseDependencies {
@@ -69,7 +69,7 @@ func (c *ReleaseDependencyClient) List(productSlug string, releaseVersion string
 				strconv.Itoa(r.Release.ID),
 				r.Release.Version,
 				strconv.Itoa(r.Release.Product.ID),
-				r.Release.Product.Slug,
+				r.Release.Product.Name,
 			})
 		}
 		table.Render()
