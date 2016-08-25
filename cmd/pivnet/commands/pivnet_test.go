@@ -75,9 +75,9 @@ var _ = Describe("Pivnet commands", func() {
 		})
 	})
 
-	Describe("Version", func() {
+	Describe("VersionFunc", func() {
 		BeforeEach(func() {
-			field = fieldFor(commands.Pivnet, "Version")
+			field = fieldFor(commands.Pivnet, "VersionFunc")
 		})
 
 		It("contains short flag", func() {
@@ -86,6 +86,20 @@ var _ = Describe("Pivnet commands", func() {
 
 		It("contains long flag", func() {
 			Expect(longTag(field)).To(Equal("version"))
+		})
+	})
+
+	Describe("Version command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "Version")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("version"))
+		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("v"))
 		})
 	})
 

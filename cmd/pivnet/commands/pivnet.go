@@ -77,15 +77,16 @@ var (
 )
 
 type PivnetCommand struct {
-	Version func() `short:"v" long:"version" description:"Print the version of Pivnet and exit"`
-
-	Help HelpCommand `command:"help" alias:"h" description:"Print this help message"`
+	VersionFunc func() `short:"v" long:"version" description:"Print the version of this CLI and exit"`
 
 	Format  string `long:"format" description:"Format to print as" default:"table" choice:"table" choice:"json" choice:"yaml"`
 	Verbose bool   `long:"verbose" description:"Display verbose output"`
 
 	APIToken string `long:"api-token" description:"Pivnet API token"`
 	Host     string `long:"host" description:"Pivnet API Host"`
+
+	Help    HelpCommand    `command:"help" alias:"h" description:"Print this help message"`
+	Version VersionCommand `command:"version" alias:"v" description:"Print the version of this CLI and exit"`
 
 	ReleaseTypes ReleaseTypesCommand `command:"release-types" alias:"rts" description:"List release types"`
 
@@ -136,7 +137,7 @@ type PivnetCommand struct {
 var Pivnet PivnetCommand
 
 func init() {
-	Pivnet.Version = func() {
+	Pivnet.VersionFunc = func() {
 		fmt.Println(version.Version)
 		os.Exit(0)
 	}
