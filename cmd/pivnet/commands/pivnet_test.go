@@ -97,6 +97,10 @@ var _ = Describe("Pivnet commands", func() {
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("help"))
 		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("h"))
+		})
 	})
 
 	Describe("Verbose flag", func() {
@@ -168,6 +172,10 @@ var _ = Describe("Pivnet commands", func() {
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("release-types"))
 		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("rts"))
+		})
 	})
 
 	Describe("EULAs command", func() {
@@ -177,6 +185,10 @@ var _ = Describe("Pivnet commands", func() {
 
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("eulas"))
+		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("es"))
 		})
 	})
 
@@ -188,6 +200,10 @@ var _ = Describe("Pivnet commands", func() {
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("eula"))
 		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("e"))
+		})
 	})
 
 	Describe("AcceptEULA command", func() {
@@ -197,6 +213,10 @@ var _ = Describe("Pivnet commands", func() {
 
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("accept-eula"))
+		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("ae"))
 		})
 	})
 
@@ -208,6 +228,10 @@ var _ = Describe("Pivnet commands", func() {
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("products"))
 		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("ps"))
+		})
 	})
 
 	Describe("Product command", func() {
@@ -217,6 +241,10 @@ var _ = Describe("Pivnet commands", func() {
 
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("product"))
+		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("p"))
 		})
 	})
 
@@ -228,6 +256,10 @@ var _ = Describe("Pivnet commands", func() {
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("product-files"))
 		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("pfs"))
+		})
 	})
 
 	Describe("ProductFile command", func() {
@@ -237,6 +269,10 @@ var _ = Describe("Pivnet commands", func() {
 
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("product-file"))
+		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("pf"))
 		})
 	})
 
@@ -248,6 +284,10 @@ var _ = Describe("Pivnet commands", func() {
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("add-product-file"))
 		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("apf"))
+		})
 	})
 
 	Describe("RemoveProductFile command", func() {
@@ -257,6 +297,10 @@ var _ = Describe("Pivnet commands", func() {
 
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("remove-product-file"))
+		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("rpf"))
 		})
 	})
 
@@ -268,6 +312,10 @@ var _ = Describe("Pivnet commands", func() {
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("delete-product-file"))
 		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("dpf"))
+		})
 	})
 
 	Describe("FileGroups command", func() {
@@ -277,6 +325,10 @@ var _ = Describe("Pivnet commands", func() {
 
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("file-groups"))
+		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("fgs"))
 		})
 	})
 
@@ -288,6 +340,10 @@ var _ = Describe("Pivnet commands", func() {
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("file-group"))
 		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("fg"))
+		})
 	})
 
 	Describe("CreateFileGroup command", func() {
@@ -297,6 +353,10 @@ var _ = Describe("Pivnet commands", func() {
 
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("create-file-group"))
+		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("cfg"))
 		})
 	})
 
@@ -308,6 +368,10 @@ var _ = Describe("Pivnet commands", func() {
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("update-file-group"))
 		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("ufg"))
+		})
 	})
 
 	Describe("DeleteFileGroup command", func() {
@@ -317,6 +381,10 @@ var _ = Describe("Pivnet commands", func() {
 
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("delete-file-group"))
+		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("dfg"))
 		})
 	})
 
@@ -328,6 +396,10 @@ var _ = Describe("Pivnet commands", func() {
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("releases"))
 		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("rs"))
+		})
 	})
 
 	Describe("Release command", func() {
@@ -337,6 +409,10 @@ var _ = Describe("Pivnet commands", func() {
 
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("release"))
+		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("r"))
 		})
 	})
 
@@ -348,6 +424,10 @@ var _ = Describe("Pivnet commands", func() {
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("delete-release"))
 		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("dr"))
+		})
 	})
 
 	Describe("UserGroups command", func() {
@@ -357,6 +437,10 @@ var _ = Describe("Pivnet commands", func() {
 
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("user-groups"))
+		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("ugs"))
 		})
 	})
 
@@ -368,6 +452,10 @@ var _ = Describe("Pivnet commands", func() {
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("user-group"))
 		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("ug"))
+		})
 	})
 
 	Describe("AddUserGroup command", func() {
@@ -377,6 +465,10 @@ var _ = Describe("Pivnet commands", func() {
 
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("add-user-group"))
+		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("aug"))
 		})
 	})
 
@@ -388,6 +480,10 @@ var _ = Describe("Pivnet commands", func() {
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("remove-user-group"))
 		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("rug"))
+		})
 	})
 
 	Describe("CreateUserGroup command", func() {
@@ -397,6 +493,10 @@ var _ = Describe("Pivnet commands", func() {
 
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("create-user-group"))
+		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("cug"))
 		})
 	})
 
@@ -408,6 +508,10 @@ var _ = Describe("Pivnet commands", func() {
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("update-user-group"))
 		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("uug"))
+		})
 	})
 
 	Describe("DeleteUserGroup command", func() {
@@ -417,6 +521,10 @@ var _ = Describe("Pivnet commands", func() {
 
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("delete-user-group"))
+		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("dug"))
 		})
 	})
 
@@ -428,6 +536,10 @@ var _ = Describe("Pivnet commands", func() {
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("add-user-group-member"))
 		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("augm"))
+		})
 	})
 
 	Describe("RemoveUserGroupMemberCommand command", func() {
@@ -437,6 +549,10 @@ var _ = Describe("Pivnet commands", func() {
 
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("remove-user-group-member"))
+		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("rugm"))
 		})
 	})
 
@@ -448,6 +564,10 @@ var _ = Describe("Pivnet commands", func() {
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("release-dependencies"))
 		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("rds"))
+		})
 	})
 
 	Describe("ReleaseUpgradePaths command", func() {
@@ -457,6 +577,10 @@ var _ = Describe("Pivnet commands", func() {
 
 		It("contains command", func() {
 			Expect(command(field)).To(Equal("release-upgrade-paths"))
+		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("rups"))
 		})
 	})
 })

@@ -41,6 +41,10 @@ func shortTag(f reflect.StructField) string {
 	return f.Tag.Get("short")
 }
 
+var alias = func(f reflect.StructField) string {
+	return f.Tag.Get("alias")
+}
+
 var command = func(f reflect.StructField) string {
 	return f.Tag.Get("command")
 }
