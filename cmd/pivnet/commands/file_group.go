@@ -9,7 +9,7 @@ type FileGroupsCommand struct {
 
 type FileGroupCommand struct {
 	ProductSlug string `long:"product-slug" short:"p" description:"Product slug e.g. p-mysql" required:"true"`
-	FileGroupID int    `long:"file-group-id" description:"Filegroup ID e.g. 1234" required:"true"`
+	FileGroupID int    `long:"file-group-id" short:"i" description:"Filegroup ID e.g. 1234" required:"true"`
 }
 
 type CreateFileGroupCommand struct {
@@ -19,13 +19,13 @@ type CreateFileGroupCommand struct {
 
 type UpdateFileGroupCommand struct {
 	ProductSlug string  `long:"product-slug" short:"p" description:"Product slug e.g. p-mysql" required:"true"`
-	FileGroupID int     `long:"file-group-id" description:"Filegroup ID e.g. 1234" required:"true"`
+	FileGroupID int     `long:"file-group-id" short:"i" description:"Filegroup ID e.g. 1234" required:"true"`
 	Name        *string `long:"name" description:"Name e.g. my_file_group"`
 }
 
 type DeleteFileGroupCommand struct {
 	ProductSlug string `long:"product-slug" short:"p" description:"Product slug e.g. p-mysql" required:"true"`
-	FileGroupID int    `long:"file-group-id" description:"File group ID e.g. 1234" required:"true"`
+	FileGroupID int    `long:"file-group-id" short:"i" description:"File group ID e.g. 1234" required:"true"`
 }
 
 //go:generate counterfeiter . FileGroupClient

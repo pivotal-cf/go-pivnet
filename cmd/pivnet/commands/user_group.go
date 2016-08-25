@@ -8,7 +8,7 @@ type UserGroupsCommand struct {
 }
 
 type UserGroupCommand struct {
-	UserGroupID int `long:"user-group-id" description:"User group ID e.g. 1234" required:"true"`
+	UserGroupID int `long:"user-group-id" short:"i" description:"User group ID e.g. 1234" required:"true"`
 }
 
 type CreateUserGroupCommand struct {
@@ -18,7 +18,7 @@ type CreateUserGroupCommand struct {
 }
 
 type UpdateUserGroupCommand struct {
-	UserGroupID int     `long:"user-group-id" description:"User group ID e.g. 1234" required:"true"`
+	UserGroupID int     `long:"user-group-id" short:"i" description:"User group ID e.g. 1234" required:"true"`
 	Name        *string `long:"name" description:"Name e.g. all_users"`
 	Description *string `long:"description" description:"Description e.g. 'All users in the world'"`
 }
@@ -26,27 +26,27 @@ type UpdateUserGroupCommand struct {
 type AddUserGroupCommand struct {
 	ProductSlug    string `long:"product-slug" short:"p" description:"Product slug e.g. p-mysql" required:"true"`
 	ReleaseVersion string `long:"release-version" short:"r" description:"Release version e.g. 0.1.2-rc1" required:"true"`
-	UserGroupID    int    `long:"user-group-id" description:"User Group ID e.g. 1234" required:"true"`
+	UserGroupID    int    `long:"user-group-id" short:"i" description:"User Group ID e.g. 1234" required:"true"`
 }
 
 type RemoveUserGroupCommand struct {
 	ProductSlug    string `long:"product-slug" short:"p" description:"Product slug e.g. p-mysql" required:"true"`
 	ReleaseVersion string `long:"release-version" short:"r" description:"Release version e.g. 0.1.2-rc1" required:"true"`
-	UserGroupID    int    `long:"user-group-id" description:"User Group ID e.g. 1234" required:"true"`
+	UserGroupID    int    `long:"user-group-id" short:"i" description:"User Group ID e.g. 1234" required:"true"`
 }
 
 type DeleteUserGroupCommand struct {
-	UserGroupID int `long:"user-group-id" description:"User group ID e.g. 1234" required:"true"`
+	UserGroupID int `long:"user-group-id" short:"i" description:"User group ID e.g. 1234" required:"true"`
 }
 
 type AddUserGroupMemberCommand struct {
-	UserGroupID        int    `long:"user-group-id" description:"User group ID e.g. 1234" required:"true"`
+	UserGroupID        int    `long:"user-group-id" short:"i" description:"User group ID e.g. 1234" required:"true"`
 	MemberEmailAddress string `long:"member-email" description:"Member email address e.g. 1234" required:"true"`
 	Admin              bool   `long:"admin" description:"Whether the user should be an admin"`
 }
 
 type RemoveUserGroupMemberCommand struct {
-	UserGroupID        int    `long:"user-group-id" description:"User group ID e.g. 1234" required:"true"`
+	UserGroupID        int    `long:"user-group-id" short:"i" description:"User group ID e.g. 1234" required:"true"`
 	MemberEmailAddress string `long:"member-email" description:"Member email address e.g. 1234" required:"true"`
 }
 

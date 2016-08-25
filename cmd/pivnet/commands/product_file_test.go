@@ -175,6 +175,10 @@ var _ = Describe("product file commands", func() {
 				Expect(isRequired(field)).To(BeTrue())
 			})
 
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("i"))
+			})
+
 			It("contains long name", func() {
 				Expect(longTag(field)).To(Equal("product-file-id"))
 			})
@@ -240,6 +244,10 @@ var _ = Describe("product file commands", func() {
 
 			It("is required", func() {
 				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("i"))
 			})
 
 			It("contains long name", func() {
@@ -327,6 +335,10 @@ var _ = Describe("product file commands", func() {
 				Expect(isRequired(field)).To(BeTrue())
 			})
 
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("i"))
+			})
+
 			It("contains long name", func() {
 				Expect(longTag(field)).To(Equal("product-file-id"))
 			})
@@ -412,6 +424,10 @@ var _ = Describe("product file commands", func() {
 				Expect(isRequired(field)).To(BeTrue())
 			})
 
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("i"))
+			})
+
 			It("contains long name", func() {
 				Expect(longTag(field)).To(Equal("product-file-id"))
 			})
@@ -495,6 +511,10 @@ var _ = Describe("product file commands", func() {
 
 			It("is required", func() {
 				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("i"))
 			})
 
 			It("contains long name", func() {
