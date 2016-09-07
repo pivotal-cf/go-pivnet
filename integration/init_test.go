@@ -3,8 +3,8 @@ package integration_test
 import (
 	"os"
 
-	"github.com/pivotal-cf-experimental/go-pivnet"
-	"github.com/pivotal-cf-experimental/go-pivnet/logger/loggerfakes"
+	"github.com/pivotal-cf/go-pivnet"
+	"github.com/pivotal-cf/go-pivnet/logger/loggerfakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

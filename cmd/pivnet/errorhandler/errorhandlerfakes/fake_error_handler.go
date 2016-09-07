@@ -4,7 +4,7 @@ package errorhandlerfakes
 import (
 	"sync"
 
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errorhandler"
+	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/errorhandler"
 )
 
 type FakeErrorHandler struct {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/pivotal-cf-experimental/go-pivnet/logger"
+	"github.com/pivotal-cf/go-pivnet/logger"
 )
 
 type LogShim interface {

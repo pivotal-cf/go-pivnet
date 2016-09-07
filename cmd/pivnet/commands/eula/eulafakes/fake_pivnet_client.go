@@ -4,8 +4,8 @@ package eulafakes
 import (
 	"sync"
 
-	"github.com/pivotal-cf-experimental/go-pivnet"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands/eula"
+	"github.com/pivotal-cf/go-pivnet"
+	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/commands/eula"
 )
 
 type FakePivnetClient struct {

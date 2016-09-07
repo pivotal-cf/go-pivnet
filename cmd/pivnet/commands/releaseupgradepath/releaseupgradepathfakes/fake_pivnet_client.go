@@ -4,8 +4,8 @@ package releaseupgradepathfakes
 import (
 	"sync"
 
-	pivnet "github.com/pivotal-cf-experimental/go-pivnet"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands/releaseupgradepath"
+	pivnet "github.com/pivotal-cf/go-pivnet"
+	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/commands/releaseupgradepath"
 )
 
 type FakePivnetClient struct {

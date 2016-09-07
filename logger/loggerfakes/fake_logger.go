@@ -4,7 +4,7 @@ package loggerfakes
 import (
 	"sync"
 
-	"github.com/pivotal-cf-experimental/go-pivnet/logger"
+	"github.com/pivotal-cf/go-pivnet/logger"
 )
 
 type FakeLogger struct {

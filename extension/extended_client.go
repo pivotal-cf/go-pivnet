@@ -8,7 +8,7 @@ import (
 	"net/http/httputil"
 	"strings"
 
-	"github.com/pivotal-cf-experimental/go-pivnet/logger"
+	"github.com/pivotal-cf/go-pivnet/logger"
 )
 
 //go:generate counterfeiter . Client

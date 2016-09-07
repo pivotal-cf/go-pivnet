@@ -7,13 +7,13 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/pivotal-cf-experimental/go-pivnet"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errorhandler"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/gp"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/logshim"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/version"
-	"github.com/pivotal-cf-experimental/go-pivnet/logger"
+	"github.com/pivotal-cf/go-pivnet"
+	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/errorhandler"
+	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/gp"
+	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/logshim"
+	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/printer"
+	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/version"
+	"github.com/pivotal-cf/go-pivnet/logger"
 	"github.com/robdimsdale/sanitizer"
 )
 

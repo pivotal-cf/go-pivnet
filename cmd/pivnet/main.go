@@ -5,9 +5,9 @@ import (
 	"os"
 
 	"github.com/jessevdk/go-flags"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errorhandler"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/version"
+	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/commands"
+	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/errorhandler"
+	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/version"
 )
 
 var (

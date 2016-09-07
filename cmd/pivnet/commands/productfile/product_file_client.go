@@ -7,10 +7,10 @@ import (
 	"strconv"
 
 	"github.com/olekukonko/tablewriter"
-	pivnet "github.com/pivotal-cf-experimental/go-pivnet"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errorhandler"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
-	"github.com/pivotal-cf-experimental/go-pivnet/logger"
+	pivnet "github.com/pivotal-cf/go-pivnet"
+	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/errorhandler"
+	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/printer"
+	"github.com/pivotal-cf/go-pivnet/logger"
 	"gopkg.in/cheggaaa/pb.v1"
 )
 

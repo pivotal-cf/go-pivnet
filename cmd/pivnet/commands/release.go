@@ -1,6 +1,6 @@
 package commands
 
-import "github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands/release"
+import "github.com/pivotal-cf/go-pivnet/cmd/pivnet/commands/release"
 
 type ReleasesCommand struct {
 	ProductSlug string `long:"product-slug" short:"p" description:"Product slug e.g. p-mysql" required:"true"`

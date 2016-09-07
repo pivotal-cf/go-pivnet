@@ -7,11 +7,11 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	pivnet "github.com/pivotal-cf-experimental/go-pivnet"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands/release"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands/release/releasefakes"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errorhandler/errorhandlerfakes"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
+	pivnet "github.com/pivotal-cf/go-pivnet"
+	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/commands/release"
+	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/commands/release/releasefakes"
+	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/errorhandler/errorhandlerfakes"
+	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/printer"
 )
 
 var _ = Describe("release commands", func() {

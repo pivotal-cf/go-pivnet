@@ -7,9 +7,9 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
-	"github.com/pivotal-cf-experimental/go-pivnet"
-	"github.com/pivotal-cf-experimental/go-pivnet/logger"
-	"github.com/pivotal-cf-experimental/go-pivnet/logger/loggerfakes"
+	"github.com/pivotal-cf/go-pivnet"
+	"github.com/pivotal-cf/go-pivnet/logger"
+	"github.com/pivotal-cf/go-pivnet/logger/loggerfakes"
 )
 
 var _ = Describe("PivnetClient - product files", func() {

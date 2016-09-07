@@ -4,8 +4,8 @@ package filegroupfakes
 import (
 	"sync"
 
-	pivnet "github.com/pivotal-cf-experimental/go-pivnet"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands/filegroup"
+	pivnet "github.com/pivotal-cf/go-pivnet"
+	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/commands/filegroup"
 )
 
 type FakePivnetClient struct {

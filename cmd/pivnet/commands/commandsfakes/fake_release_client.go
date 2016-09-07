@@ -4,7 +4,7 @@ package commandsfakes
 import (
 	"sync"
 
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands"
+	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/commands"
 )
 
 type FakeReleaseClient struct {

@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/pivotal-cf-experimental/go-pivnet/extension"
+	"github.com/pivotal-cf/go-pivnet/extension"
 )
 
 type FakeClient struct {

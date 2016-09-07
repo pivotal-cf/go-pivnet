@@ -4,8 +4,8 @@ package usergroupfakes
 import (
 	"sync"
 
-	pivnet "github.com/pivotal-cf-experimental/go-pivnet"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/commands/usergroup"
+	pivnet "github.com/pivotal-cf/go-pivnet"
+	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/commands/usergroup"
 )
 
 type FakePivnetClient struct {

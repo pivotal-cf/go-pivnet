@@ -7,9 +7,9 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/pivotal-cf-experimental/go-pivnet"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errorhandler"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
+	"github.com/pivotal-cf/go-pivnet"
+	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/errorhandler"
+	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/printer"
 )
 
 var _ = Describe("ErrorHandler", func() {

@@ -5,9 +5,9 @@ import (
 	"strconv"
 
 	"github.com/olekukonko/tablewriter"
-	pivnet "github.com/pivotal-cf-experimental/go-pivnet"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/errorhandler"
-	"github.com/pivotal-cf-experimental/go-pivnet/cmd/pivnet/printer"
+	pivnet "github.com/pivotal-cf/go-pivnet"
+	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/errorhandler"
+	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/printer"
 )
 
 //go:generate counterfeiter . PivnetClient
