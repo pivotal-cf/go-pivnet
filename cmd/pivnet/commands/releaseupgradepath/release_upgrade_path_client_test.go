@@ -118,4 +118,85 @@ var _ = Describe("releaseupgradepath commands", func() {
 			})
 		})
 	})
+
+	Describe("AddReleaseUpgradePath", func() {
+		var (
+			productSlug            string
+			releaseVersion         string
+			previousReleaseVersion string
+		)
+
+		BeforeEach(func() {
+			productSlug = "some product slug"
+			releaseVersion = "some release version"
+			previousReleaseVersion = "previous release version"
+		})
+
+		It("adds ReleaseUpgradePath", func() {
+			err := client.Add(productSlug, releaseVersion, previousReleaseVersion)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Context("when there is an error", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("releaseUpgradePaths error")
+				fakePivnetClient.AddReleaseUpgradePathReturns(expectedErr)
+			})
+
+			It("invokes the error handler", func() {
+				err := client.Add(productSlug, releaseVersion, previousReleaseVersion)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(fakeErrorHandler.HandleErrorArgsForCall(0)).To(Equal(expectedErr))
+			})
+		})
+
+		Context("when there is an error getting release", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("releases error")
+				fakePivnetClient.ReleaseForProductVersionReturns(pivnet.Release{}, expectedErr)
+			})
+
+			It("invokes the error handler", func() {
+				err := client.Add(productSlug, releaseVersion, previousReleaseVersion)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(fakeErrorHandler.HandleErrorArgsForCall(0)).To(Equal(expectedErr))
+			})
+		})
+
+		Context("when there is an error getting release", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("releases error")
+				fakePivnetClient.ReleaseForProductVersionStub = func(productSlug string, releaseVersion string) (pivnet.Release, error) {
+					if releaseVersion == previousReleaseVersion {
+						return pivnet.Release{}, expectedErr
+					}
+					return pivnet.Release{}, nil
+				}
+			})
+
+			It("invokes the error handler", func() {
+				err := client.Add(productSlug, releaseVersion, previousReleaseVersion)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(fakeErrorHandler.HandleErrorArgsForCall(0)).To(Equal(expectedErr))
+			})
+		})
+	})
 })

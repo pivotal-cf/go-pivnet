@@ -95,4 +95,89 @@ var _ = Describe("release upgrade path commands", func() {
 			})
 		})
 	})
+
+	Describe("AddReleasesUpgradePathsCommand", func() {
+		var (
+			cmd commands.AddReleaseUpgradePathCommand
+		)
+
+		BeforeEach(func() {
+			cmd = commands.AddReleaseUpgradePathCommand{}
+		})
+
+		It("invokes the ReleaseUpgradePath client", func() {
+			err := cmd.Execute(nil)
+
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(fakeReleaseUpgradePathClient.AddCallCount()).To(Equal(1))
+		})
+
+		Context("when the ReleaseUpgradePath client returns an error", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("expected error")
+				fakeReleaseUpgradePathClient.AddReturns(expectedErr)
+			})
+
+			It("forwards the error", func() {
+				err := cmd.Execute(nil)
+
+				Expect(err).To(Equal(expectedErr))
+			})
+		})
+
+		Describe("ProductSlug flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(commands.AddReleaseUpgradePathCommand{}, "ProductSlug")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("p"))
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("product-slug"))
+			})
+		})
+
+		Describe("ReleaseVersion flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(commands.AddReleaseUpgradePathCommand{}, "ReleaseVersion")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("r"))
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("release-version"))
+			})
+		})
+
+		Describe("PreviousReleaseVersion flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(commands.AddReleaseUpgradePathCommand{}, "PreviousReleaseVersion")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("previous-release-version"))
+			})
+		})
+	})
 })

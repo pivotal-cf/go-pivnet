@@ -49,7 +49,6 @@ var _ = Describe("PivnetClient - release upgrade paths", func() {
 
 	Describe("Get", func() {
 		It("returns the release upgrade paths", func() {
-
 			response := pivnet.ReleaseUpgradePathsResponse{
 				ReleaseUpgradePaths: []pivnet.ReleaseUpgradePath{
 					{
@@ -112,6 +111,73 @@ var _ = Describe("PivnetClient - release upgrade paths", func() {
 
 			It("returns an error", func() {
 				_, err := client.ReleaseUpgradePaths.Get(productSlug, releaseID)
+				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+	})
+
+	Describe("Add", func() {
+		var (
+			previousReleaseID int
+		)
+
+		BeforeEach(func() {
+			previousReleaseID = 1234
+		})
+
+		It("adds the release upgrade path", func() {
+			expectedRequestBody := `{"upgrade_path":{"release_id":1234}}`
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+						"%s/products/%s/releases/%d/add_upgrade_path",
+						apiPrefix,
+						productSlug,
+						releaseID,
+					)),
+					ghttp.VerifyJSON(expectedRequestBody),
+					ghttp.RespondWithJSONEncoded(http.StatusNoContent, nil),
+				),
+			)
+
+			err := client.ReleaseUpgradePaths.Add(
+				productSlug,
+				releaseID,
+				previousReleaseID,
+			)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Context("when the server responds with a non-2XX status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
+			BeforeEach(func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/releases/%d/add_upgrade_path",
+							apiPrefix,
+							productSlug,
+							releaseID,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, body),
+					),
+				)
+			})
+
+			It("returns an error", func() {
+				err := client.ReleaseUpgradePaths.Add(
+					productSlug,
+					releaseID,
+					previousReleaseID,
+				)
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})

@@ -597,4 +597,18 @@ var _ = Describe("Pivnet commands", func() {
 			Expect(alias(field)).To(Equal("rups"))
 		})
 	})
+
+	Describe("AddReleaseUpgradePath command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "AddReleaseUpgradePath")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("add-release-upgrade-path"))
+		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("arup"))
+		})
+	})
 })
