@@ -16,6 +16,7 @@ type PivnetClient interface {
 	ReleaseForProductVersion(productSlug string, releaseVersion string) (pivnet.Release, error)
 	ReleaseUpgradePaths(productSlug string, releaseID int) ([]pivnet.ReleaseUpgradePath, error)
 	AddReleaseUpgradePath(productSlug string, releaseID int, previousReleaseID int) error
+	RemoveReleaseUpgradePath(productSlug string, releaseID int, previousReleaseID int) error
 }
 
 type ReleaseUpgradePathClient struct {
@@ -113,6 +114,42 @@ func (c *ReleaseUpgradePathClient) Add(
 		_, err = fmt.Fprintf(
 			c.outputWriter,
 			"release upgrade path added successfully to %s/%s\n",
+			productSlug,
+			releaseVersion,
+		)
+	}
+
+	return nil
+}
+
+func (c *ReleaseUpgradePathClient) Remove(
+	productSlug string,
+	releaseVersion string,
+	previousReleaseVersion string,
+) error {
+	release, err := c.pivnetClient.ReleaseForProductVersion(productSlug, releaseVersion)
+	if err != nil {
+		return c.eh.HandleError(err)
+	}
+
+	previousRelease, err := c.pivnetClient.ReleaseForProductVersion(productSlug, previousReleaseVersion)
+	if err != nil {
+		return c.eh.HandleError(err)
+	}
+
+	err = c.pivnetClient.RemoveReleaseUpgradePath(
+		productSlug,
+		release.ID,
+		previousRelease.ID,
+	)
+	if err != nil {
+		return c.eh.HandleError(err)
+	}
+
+	if c.format == printer.PrintAsTable {
+		_, err = fmt.Fprintf(
+			c.outputWriter,
+			"release upgrade path removed successfully from %s/%s\n",
 			productSlug,
 			releaseVersion,
 		)

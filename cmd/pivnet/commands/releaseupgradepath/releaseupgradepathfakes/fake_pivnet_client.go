@@ -29,14 +29,24 @@ type FakePivnetClient struct {
 		result1 []go_pivnet.ReleaseUpgradePath
 		result2 error
 	}
-	AddReleaseUpgradePathStub        func(productSlug string, releaseID int, upgradeFromReleaseID int) error
+	AddReleaseUpgradePathStub        func(productSlug string, releaseID int, previousReleaseID int) error
 	addReleaseUpgradePathMutex       sync.RWMutex
 	addReleaseUpgradePathArgsForCall []struct {
-		productSlug          string
-		releaseID            int
-		upgradeFromReleaseID int
+		productSlug       string
+		releaseID         int
+		previousReleaseID int
 	}
 	addReleaseUpgradePathReturns struct {
+		result1 error
+	}
+	RemoveReleaseUpgradePathStub        func(productSlug string, releaseID int, previousReleaseID int) error
+	removeReleaseUpgradePathMutex       sync.RWMutex
+	removeReleaseUpgradePathArgsForCall []struct {
+		productSlug       string
+		releaseID         int
+		previousReleaseID int
+	}
+	removeReleaseUpgradePathReturns struct {
 		result1 error
 	}
 	invocations      map[string][][]interface{}
@@ -113,17 +123,17 @@ func (fake *FakePivnetClient) ReleaseUpgradePathsReturns(result1 []go_pivnet.Rel
 	}{result1, result2}
 }
 
-func (fake *FakePivnetClient) AddReleaseUpgradePath(productSlug string, releaseID int, upgradeFromReleaseID int) error {
+func (fake *FakePivnetClient) AddReleaseUpgradePath(productSlug string, releaseID int, previousReleaseID int) error {
 	fake.addReleaseUpgradePathMutex.Lock()
 	fake.addReleaseUpgradePathArgsForCall = append(fake.addReleaseUpgradePathArgsForCall, struct {
-		productSlug          string
-		releaseID            int
-		upgradeFromReleaseID int
-	}{productSlug, releaseID, upgradeFromReleaseID})
-	fake.recordInvocation("AddReleaseUpgradePath", []interface{}{productSlug, releaseID, upgradeFromReleaseID})
+		productSlug       string
+		releaseID         int
+		previousReleaseID int
+	}{productSlug, releaseID, previousReleaseID})
+	fake.recordInvocation("AddReleaseUpgradePath", []interface{}{productSlug, releaseID, previousReleaseID})
 	fake.addReleaseUpgradePathMutex.Unlock()
 	if fake.AddReleaseUpgradePathStub != nil {
-		return fake.AddReleaseUpgradePathStub(productSlug, releaseID, upgradeFromReleaseID)
+		return fake.AddReleaseUpgradePathStub(productSlug, releaseID, previousReleaseID)
 	} else {
 		return fake.addReleaseUpgradePathReturns.result1
 	}
@@ -138,12 +148,47 @@ func (fake *FakePivnetClient) AddReleaseUpgradePathCallCount() int {
 func (fake *FakePivnetClient) AddReleaseUpgradePathArgsForCall(i int) (string, int, int) {
 	fake.addReleaseUpgradePathMutex.RLock()
 	defer fake.addReleaseUpgradePathMutex.RUnlock()
-	return fake.addReleaseUpgradePathArgsForCall[i].productSlug, fake.addReleaseUpgradePathArgsForCall[i].releaseID, fake.addReleaseUpgradePathArgsForCall[i].upgradeFromReleaseID
+	return fake.addReleaseUpgradePathArgsForCall[i].productSlug, fake.addReleaseUpgradePathArgsForCall[i].releaseID, fake.addReleaseUpgradePathArgsForCall[i].previousReleaseID
 }
 
 func (fake *FakePivnetClient) AddReleaseUpgradePathReturns(result1 error) {
 	fake.AddReleaseUpgradePathStub = nil
 	fake.addReleaseUpgradePathReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakePivnetClient) RemoveReleaseUpgradePath(productSlug string, releaseID int, previousReleaseID int) error {
+	fake.removeReleaseUpgradePathMutex.Lock()
+	fake.removeReleaseUpgradePathArgsForCall = append(fake.removeReleaseUpgradePathArgsForCall, struct {
+		productSlug       string
+		releaseID         int
+		previousReleaseID int
+	}{productSlug, releaseID, previousReleaseID})
+	fake.recordInvocation("RemoveReleaseUpgradePath", []interface{}{productSlug, releaseID, previousReleaseID})
+	fake.removeReleaseUpgradePathMutex.Unlock()
+	if fake.RemoveReleaseUpgradePathStub != nil {
+		return fake.RemoveReleaseUpgradePathStub(productSlug, releaseID, previousReleaseID)
+	} else {
+		return fake.removeReleaseUpgradePathReturns.result1
+	}
+}
+
+func (fake *FakePivnetClient) RemoveReleaseUpgradePathCallCount() int {
+	fake.removeReleaseUpgradePathMutex.RLock()
+	defer fake.removeReleaseUpgradePathMutex.RUnlock()
+	return len(fake.removeReleaseUpgradePathArgsForCall)
+}
+
+func (fake *FakePivnetClient) RemoveReleaseUpgradePathArgsForCall(i int) (string, int, int) {
+	fake.removeReleaseUpgradePathMutex.RLock()
+	defer fake.removeReleaseUpgradePathMutex.RUnlock()
+	return fake.removeReleaseUpgradePathArgsForCall[i].productSlug, fake.removeReleaseUpgradePathArgsForCall[i].releaseID, fake.removeReleaseUpgradePathArgsForCall[i].previousReleaseID
+}
+
+func (fake *FakePivnetClient) RemoveReleaseUpgradePathReturns(result1 error) {
+	fake.RemoveReleaseUpgradePathStub = nil
+	fake.removeReleaseUpgradePathReturns = struct {
 		result1 error
 	}{result1}
 }
@@ -157,6 +202,8 @@ func (fake *FakePivnetClient) Invocations() map[string][][]interface{} {
 	defer fake.releaseUpgradePathsMutex.RUnlock()
 	fake.addReleaseUpgradePathMutex.RLock()
 	defer fake.addReleaseUpgradePathMutex.RUnlock()
+	fake.removeReleaseUpgradePathMutex.RLock()
+	defer fake.removeReleaseUpgradePathMutex.RUnlock()
 	return fake.invocations
 }
 

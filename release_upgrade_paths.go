@@ -57,8 +57,8 @@ func (r ReleaseUpgradePathsService) Add(
 		releaseID,
 	)
 
-	body := addUpgradePathBody{
-		UpgradePath: addUpgradePathBodyUpgradePath{
+	body := addRemoveUpgradePathBody{
+		UpgradePath: addRemoveUpgradePathBodyUpgradePath{
 			ReleaseID: previousReleaseID,
 		},
 	}
@@ -84,10 +84,48 @@ func (r ReleaseUpgradePathsService) Add(
 	return nil
 }
 
-type addUpgradePathBody struct {
-	UpgradePath addUpgradePathBodyUpgradePath `json:"upgrade_path"`
+func (r ReleaseUpgradePathsService) Remove(
+	productSlug string,
+	releaseID int,
+	previousReleaseID int,
+) error {
+	url := fmt.Sprintf(
+		"/products/%s/releases/%d/remove_upgrade_path",
+		productSlug,
+		releaseID,
+	)
+
+	body := addRemoveUpgradePathBody{
+		UpgradePath: addRemoveUpgradePathBodyUpgradePath{
+			ReleaseID: previousReleaseID,
+		},
+	}
+
+	b, err := json.Marshal(body)
+	if err != nil {
+		// Untested as we cannot force an error because we are marshalling
+		// a known-good body
+		return err
+	}
+
+	_, err = r.client.MakeRequest(
+		"PATCH",
+		url,
+		http.StatusNoContent,
+		bytes.NewReader(b),
+		nil,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-type addUpgradePathBodyUpgradePath struct {
+type addRemoveUpgradePathBody struct {
+	UpgradePath addRemoveUpgradePathBodyUpgradePath `json:"upgrade_path"`
+}
+
+type addRemoveUpgradePathBodyUpgradePath struct {
 	ReleaseID int `json:"release_id"`
 }

@@ -128,8 +128,9 @@ type PivnetCommand struct {
 
 	ReleaseDependencies ReleaseDependenciesCommand `command:"release-dependencies" alias:"rds" description:"List release dependencies"`
 
-	ReleaseUpgradePaths   ReleaseUpgradePathsCommand   `command:"release-upgrade-paths" alias:"rups" description:"List release upgrade paths"`
-	AddReleaseUpgradePath AddReleaseUpgradePathCommand `command:"add-release-upgrade-path" alias:"arup" description:"Add release upgrade path"`
+	ReleaseUpgradePaths      ReleaseUpgradePathsCommand      `command:"release-upgrade-paths" alias:"rups" description:"List release upgrade paths"`
+	AddReleaseUpgradePath    AddReleaseUpgradePathCommand    `command:"add-release-upgrade-path" alias:"arup" description:"Add release upgrade path"`
+	RemoveReleaseUpgradePath RemoveReleaseUpgradePathCommand `command:"remove-release-upgrade-path" alias:"rrup" description:"Remove release upgrade path"`
 
 	Logger    logger.Logger
 	userAgent string
