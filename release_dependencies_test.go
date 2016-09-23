@@ -126,4 +126,138 @@ var _ = Describe("PivnetClient - release dependencies", func() {
 			})
 		})
 	})
+
+	Describe("Add", func() {
+		var (
+			dependentReleaseID int
+		)
+
+		BeforeEach(func() {
+			dependentReleaseID = 1234
+		})
+
+		It("adds the release dependency", func() {
+			expectedRequestBody := `{"dependency":{"release_id":1234}}`
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+						"%s/products/%s/releases/%d/add_dependency",
+						apiPrefix,
+						productSlug,
+						releaseID,
+					)),
+					ghttp.VerifyJSON(expectedRequestBody),
+					ghttp.RespondWithJSONEncoded(http.StatusNoContent, nil),
+				),
+			)
+
+			err := client.ReleaseDependencies.Add(
+				productSlug,
+				releaseID,
+				dependentReleaseID,
+			)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Context("when the server responds with a non-2XX status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
+			BeforeEach(func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/releases/%d/add_dependency",
+							apiPrefix,
+							productSlug,
+							releaseID,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, body),
+					),
+				)
+			})
+
+			It("returns an error", func() {
+				err := client.ReleaseDependencies.Add(
+					productSlug,
+					releaseID,
+					dependentReleaseID,
+				)
+				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+	})
+
+	Describe("Remove", func() {
+		var (
+			dependentReleaseID int
+		)
+
+		BeforeEach(func() {
+			dependentReleaseID = 1234
+		})
+
+		It("removes the release dependency", func() {
+			expectedRequestBody := `{"dependency":{"release_id":1234}}`
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+						"%s/products/%s/releases/%d/remove_dependency",
+						apiPrefix,
+						productSlug,
+						releaseID,
+					)),
+					ghttp.VerifyJSON(expectedRequestBody),
+					ghttp.RespondWithJSONEncoded(http.StatusNoContent, nil),
+				),
+			)
+
+			err := client.ReleaseDependencies.Remove(
+				productSlug,
+				releaseID,
+				dependentReleaseID,
+			)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Context("when the server responds with a non-2XX status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
+			BeforeEach(func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/releases/%d/remove_dependency",
+							apiPrefix,
+							productSlug,
+							releaseID,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, body),
+					),
+				)
+			})
+
+			It("returns an error", func() {
+				err := client.ReleaseDependencies.Remove(
+					productSlug,
+					releaseID,
+					dependentReleaseID,
+				)
+				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+	})
 })

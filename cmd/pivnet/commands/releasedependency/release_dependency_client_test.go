@@ -118,4 +118,210 @@ var _ = Describe("releasedependency commands", func() {
 			})
 		})
 	})
+
+	Describe("AddReleaseDependency", func() {
+		var (
+			productSlug             string
+			releaseVersion          string
+			dependentProductSlug    string
+			dependentReleaseVersion string
+		)
+
+		BeforeEach(func() {
+			productSlug = "some product slug"
+			releaseVersion = "some release version"
+			dependentProductSlug = "dependent product slug"
+			dependentReleaseVersion = "dependent release version"
+		})
+
+		It("adds ReleaseDependency", func() {
+			err := client.Add(
+				productSlug,
+				releaseVersion,
+				dependentProductSlug,
+				dependentReleaseVersion,
+			)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Context("when there is an error", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("releaseDependencies error")
+				fakePivnetClient.AddReleaseDependencyReturns(expectedErr)
+			})
+
+			It("invokes the error handler", func() {
+				err := client.Add(
+					productSlug,
+					releaseVersion,
+					dependentProductSlug,
+					dependentReleaseVersion,
+				)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(fakeErrorHandler.HandleErrorArgsForCall(0)).To(Equal(expectedErr))
+			})
+		})
+
+		Context("when there is an error getting release", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("releases error")
+				fakePivnetClient.ReleaseForProductVersionReturns(pivnet.Release{}, expectedErr)
+			})
+
+			It("invokes the error handler", func() {
+				err := client.Add(
+					productSlug,
+					releaseVersion,
+					dependentProductSlug,
+					dependentReleaseVersion,
+				)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(fakeErrorHandler.HandleErrorArgsForCall(0)).To(Equal(expectedErr))
+			})
+		})
+
+		Context("when there is an error getting release", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("releases error")
+				fakePivnetClient.ReleaseForProductVersionStub = func(productSlug string, releaseVersion string) (pivnet.Release, error) {
+					if releaseVersion == dependentReleaseVersion {
+						return pivnet.Release{}, expectedErr
+					}
+					return pivnet.Release{}, nil
+				}
+			})
+
+			It("invokes the error handler", func() {
+				err := client.Add(
+					productSlug,
+					releaseVersion,
+					dependentProductSlug,
+					dependentReleaseVersion,
+				)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(fakeErrorHandler.HandleErrorArgsForCall(0)).To(Equal(expectedErr))
+			})
+		})
+	})
+
+	Describe("RemoveReleaseDependency", func() {
+		var (
+			productSlug             string
+			releaseVersion          string
+			dependentProductSlug    string
+			dependentReleaseVersion string
+		)
+
+		BeforeEach(func() {
+			productSlug = "some product slug"
+			releaseVersion = "some release version"
+			dependentProductSlug = "dependent product slug"
+			dependentReleaseVersion = "dependent release version"
+		})
+
+		It("removes ReleaseDependency", func() {
+			err := client.Remove(
+				productSlug,
+				releaseVersion,
+				dependentProductSlug,
+				dependentReleaseVersion,
+			)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Context("when there is an error", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("releaseDependencies error")
+				fakePivnetClient.RemoveReleaseDependencyReturns(expectedErr)
+			})
+
+			It("invokes the error handler", func() {
+				err := client.Remove(
+					productSlug,
+					releaseVersion,
+					dependentProductSlug,
+					dependentReleaseVersion,
+				)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(fakeErrorHandler.HandleErrorArgsForCall(0)).To(Equal(expectedErr))
+			})
+		})
+
+		Context("when there is an error getting release", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("releases error")
+				fakePivnetClient.ReleaseForProductVersionReturns(pivnet.Release{}, expectedErr)
+			})
+
+			It("invokes the error handler", func() {
+				err := client.Remove(
+					productSlug,
+					releaseVersion,
+					dependentProductSlug,
+					dependentReleaseVersion,
+				)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(fakeErrorHandler.HandleErrorArgsForCall(0)).To(Equal(expectedErr))
+			})
+		})
+
+		Context("when there is an error getting release", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("releases error")
+				fakePivnetClient.ReleaseForProductVersionStub = func(productSlug string, releaseVersion string) (pivnet.Release, error) {
+					if releaseVersion == dependentReleaseVersion {
+						return pivnet.Release{}, expectedErr
+					}
+					return pivnet.Release{}, nil
+				}
+			})
+
+			It("invokes the error handler", func() {
+				err := client.Remove(
+					productSlug,
+					releaseVersion,
+					dependentProductSlug,
+					dependentReleaseVersion,
+				)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(fakeErrorHandler.HandleErrorArgsForCall(0)).To(Equal(expectedErr))
+			})
+		})
+	})
 })

@@ -584,6 +584,34 @@ var _ = Describe("Pivnet commands", func() {
 		})
 	})
 
+	Describe("AddReleaseDependency command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "AddReleaseDependency")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("add-release-dependency"))
+		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("ard"))
+		})
+	})
+
+	Describe("RemoveReleaseDependency command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "RemoveReleaseDependency")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("remove-release-dependency"))
+		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("rrd"))
+		})
+	})
+
 	Describe("ReleaseUpgradePaths command", func() {
 		BeforeEach(func() {
 			field = fieldFor(commands.Pivnet, "ReleaseUpgradePaths")
