@@ -24,7 +24,6 @@ var _ = Describe("Pivnet commands", func() {
 			server *ghttp.Server
 
 			outBuffer bytes.Buffer
-			client    commands.PivnetClient
 		)
 
 		BeforeEach(func() {
@@ -36,9 +35,6 @@ var _ = Describe("Pivnet commands", func() {
 			outBuffer = bytes.Buffer{}
 			commands.LogWriter = &outBuffer
 			commands.Printer = printer.NewPrinter(commands.OutputWriter)
-
-			commands.Init()
-			client = commands.NewPivnetClient()
 
 			products := []pivnet.Product{
 				{
@@ -61,6 +57,10 @@ var _ = Describe("Pivnet commands", func() {
 		})
 
 		It("redacts api token", func() {
+			commands.Init()
+
+			client := commands.NewPivnetClient()
+
 			_, err := client.Products()
 			Expect(err).NotTo(HaveOccurred())
 
