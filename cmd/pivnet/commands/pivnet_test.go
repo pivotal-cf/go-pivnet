@@ -430,6 +430,20 @@ var _ = Describe("Pivnet commands", func() {
 		})
 	})
 
+	Describe("CreateRelease command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "CreateRelease")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("create-release"))
+		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("cr"))
+		})
+	})
+
 	Describe("DeleteRelease command", func() {
 		BeforeEach(func() {
 			field = fieldFor(commands.Pivnet, "DeleteRelease")

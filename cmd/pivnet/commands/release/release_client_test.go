@@ -105,7 +105,7 @@ var _ = Describe("release commands", func() {
 
 		BeforeEach(func() {
 			productSlug = "some-product-slug"
-			releaseVersion = ""
+			releaseVersion = "some-release-version"
 			releaseID = releases[0].ID
 
 			fakePivnetClient.ReleaseForProductVersionReturns(releases[0], nil)
@@ -154,6 +154,83 @@ var _ = Describe("release commands", func() {
 
 			It("invokes the error handler", func() {
 				err := client.Get(productSlug, releaseVersion)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(fakeErrorHandler.HandleErrorArgsForCall(0)).To(Equal(expectedErr))
+			})
+		})
+	})
+
+	Describe("Create", func() {
+		var (
+			productSlug    string
+			releaseVersion string
+			releaseType    string
+			eulaSlug       string
+		)
+
+		BeforeEach(func() {
+			productSlug = "some-product-slug"
+			releaseVersion = "some-release-version"
+			releaseType = "some-release-type"
+			eulaSlug = "some-eula-slug"
+
+			fakePivnetClient.ReleaseForProductVersionReturns(releases[0], nil)
+			fakePivnetClient.CreateReleaseReturns(releases[0], nil)
+		})
+
+		It("creates Release", func() {
+			err := client.Create(
+				productSlug,
+				releaseVersion,
+				releaseType,
+				eulaSlug,
+			)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Context("when there is an error", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("release error")
+				fakePivnetClient.CreateReleaseReturns(pivnet.Release{}, expectedErr)
+			})
+
+			It("invokes the error handler", func() {
+				err := client.Create(
+					productSlug,
+					releaseVersion,
+					releaseType,
+					eulaSlug,
+				)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(fakeErrorHandler.HandleErrorArgsForCall(0)).To(Equal(expectedErr))
+			})
+		})
+
+		Context("when there is an error getting release", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("release error")
+				fakePivnetClient.CreateReleaseReturns(pivnet.Release{}, expectedErr)
+			})
+
+			It("invokes the error handler", func() {
+				err := client.Create(
+					productSlug,
+					releaseVersion,
+					releaseType,
+					eulaSlug,
+				)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))

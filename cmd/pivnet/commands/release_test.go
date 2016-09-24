@@ -149,6 +149,113 @@ var _ = Describe("release commands", func() {
 		})
 	})
 
+	Describe("CreateReleaseCommand", func() {
+		var (
+			cmd commands.CreateReleaseCommand
+		)
+
+		BeforeEach(func() {
+			cmd = cmd
+		})
+
+		It("invokes the Release client", func() {
+			err := cmd.Execute(nil)
+
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(fakeReleaseClient.CreateCallCount()).To(Equal(1))
+		})
+
+		Context("when the Release client returns an error", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("expected error")
+				fakeReleaseClient.CreateReturns(expectedErr)
+			})
+
+			It("forwards the error", func() {
+				err := cmd.Execute(nil)
+
+				Expect(err).To(Equal(expectedErr))
+			})
+		})
+
+		Describe("ProductSlug flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(cmd, "ProductSlug")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("p"))
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("product-slug"))
+			})
+		})
+
+		Describe("ReleaseVersion flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(cmd, "ReleaseVersion")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("r"))
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("release-version"))
+			})
+		})
+
+		Describe("ReleaseType flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(cmd, "ReleaseType")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("t"))
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("release-type"))
+			})
+		})
+
+		Describe("EULASlug flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(cmd, "EULASlug")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("e"))
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("eula-slug"))
+			})
+		})
+	})
+
 	Describe("DeleteReleaseCommand", func() {
 		var (
 			cmd commands.DeleteReleaseCommand
