@@ -34,6 +34,12 @@ type AddFileGroupToReleaseCommand struct {
 	ReleaseVersion string `long:"release-version" short:"r" description:"Release version e.g. 0.1.2-rc1" required:"true"`
 }
 
+type RemoveFileGroupFromReleaseCommand struct {
+	ProductSlug    string `long:"product-slug" short:"p" description:"Product slug e.g. p-mysql" required:"true"`
+	FileGroupID    int    `long:"file-group-id" short:"i" description:"Filegroup ID e.g. 1234" required:"true"`
+	ReleaseVersion string `long:"release-version" short:"r" description:"Release version e.g. 0.1.2-rc1" required:"true"`
+}
+
 //go:generate counterfeiter . FileGroupClient
 type FileGroupClient interface {
 	List(productSlug string, releaseVersion string) error
@@ -42,6 +48,7 @@ type FileGroupClient interface {
 	Update(productSlug string, productFileID int, name *string) error
 	Delete(productSlug string, productFileID int) error
 	AddToRelease(productSlug string, productFileID int, releaseVersion string) error
+	RemoveFromRelease(productSlug string, productFileID int, releaseVersion string) error
 }
 
 var NewFileGroupClient = func() FileGroupClient {
@@ -88,6 +95,16 @@ func (command *AddFileGroupToReleaseCommand) Execute([]string) error {
 	Init()
 
 	return NewFileGroupClient().AddToRelease(
+		command.ProductSlug,
+		command.FileGroupID,
+		command.ReleaseVersion,
+	)
+}
+
+func (command *RemoveFileGroupFromReleaseCommand) Execute([]string) error {
+	Init()
+
+	return NewFileGroupClient().RemoveFromRelease(
 		command.ProductSlug,
 		command.FileGroupID,
 		command.ReleaseVersion,

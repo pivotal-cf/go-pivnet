@@ -88,6 +88,16 @@ type FakePivnetClient struct {
 	addFileGroupToReleaseReturns struct {
 		result1 error
 	}
+	RemoveFileGroupFromReleaseStub        func(productSlug string, fileGroupID int, releaseID int) error
+	removeFileGroupFromReleaseMutex       sync.RWMutex
+	removeFileGroupFromReleaseArgsForCall []struct {
+		productSlug string
+		fileGroupID int
+		releaseID   int
+	}
+	removeFileGroupFromReleaseReturns struct {
+		result1 error
+	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
@@ -371,6 +381,41 @@ func (fake *FakePivnetClient) AddFileGroupToReleaseReturns(result1 error) {
 	}{result1}
 }
 
+func (fake *FakePivnetClient) RemoveFileGroupFromRelease(productSlug string, fileGroupID int, releaseID int) error {
+	fake.removeFileGroupFromReleaseMutex.Lock()
+	fake.removeFileGroupFromReleaseArgsForCall = append(fake.removeFileGroupFromReleaseArgsForCall, struct {
+		productSlug string
+		fileGroupID int
+		releaseID   int
+	}{productSlug, fileGroupID, releaseID})
+	fake.recordInvocation("RemoveFileGroupFromRelease", []interface{}{productSlug, fileGroupID, releaseID})
+	fake.removeFileGroupFromReleaseMutex.Unlock()
+	if fake.RemoveFileGroupFromReleaseStub != nil {
+		return fake.RemoveFileGroupFromReleaseStub(productSlug, fileGroupID, releaseID)
+	} else {
+		return fake.removeFileGroupFromReleaseReturns.result1
+	}
+}
+
+func (fake *FakePivnetClient) RemoveFileGroupFromReleaseCallCount() int {
+	fake.removeFileGroupFromReleaseMutex.RLock()
+	defer fake.removeFileGroupFromReleaseMutex.RUnlock()
+	return len(fake.removeFileGroupFromReleaseArgsForCall)
+}
+
+func (fake *FakePivnetClient) RemoveFileGroupFromReleaseArgsForCall(i int) (string, int, int) {
+	fake.removeFileGroupFromReleaseMutex.RLock()
+	defer fake.removeFileGroupFromReleaseMutex.RUnlock()
+	return fake.removeFileGroupFromReleaseArgsForCall[i].productSlug, fake.removeFileGroupFromReleaseArgsForCall[i].fileGroupID, fake.removeFileGroupFromReleaseArgsForCall[i].releaseID
+}
+
+func (fake *FakePivnetClient) RemoveFileGroupFromReleaseReturns(result1 error) {
+	fake.RemoveFileGroupFromReleaseStub = nil
+	fake.removeFileGroupFromReleaseReturns = struct {
+		result1 error
+	}{result1}
+}
+
 func (fake *FakePivnetClient) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -390,6 +435,8 @@ func (fake *FakePivnetClient) Invocations() map[string][][]interface{} {
 	defer fake.deleteFileGroupMutex.RUnlock()
 	fake.addFileGroupToReleaseMutex.RLock()
 	defer fake.addFileGroupToReleaseMutex.RUnlock()
+	fake.removeFileGroupFromReleaseMutex.RLock()
+	defer fake.removeFileGroupFromReleaseMutex.RUnlock()
 	return fake.invocations
 }
 

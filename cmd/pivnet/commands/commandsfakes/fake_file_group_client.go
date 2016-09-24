@@ -64,6 +64,16 @@ type FakeFileGroupClient struct {
 	addToReleaseReturns struct {
 		result1 error
 	}
+	RemoveFromReleaseStub        func(productSlug string, productFileID int, releaseVersion string) error
+	removeFromReleaseMutex       sync.RWMutex
+	removeFromReleaseArgsForCall []struct {
+		productSlug    string
+		productFileID  int
+		releaseVersion string
+	}
+	removeFromReleaseReturns struct {
+		result1 error
+	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
@@ -274,6 +284,41 @@ func (fake *FakeFileGroupClient) AddToReleaseReturns(result1 error) {
 	}{result1}
 }
 
+func (fake *FakeFileGroupClient) RemoveFromRelease(productSlug string, productFileID int, releaseVersion string) error {
+	fake.removeFromReleaseMutex.Lock()
+	fake.removeFromReleaseArgsForCall = append(fake.removeFromReleaseArgsForCall, struct {
+		productSlug    string
+		productFileID  int
+		releaseVersion string
+	}{productSlug, productFileID, releaseVersion})
+	fake.recordInvocation("RemoveFromRelease", []interface{}{productSlug, productFileID, releaseVersion})
+	fake.removeFromReleaseMutex.Unlock()
+	if fake.RemoveFromReleaseStub != nil {
+		return fake.RemoveFromReleaseStub(productSlug, productFileID, releaseVersion)
+	} else {
+		return fake.removeFromReleaseReturns.result1
+	}
+}
+
+func (fake *FakeFileGroupClient) RemoveFromReleaseCallCount() int {
+	fake.removeFromReleaseMutex.RLock()
+	defer fake.removeFromReleaseMutex.RUnlock()
+	return len(fake.removeFromReleaseArgsForCall)
+}
+
+func (fake *FakeFileGroupClient) RemoveFromReleaseArgsForCall(i int) (string, int, string) {
+	fake.removeFromReleaseMutex.RLock()
+	defer fake.removeFromReleaseMutex.RUnlock()
+	return fake.removeFromReleaseArgsForCall[i].productSlug, fake.removeFromReleaseArgsForCall[i].productFileID, fake.removeFromReleaseArgsForCall[i].releaseVersion
+}
+
+func (fake *FakeFileGroupClient) RemoveFromReleaseReturns(result1 error) {
+	fake.RemoveFromReleaseStub = nil
+	fake.removeFromReleaseReturns = struct {
+		result1 error
+	}{result1}
+}
+
 func (fake *FakeFileGroupClient) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -289,6 +334,8 @@ func (fake *FakeFileGroupClient) Invocations() map[string][][]interface{} {
 	defer fake.deleteMutex.RUnlock()
 	fake.addToReleaseMutex.RLock()
 	defer fake.addToReleaseMutex.RUnlock()
+	fake.removeFromReleaseMutex.RLock()
+	defer fake.removeFromReleaseMutex.RUnlock()
 	return fake.invocations
 }
 

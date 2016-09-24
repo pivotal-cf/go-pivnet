@@ -457,7 +457,11 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 					),
 				)
 
-				err := client.FileGroups.AddToRelease(productSlug, releaseID, fileGroupID)
+				err := client.FileGroups.AddToRelease(
+					productSlug,
+					releaseID,
+					fileGroupID,
+				)
 				Expect(err).NotTo(HaveOccurred())
 			})
 		})
@@ -485,6 +489,67 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 				)
 
 				err := client.FileGroups.AddToRelease(productSlug, releaseID, fileGroupID)
+				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+	})
+
+	Describe("Remove File Group", func() {
+		var (
+			productSlug = "some-product"
+			releaseID   = 2345
+			fileGroupID = 3456
+
+			expectedRequestBody = `{"file_group":{"id":3456}}`
+		)
+
+		Context("when the server responds with a 204 status code", func() {
+			It("returns without error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/releases/%d/remove_file_group",
+							apiPrefix,
+							productSlug,
+							releaseID,
+						)),
+						ghttp.VerifyJSON(expectedRequestBody),
+						ghttp.RespondWith(http.StatusNoContent, nil),
+					),
+				)
+
+				err := client.FileGroups.RemoveFromRelease(
+					productSlug,
+					releaseID,
+					fileGroupID,
+				)
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+
+		Context("when the server responds with a non-204 status code", func() {
+			var (
+				response interface{}
+			)
+
+			BeforeEach(func() {
+				response = pivnetErr{Message: "foo message"}
+			})
+
+			It("returns an error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/releases/%d/remove_file_group",
+							apiPrefix,
+							productSlug,
+							releaseID,
+						)),
+						ghttp.RespondWithJSONEncoded(http.StatusTeapot, response),
+					),
+				)
+
+				err := client.FileGroups.RemoveFromRelease(productSlug, releaseID, fileGroupID)
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})

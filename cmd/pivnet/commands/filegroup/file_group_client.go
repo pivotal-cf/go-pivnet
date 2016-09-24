@@ -22,6 +22,7 @@ type PivnetClient interface {
 	UpdateFileGroup(productSlug string, fileGroup pivnet.FileGroup) (pivnet.FileGroup, error)
 	DeleteFileGroup(productSlug string, fileGroupID int) (pivnet.FileGroup, error)
 	AddFileGroupToRelease(productSlug string, fileGroupID int, releaseID int) error
+	RemoveFileGroupFromRelease(productSlug string, fileGroupID int, releaseID int) error
 }
 
 type FileGroupClient struct {
@@ -224,7 +225,39 @@ func (c *FileGroupClient) AddToRelease(
 	if c.format == printer.PrintAsTable {
 		_, err = fmt.Fprintf(
 			c.outputWriter,
-			"file group %d added successfully to %s/%s\n",
+			"file group %d successfully added to %s/%s\n",
+			fileGroupID,
+			productSlug,
+			releaseVersion,
+		)
+	}
+
+	return nil
+}
+
+func (c *FileGroupClient) RemoveFromRelease(
+	productSlug string,
+	fileGroupID int,
+	releaseVersion string,
+) error {
+	release, err := c.pivnetClient.ReleaseForProductVersion(productSlug, releaseVersion)
+	if err != nil {
+		return c.eh.HandleError(err)
+	}
+
+	err = c.pivnetClient.RemoveFileGroupFromRelease(
+		productSlug,
+		release.ID,
+		fileGroupID,
+	)
+	if err != nil {
+		return c.eh.HandleError(err)
+	}
+
+	if c.format == printer.PrintAsTable {
+		_, err = fmt.Fprintf(
+			c.outputWriter,
+			"file group %d successfully removed from %s/%s\n",
 			fileGroupID,
 			productSlug,
 			releaseVersion,

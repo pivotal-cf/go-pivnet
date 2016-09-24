@@ -416,6 +416,20 @@ var _ = Describe("Pivnet commands", func() {
 		})
 	})
 
+	Describe("RemoveFileGroupFromRelease command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "RemoveFileGroupFromRelease")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("remove-file-group"))
+		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("rfg"))
+		})
+	})
+
 	Describe("Releases command", func() {
 		BeforeEach(func() {
 			field = fieldFor(commands.Pivnet, "Releases")

@@ -387,12 +387,83 @@ var _ = Describe("filegroup commands", func() {
 			)
 
 			BeforeEach(func() {
-				expectedErr = errors.New("productfile error")
+				expectedErr = errors.New("file group error")
 				fakePivnetClient.AddFileGroupToReleaseReturns(expectedErr)
 			})
 
 			It("invokes the error handler", func() {
 				err := client.AddToRelease(
+					productSlug,
+					fileGroupID,
+					releaseVersion,
+				)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(fakeErrorHandler.HandleErrorArgsForCall(0)).To(Equal(expectedErr))
+			})
+		})
+	})
+
+	Describe("RemoveFromRelease", func() {
+		var (
+			productSlug    string
+			releaseVersion string
+			fileGroupID    int
+		)
+
+		BeforeEach(func() {
+			productSlug = "some-product-slug"
+			releaseVersion = "release-version"
+			fileGroupID = fileGroups[0].ID
+
+			fakePivnetClient.RemoveFileGroupFromReleaseReturns(nil)
+		})
+
+		It("removes FileGroup from release", func() {
+			err := client.RemoveFromRelease(
+				productSlug,
+				fileGroupID,
+				releaseVersion,
+			)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Context("when there is an error getting release", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("releases error")
+				fakePivnetClient.ReleaseForProductVersionReturns(pivnet.Release{}, expectedErr)
+			})
+
+			It("invokes the error handler", func() {
+				err := client.RemoveFromRelease(
+					productSlug,
+					fileGroupID,
+					releaseVersion,
+				)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(fakeErrorHandler.HandleErrorArgsForCall(0)).To(Equal(expectedErr))
+			})
+		})
+
+		Context("when there is an error", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("file group error")
+				fakePivnetClient.RemoveFileGroupFromReleaseReturns(expectedErr)
+			})
+
+			It("invokes the error handler", func() {
+				err := client.RemoveFromRelease(
 					productSlug,
 					fileGroupID,
 					releaseVersion,

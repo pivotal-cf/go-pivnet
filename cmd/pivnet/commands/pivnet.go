@@ -57,12 +57,13 @@ type PivnetCommand struct {
 
 	DownloadProductFile DownloadProductFileCommand `command:"download-product-file" alias:"dlpf" description:"Download product file"`
 
-	FileGroups            FileGroupsCommand            `command:"file-groups" alias:"fgs" description:"List file groups"`
-	FileGroup             FileGroupCommand             `command:"file-group" alias:"fg" description:"Show file group"`
-	CreateFileGroup       CreateFileGroupCommand       `command:"create-file-group" alias:"cfg" description:"Create file group"`
-	UpdateFileGroup       UpdateFileGroupCommand       `command:"update-file-group" alias:"ufg" description:"Update file group"`
-	DeleteFileGroup       DeleteFileGroupCommand       `command:"delete-file-group" alias:"dfg" description:"Delete file group"`
-	AddFileGroupToRelease AddFileGroupToReleaseCommand `command:"add-file-group" alias:"afg" description:"Add file group to release"`
+	FileGroups                 FileGroupsCommand                 `command:"file-groups" alias:"fgs" description:"List file groups"`
+	FileGroup                  FileGroupCommand                  `command:"file-group" alias:"fg" description:"Show file group"`
+	CreateFileGroup            CreateFileGroupCommand            `command:"create-file-group" alias:"cfg" description:"Create file group"`
+	UpdateFileGroup            UpdateFileGroupCommand            `command:"update-file-group" alias:"ufg" description:"Update file group"`
+	DeleteFileGroup            DeleteFileGroupCommand            `command:"delete-file-group" alias:"dfg" description:"Delete file group"`
+	AddFileGroupToRelease      AddFileGroupToReleaseCommand      `command:"add-file-group" alias:"afg" description:"Add file group to release"`
+	RemoveFileGroupFromRelease RemoveFileGroupFromReleaseCommand `command:"remove-file-group" alias:"rfg" description:"Remove file group from release"`
 
 	Releases      ReleasesCommand      `command:"releases" alias:"rs" description:"List releases"`
 	Release       ReleaseCommand       `command:"release" alias:"r" description:"Show release"`
