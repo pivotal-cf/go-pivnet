@@ -22,7 +22,7 @@ var _ = Describe("filegroup commands", func() {
 
 		outBuffer bytes.Buffer
 
-		filegroups []pivnet.FileGroup
+		fileGroups []pivnet.FileGroup
 
 		client *filegroup.FileGroupClient
 	)
@@ -34,7 +34,7 @@ var _ = Describe("filegroup commands", func() {
 
 		fakeErrorHandler = &errorhandlerfakes.FakeErrorHandler{}
 
-		filegroups = []pivnet.FileGroup{
+		fileGroups = []pivnet.FileGroup{
 			{
 				ID: 1234,
 			},
@@ -62,7 +62,7 @@ var _ = Describe("filegroup commands", func() {
 			productSlug = "some-product-slug"
 			releaseVersion = ""
 
-			fakePivnetClient.FileGroupsReturns(filegroups, nil)
+			fakePivnetClient.FileGroupsReturns(fileGroups, nil)
 		})
 
 		It("lists all FileGroups", func() {
@@ -73,7 +73,7 @@ var _ = Describe("filegroup commands", func() {
 			err = json.Unmarshal(outBuffer.Bytes(), &returnedFileGroups)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(returnedFileGroups).To(Equal(filegroups))
+			Expect(returnedFileGroups).To(Equal(fileGroups))
 		})
 
 		Context("when there is an error", func() {
@@ -82,7 +82,7 @@ var _ = Describe("filegroup commands", func() {
 			)
 
 			BeforeEach(func() {
-				expectedErr = errors.New("filegroups error")
+				expectedErr = errors.New("fileGroups error")
 				fakePivnetClient.FileGroupsReturns(nil, expectedErr)
 			})
 
@@ -98,7 +98,7 @@ var _ = Describe("filegroup commands", func() {
 		Context("when release version is not empty", func() {
 			BeforeEach(func() {
 				releaseVersion = "some-release-version"
-				fakePivnetClient.FileGroupsForReleaseReturns(filegroups, nil)
+				fakePivnetClient.FileGroupsForReleaseReturns(fileGroups, nil)
 			})
 
 			It("lists all FileGroups", func() {
@@ -109,7 +109,7 @@ var _ = Describe("filegroup commands", func() {
 				err = json.Unmarshal(outBuffer.Bytes(), &returnedFileGroups)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(returnedFileGroups).To(Equal(filegroups))
+				Expect(returnedFileGroups).To(Equal(fileGroups))
 			})
 
 			Context("when there is an error getting release", func() {
@@ -137,7 +137,7 @@ var _ = Describe("filegroup commands", func() {
 				)
 
 				BeforeEach(func() {
-					expectedErr = errors.New("filegroups error")
+					expectedErr = errors.New("fileGroups error")
 					fakePivnetClient.FileGroupsForReleaseReturns(nil, expectedErr)
 				})
 
@@ -160,9 +160,9 @@ var _ = Describe("filegroup commands", func() {
 
 		BeforeEach(func() {
 			productSlug = "some-product-slug"
-			fileGroupID = filegroups[0].ID
+			fileGroupID = fileGroups[0].ID
 
-			fakePivnetClient.FileGroupReturns(filegroups[0], nil)
+			fakePivnetClient.FileGroupReturns(fileGroups[0], nil)
 		})
 
 		It("gets FileGroup", func() {
@@ -173,7 +173,7 @@ var _ = Describe("filegroup commands", func() {
 			err = json.Unmarshal(outBuffer.Bytes(), &returnedFileGroup)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(returnedFileGroup).To(Equal(filegroups[0]))
+			Expect(returnedFileGroup).To(Equal(fileGroups[0]))
 		})
 
 		Context("when there is an error", func() {
@@ -206,7 +206,7 @@ var _ = Describe("filegroup commands", func() {
 			productSlug = "some-product-slug"
 			name = "new-name"
 
-			fakePivnetClient.CreateFileGroupReturns(filegroups[0], nil)
+			fakePivnetClient.CreateFileGroupReturns(fileGroups[0], nil)
 		})
 
 		It("creates FileGroup", func() {
@@ -243,10 +243,10 @@ var _ = Describe("filegroup commands", func() {
 
 		BeforeEach(func() {
 			productSlug = "some-product-slug"
-			fileGroupID = filegroups[0].ID
+			fileGroupID = fileGroups[0].ID
 
-			fakePivnetClient.FileGroupReturns(filegroups[0], nil)
-			fakePivnetClient.UpdateFileGroupReturns(filegroups[0], nil)
+			fakePivnetClient.FileGroupReturns(fileGroups[0], nil)
+			fakePivnetClient.UpdateFileGroupReturns(fileGroups[0], nil)
 		})
 
 		It("updates FileGroup", func() {
@@ -304,9 +304,9 @@ var _ = Describe("filegroup commands", func() {
 
 		BeforeEach(func() {
 			productSlug = "some-product-slug"
-			fileGroupID = filegroups[0].ID
+			fileGroupID = fileGroups[0].ID
 
-			fakePivnetClient.DeleteFileGroupReturns(filegroups[0], nil)
+			fakePivnetClient.DeleteFileGroupReturns(fileGroups[0], nil)
 		})
 
 		It("deletes FileGroup", func() {
@@ -326,6 +326,77 @@ var _ = Describe("filegroup commands", func() {
 
 			It("invokes the error handler", func() {
 				err := client.Delete(productSlug, fileGroupID)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(fakeErrorHandler.HandleErrorArgsForCall(0)).To(Equal(expectedErr))
+			})
+		})
+	})
+
+	Describe("AddToRelease", func() {
+		var (
+			productSlug    string
+			releaseVersion string
+			fileGroupID    int
+		)
+
+		BeforeEach(func() {
+			productSlug = "some-product-slug"
+			releaseVersion = "release-version"
+			fileGroupID = fileGroups[0].ID
+
+			fakePivnetClient.AddFileGroupToReleaseReturns(nil)
+		})
+
+		It("adds FileGroup to release", func() {
+			err := client.AddToRelease(
+				productSlug,
+				fileGroupID,
+				releaseVersion,
+			)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Context("when there is an error getting release", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("releases error")
+				fakePivnetClient.ReleaseForProductVersionReturns(pivnet.Release{}, expectedErr)
+			})
+
+			It("invokes the error handler", func() {
+				err := client.AddToRelease(
+					productSlug,
+					fileGroupID,
+					releaseVersion,
+				)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(fakeErrorHandler.HandleErrorArgsForCall(0)).To(Equal(expectedErr))
+			})
+		})
+
+		Context("when there is an error", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("productfile error")
+				fakePivnetClient.AddFileGroupToReleaseReturns(expectedErr)
+			})
+
+			It("invokes the error handler", func() {
+				err := client.AddToRelease(
+					productSlug,
+					fileGroupID,
+					releaseVersion,
+				)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))

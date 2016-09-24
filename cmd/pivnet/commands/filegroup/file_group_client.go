@@ -21,6 +21,7 @@ type PivnetClient interface {
 	CreateFileGroup(productSlug string, name string) (pivnet.FileGroup, error)
 	UpdateFileGroup(productSlug string, fileGroup pivnet.FileGroup) (pivnet.FileGroup, error)
 	DeleteFileGroup(productSlug string, fileGroupID int) (pivnet.FileGroup, error)
+	AddFileGroupToRelease(productSlug string, fileGroupID int, releaseID int) error
 }
 
 type FileGroupClient struct {
@@ -195,6 +196,38 @@ func (c *FileGroupClient) Delete(productSlug string, fileGroupID int) error {
 			"file group %d deleted successfully for %s\n",
 			fileGroupID,
 			productSlug,
+		)
+	}
+
+	return nil
+}
+
+func (c *FileGroupClient) AddToRelease(
+	productSlug string,
+	fileGroupID int,
+	releaseVersion string,
+) error {
+	release, err := c.pivnetClient.ReleaseForProductVersion(productSlug, releaseVersion)
+	if err != nil {
+		return c.eh.HandleError(err)
+	}
+
+	err = c.pivnetClient.AddFileGroupToRelease(
+		productSlug,
+		release.ID,
+		fileGroupID,
+	)
+	if err != nil {
+		return c.eh.HandleError(err)
+	}
+
+	if c.format == printer.PrintAsTable {
+		_, err = fmt.Fprintf(
+			c.outputWriter,
+			"file group %d added successfully to %s/%s\n",
+			fileGroupID,
+			productSlug,
+			releaseVersion,
 		)
 	}
 

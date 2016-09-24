@@ -235,6 +235,10 @@ func (c Client) DeleteFileGroup(productSlug string, fileGroupID int) (pivnet.Fil
 	return c.client.FileGroups.Delete(productSlug, fileGroupID)
 }
 
+func (c Client) AddFileGroupToRelease(productSlug string, fileGroupID int, releaseID int) error {
+	return c.client.FileGroups.AddToRelease(productSlug, fileGroupID, releaseID)
+}
+
 func (c Client) MakeRequest(method string, url string, expectedResponseCode int, body io.Reader, data interface{}) (*http.Response, error) {
 	return c.client.MakeRequest(method, url, expectedResponseCode, body, data)
 }

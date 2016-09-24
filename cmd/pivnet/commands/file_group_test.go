@@ -27,11 +27,11 @@ var _ = Describe("file group commands", func() {
 
 	Describe("FileGroupsCommand", func() {
 		var (
-			cmd *commands.FileGroupsCommand
+			cmd commands.FileGroupsCommand
 		)
 
 		BeforeEach(func() {
-			cmd = &commands.FileGroupsCommand{}
+			cmd = commands.FileGroupsCommand{}
 		})
 
 		It("invokes the FileGroup client", func() {
@@ -61,7 +61,7 @@ var _ = Describe("file group commands", func() {
 
 		Describe("ProductSlug flag", func() {
 			BeforeEach(func() {
-				field = fieldFor(commands.FileGroupsCommand{}, "ProductSlug")
+				field = fieldFor(cmd, "ProductSlug")
 			})
 
 			It("is required", func() {
@@ -79,7 +79,7 @@ var _ = Describe("file group commands", func() {
 
 		Describe("ReleaseVersion flag", func() {
 			BeforeEach(func() {
-				field = fieldFor(commands.FileGroupsCommand{}, "ReleaseVersion")
+				field = fieldFor(cmd, "ReleaseVersion")
 			})
 
 			It("is not required", func() {
@@ -98,11 +98,11 @@ var _ = Describe("file group commands", func() {
 
 	Describe("FileGroupCommand", func() {
 		var (
-			cmd *commands.FileGroupCommand
+			cmd commands.FileGroupCommand
 		)
 
 		BeforeEach(func() {
-			cmd = &commands.FileGroupCommand{}
+			cmd = commands.FileGroupCommand{}
 		})
 
 		It("invokes the FileGroup client", func() {
@@ -132,7 +132,7 @@ var _ = Describe("file group commands", func() {
 
 		Describe("ProductSlug flag", func() {
 			BeforeEach(func() {
-				field = fieldFor(commands.FileGroupCommand{}, "ProductSlug")
+				field = fieldFor(cmd, "ProductSlug")
 			})
 
 			It("is required", func() {
@@ -150,7 +150,7 @@ var _ = Describe("file group commands", func() {
 
 		Describe("FileGroupID flag", func() {
 			BeforeEach(func() {
-				field = fieldFor(commands.FileGroupCommand{}, "FileGroupID")
+				field = fieldFor(cmd, "FileGroupID")
 			})
 
 			It("is required", func() {
@@ -169,11 +169,11 @@ var _ = Describe("file group commands", func() {
 
 	Describe("CreateFileGroupCommand", func() {
 		var (
-			cmd *commands.CreateFileGroupCommand
+			cmd commands.CreateFileGroupCommand
 		)
 
 		BeforeEach(func() {
-			cmd = &commands.CreateFileGroupCommand{}
+			cmd = commands.CreateFileGroupCommand{}
 		})
 
 		It("invokes the FileGroup client", func() {
@@ -203,7 +203,7 @@ var _ = Describe("file group commands", func() {
 
 		Describe("ProductSlug flag", func() {
 			BeforeEach(func() {
-				field = fieldFor(commands.CreateFileGroupCommand{}, "ProductSlug")
+				field = fieldFor(cmd, "ProductSlug")
 			})
 
 			It("is required", func() {
@@ -221,7 +221,7 @@ var _ = Describe("file group commands", func() {
 
 		Describe("Name flag", func() {
 			BeforeEach(func() {
-				field = fieldFor(commands.CreateFileGroupCommand{}, "Name")
+				field = fieldFor(cmd, "Name")
 			})
 
 			It("is required", func() {
@@ -267,15 +267,65 @@ var _ = Describe("file group commands", func() {
 				Expect(err).To(Equal(expectedErr))
 			})
 		})
+
+		Describe("FileGroupID flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(cmd, "FileGroupID")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("i"))
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("file-group-id"))
+			})
+		})
+
+		Describe("ProductSlug flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(cmd, "ProductSlug")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("p"))
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("product-slug"))
+			})
+		})
+
+		Describe("Name flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(cmd, "Name")
+			})
+
+			It("is not required", func() {
+				Expect(isRequired(field)).To(BeFalse())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("name"))
+			})
+		})
 	})
 
 	Describe("DeleteFileGroupCommand", func() {
 		var (
-			cmd *commands.DeleteFileGroupCommand
+			cmd commands.DeleteFileGroupCommand
 		)
 
 		BeforeEach(func() {
-			cmd = &commands.DeleteFileGroupCommand{}
+			cmd = commands.DeleteFileGroupCommand{}
 		})
 
 		It("invokes the FileGroup client", func() {
@@ -305,7 +355,7 @@ var _ = Describe("file group commands", func() {
 
 		Describe("ProductSlug flag", func() {
 			BeforeEach(func() {
-				field = fieldFor(commands.DeleteFileGroupCommand{}, "ProductSlug")
+				field = fieldFor(cmd, "ProductSlug")
 			})
 
 			It("is required", func() {
@@ -323,7 +373,7 @@ var _ = Describe("file group commands", func() {
 
 		Describe("FileGroupID flag", func() {
 			BeforeEach(func() {
-				field = fieldFor(commands.DeleteFileGroupCommand{}, "FileGroupID")
+				field = fieldFor(cmd, "FileGroupID")
 			})
 
 			It("is required", func() {
@@ -336,6 +386,95 @@ var _ = Describe("file group commands", func() {
 
 			It("contains long name", func() {
 				Expect(longTag(field)).To(Equal("file-group-id"))
+			})
+		})
+	})
+
+	Describe("AddFileGroupToReleaseCommand", func() {
+		var (
+			cmd commands.AddFileGroupToReleaseCommand
+		)
+
+		BeforeEach(func() {
+			cmd = commands.AddFileGroupToReleaseCommand{}
+		})
+
+		It("invokes the FileGroup client", func() {
+			err := cmd.Execute(nil)
+
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(fakeFileGroupClient.AddToReleaseCallCount()).To(Equal(1))
+		})
+
+		Context("when the FileGroup client returns an error", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("expected error")
+				fakeFileGroupClient.AddToReleaseReturns(expectedErr)
+			})
+
+			It("forwards the error", func() {
+				err := cmd.Execute(nil)
+
+				Expect(err).To(Equal(expectedErr))
+			})
+		})
+
+		Describe("ProductSlug flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(cmd, "ProductSlug")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("p"))
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("product-slug"))
+			})
+		})
+
+		Describe("FileGroupID flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(cmd, "FileGroupID")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("i"))
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("file-group-id"))
+			})
+		})
+
+		Describe("ReleaseVersion flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(cmd, "ReleaseVersion")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("r"))
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("release-version"))
 			})
 		})
 	})

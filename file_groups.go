@@ -197,3 +197,49 @@ func (p FileGroupsService) ListForRelease(productSlug string, releaseID int) ([]
 
 	return response.FileGroups, nil
 }
+
+func (r FileGroupsService) AddToRelease(
+	productSlug string,
+	releaseID int,
+	fileGroupID int,
+) error {
+	url := fmt.Sprintf(
+		"/products/%s/releases/%d/add_file_group",
+		productSlug,
+		releaseID,
+	)
+
+	body := addRemoveFileGroupBody{
+		FileGroup: addRemoveFileGroupBodyFileGroup{
+			ID: fileGroupID,
+		},
+	}
+
+	b, err := json.Marshal(body)
+	if err != nil {
+		// Untested as we cannot force an error because we are marshalling
+		// a known-good body
+		return err
+	}
+
+	_, err = r.client.MakeRequest(
+		"PATCH",
+		url,
+		http.StatusNoContent,
+		bytes.NewReader(b),
+		nil,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+type addRemoveFileGroupBody struct {
+	FileGroup addRemoveFileGroupBodyFileGroup `json:"file_group"`
+}
+
+type addRemoveFileGroupBodyFileGroup struct {
+	ID int `json:"id"`
+}

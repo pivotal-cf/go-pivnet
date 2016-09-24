@@ -402,6 +402,20 @@ var _ = Describe("Pivnet commands", func() {
 		})
 	})
 
+	Describe("AddFileGroupToRelease command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "AddFileGroupToRelease")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("add-file-group"))
+		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("afg"))
+		})
+	})
+
 	Describe("Releases command", func() {
 		BeforeEach(func() {
 			field = fieldFor(commands.Pivnet, "Releases")
