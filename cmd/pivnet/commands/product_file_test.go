@@ -367,34 +367,106 @@ var _ = Describe("product file commands", func() {
 	Describe("RemoveProductFileCommand", func() {
 		var (
 			cmd commands.RemoveProductFileCommand
+
+			releaseVersion string
+			fileGroupID    int
 		)
 
 		BeforeEach(func() {
-			cmd = commands.RemoveProductFileCommand{}
+			releaseVersion = "some release version"
+			fileGroupID = 5432
+
+			cmd = commands.RemoveProductFileCommand{ReleaseVersion: &releaseVersion}
 		})
 
-		It("invokes the ProductFile client", func() {
-			err := cmd.Execute(nil)
-
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(fakeProductFileClient.RemoveFromReleaseCallCount()).To(Equal(1))
-		})
-
-		Context("when the ProductFile client returns an error", func() {
-			var (
-				expectedErr error
-			)
-
+		Context("when neither releaseVersion nor fileGroupID are provided", func() {
 			BeforeEach(func() {
-				expectedErr = errors.New("expected error")
-				fakeProductFileClient.RemoveFromReleaseReturns(expectedErr)
+				cmd = commands.RemoveProductFileCommand{}
 			})
 
-			It("forwards the error", func() {
+			It("returns an error", func() {
 				err := cmd.Execute(nil)
 
-				Expect(err).To(Equal(expectedErr))
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("one of release-version or file-group-id"))
+			})
+		})
+
+		Context("when both releaseVersion and fileGroupID are provided", func() {
+			BeforeEach(func() {
+				cmd = commands.RemoveProductFileCommand{
+					ReleaseVersion: &releaseVersion,
+					FileGroupID:    &fileGroupID,
+				}
+			})
+
+			It("returns an error", func() {
+				err := cmd.Execute(nil)
+
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("only one of release-version or file-group-id"))
+			})
+		})
+
+		Context("when release-version is provided", func() {
+			BeforeEach(func() {
+				cmd = commands.RemoveProductFileCommand{ReleaseVersion: &releaseVersion}
+			})
+
+			It("invokes the ProductFile client", func() {
+				err := cmd.Execute(nil)
+
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeProductFileClient.RemoveFromReleaseCallCount()).To(Equal(1))
+			})
+
+			Context("when the ProductFile client returns an error", func() {
+				var (
+					expectedErr error
+				)
+
+				BeforeEach(func() {
+					expectedErr = errors.New("expected error")
+					fakeProductFileClient.RemoveFromReleaseReturns(expectedErr)
+				})
+
+				It("forwards the error", func() {
+					err := cmd.Execute(nil)
+
+					Expect(err).To(Equal(expectedErr))
+				})
+			})
+		})
+
+		Context("when file-group-id is provided", func() {
+			BeforeEach(func() {
+				cmd = commands.RemoveProductFileCommand{FileGroupID: &fileGroupID}
+			})
+
+			It("invokes the ProductFile client", func() {
+				err := cmd.Execute(nil)
+
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeProductFileClient.RemoveFromFileGroupCallCount()).To(Equal(1))
+			})
+
+			Context("when the ProductFile client returns an error", func() {
+				var (
+					expectedErr error
+				)
+
+				BeforeEach(func() {
+					expectedErr = errors.New("expected error")
+					fakeProductFileClient.RemoveFromFileGroupReturns(expectedErr)
+				})
+
+				It("forwards the error", func() {
+					err := cmd.Execute(nil)
+
+					Expect(err).To(Equal(expectedErr))
+				})
 			})
 		})
 
@@ -439,8 +511,8 @@ var _ = Describe("product file commands", func() {
 				field = fieldFor(commands.RemoveProductFileCommand{}, "ReleaseVersion")
 			})
 
-			It("is required", func() {
-				Expect(isRequired(field)).To(BeTrue())
+			It("is not required", func() {
+				Expect(isRequired(field)).To(BeFalse())
 			})
 
 			It("contains short name", func() {
@@ -449,6 +521,20 @@ var _ = Describe("product file commands", func() {
 
 			It("contains long name", func() {
 				Expect(longTag(field)).To(Equal("release-version"))
+			})
+		})
+
+		Describe("FileGroupID flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(commands.RemoveProductFileCommand{}, "FileGroupID")
+			})
+
+			It("is not required", func() {
+				Expect(isRequired(field)).To(BeFalse())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("file-group-id"))
 			})
 		})
 	})

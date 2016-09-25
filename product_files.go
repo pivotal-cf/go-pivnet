@@ -305,3 +305,41 @@ func (p ProductFilesService) AddToFileGroup(
 
 	return nil
 }
+
+func (p ProductFilesService) RemoveFromFileGroup(
+	productSlug string,
+	fileGroupID int,
+	productFileID int,
+) error {
+	url := fmt.Sprintf(
+		"/products/%s/file_groups/%d/remove_product_file",
+		productSlug,
+		fileGroupID,
+	)
+
+	body := createProductFileBody{
+		ProductFile: ProductFile{
+			ID: productFileID,
+		},
+	}
+
+	b, err := json.Marshal(body)
+	if err != nil {
+		// Untested as we cannot force an error because we are marshalling
+		// a known-good body
+		return err
+	}
+
+	_, err = p.client.MakeRequest(
+		"PATCH",
+		url,
+		http.StatusNoContent,
+		bytes.NewReader(b),
+		nil,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

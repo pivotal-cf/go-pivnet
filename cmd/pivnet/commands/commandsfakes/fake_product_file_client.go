@@ -57,6 +57,16 @@ type FakeProductFileClient struct {
 	addToFileGroupReturns struct {
 		result1 error
 	}
+	RemoveFromFileGroupStub        func(productSlug string, fileGroupID int, productFileID int) error
+	removeFromFileGroupMutex       sync.RWMutex
+	removeFromFileGroupArgsForCall []struct {
+		productSlug   string
+		fileGroupID   int
+		productFileID int
+	}
+	removeFromFileGroupReturns struct {
+		result1 error
+	}
 	DeleteStub        func(productSlug string, productFileID int) error
 	deleteMutex       sync.RWMutex
 	deleteArgsForCall []struct {
@@ -256,6 +266,41 @@ func (fake *FakeProductFileClient) AddToFileGroupReturns(result1 error) {
 	}{result1}
 }
 
+func (fake *FakeProductFileClient) RemoveFromFileGroup(productSlug string, fileGroupID int, productFileID int) error {
+	fake.removeFromFileGroupMutex.Lock()
+	fake.removeFromFileGroupArgsForCall = append(fake.removeFromFileGroupArgsForCall, struct {
+		productSlug   string
+		fileGroupID   int
+		productFileID int
+	}{productSlug, fileGroupID, productFileID})
+	fake.recordInvocation("RemoveFromFileGroup", []interface{}{productSlug, fileGroupID, productFileID})
+	fake.removeFromFileGroupMutex.Unlock()
+	if fake.RemoveFromFileGroupStub != nil {
+		return fake.RemoveFromFileGroupStub(productSlug, fileGroupID, productFileID)
+	} else {
+		return fake.removeFromFileGroupReturns.result1
+	}
+}
+
+func (fake *FakeProductFileClient) RemoveFromFileGroupCallCount() int {
+	fake.removeFromFileGroupMutex.RLock()
+	defer fake.removeFromFileGroupMutex.RUnlock()
+	return len(fake.removeFromFileGroupArgsForCall)
+}
+
+func (fake *FakeProductFileClient) RemoveFromFileGroupArgsForCall(i int) (string, int, int) {
+	fake.removeFromFileGroupMutex.RLock()
+	defer fake.removeFromFileGroupMutex.RUnlock()
+	return fake.removeFromFileGroupArgsForCall[i].productSlug, fake.removeFromFileGroupArgsForCall[i].fileGroupID, fake.removeFromFileGroupArgsForCall[i].productFileID
+}
+
+func (fake *FakeProductFileClient) RemoveFromFileGroupReturns(result1 error) {
+	fake.RemoveFromFileGroupStub = nil
+	fake.removeFromFileGroupReturns = struct {
+		result1 error
+	}{result1}
+}
+
 func (fake *FakeProductFileClient) Delete(productSlug string, productFileID int) error {
 	fake.deleteMutex.Lock()
 	fake.deleteArgsForCall = append(fake.deleteArgsForCall, struct {
@@ -340,6 +385,8 @@ func (fake *FakeProductFileClient) Invocations() map[string][][]interface{} {
 	defer fake.removeFromReleaseMutex.RUnlock()
 	fake.addToFileGroupMutex.RLock()
 	defer fake.addToFileGroupMutex.RUnlock()
+	fake.removeFromFileGroupMutex.RLock()
+	defer fake.removeFromFileGroupMutex.RUnlock()
 	fake.deleteMutex.RLock()
 	defer fake.deleteMutex.RUnlock()
 	fake.downloadMutex.RLock()

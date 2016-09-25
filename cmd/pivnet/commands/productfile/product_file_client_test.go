@@ -337,7 +337,7 @@ var _ = Describe("productfile commands", func() {
 			releaseVersion = "release-version"
 			productFileID = productfiles[0].ID
 
-			fakePivnetClient.RemoveProductFileReturns(nil)
+			fakePivnetClient.RemoveProductFileFromReleaseReturns(nil)
 		})
 
 		It("removes ProductFile", func() {
@@ -371,7 +371,7 @@ var _ = Describe("productfile commands", func() {
 
 			BeforeEach(func() {
 				expectedErr = errors.New("productfile error")
-				fakePivnetClient.RemoveProductFileReturns(expectedErr)
+				fakePivnetClient.RemoveProductFileFromReleaseReturns(expectedErr)
 			})
 
 			It("invokes the error handler", func() {
@@ -670,6 +670,46 @@ var _ = Describe("productfile commands", func() {
 					Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
 					Expect(fakeErrorHandler.HandleErrorArgsForCall(0)).To(Equal(expectedErr))
 				})
+			})
+		})
+	})
+
+	Describe("RemoveFromFileGroup", func() {
+		var (
+			productSlug   string
+			fileGroupID   int
+			productFileID int
+		)
+
+		BeforeEach(func() {
+			productSlug = "some-product-slug"
+			fileGroupID = 1234
+			productFileID = productfiles[0].ID
+
+			fakePivnetClient.RemoveProductFileFromFileGroupReturns(nil)
+		})
+
+		It("removes ProductFile", func() {
+			err := client.RemoveFromFileGroup(productSlug, fileGroupID, productFileID)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Context("when there is an error", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("productfile error")
+				fakePivnetClient.RemoveProductFileFromFileGroupReturns(expectedErr)
+			})
+
+			It("invokes the error handler", func() {
+				err := client.RemoveFromFileGroup(productSlug, fileGroupID, productFileID)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(fakeErrorHandler.HandleErrorArgsForCall(0)).To(Equal(expectedErr))
 			})
 		})
 	})

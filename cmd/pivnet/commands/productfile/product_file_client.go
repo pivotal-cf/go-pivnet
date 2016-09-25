@@ -22,8 +22,9 @@ type PivnetClient interface {
 	GetProductFile(productSlug string, productFileID int) (pivnet.ProductFile, error)
 	GetProductFileForRelease(productSlug string, releaseID int, productFileID int) (pivnet.ProductFile, error)
 	AddProductFileToRelease(productSlug string, releaseID int, productFileID int) error
-	RemoveProductFile(productSlug string, releaseID int, productFileID int) error
+	RemoveProductFileFromRelease(productSlug string, releaseID int, productFileID int) error
 	AddProductFileToFileGroup(productSlug string, fileGroupID int, productFileID int) error
+	RemoveProductFileFromFileGroup(productSlug string, fileGroupID int, productFileID int) error
 	DeleteProductFile(productSlug string, releaseID int) (pivnet.ProductFile, error)
 	AcceptEULA(productSlug string, releaseID int) error
 	DownloadFile(writer io.Writer, downloadLink string) error
@@ -229,7 +230,7 @@ func (c *ProductFileClient) RemoveFromRelease(
 		return c.eh.HandleError(err)
 	}
 
-	err = c.pivnetClient.RemoveProductFile(
+	err = c.pivnetClient.RemoveProductFileFromRelease(
 		productSlug,
 		release.ID,
 		productFileID,
@@ -272,10 +273,40 @@ func (c *ProductFileClient) AddToFileGroup(
 	if c.format == printer.PrintAsTable {
 		_, err = fmt.Fprintf(
 			c.outputWriter,
-			"product file %d added successfully to file group %d\n",
+			"product file %d successfully added to file group %d\n",
 			productFileID,
 			fileGroupID,
 		)
+	}
+
+	return nil
+}
+
+func (c *ProductFileClient) RemoveFromFileGroup(
+	productSlug string,
+	fileGroupID int,
+	productFileID int,
+) error {
+	err := c.pivnetClient.RemoveProductFileFromFileGroup(
+		productSlug,
+		fileGroupID,
+		productFileID,
+	)
+	if err != nil {
+		return c.eh.HandleError(err)
+	}
+
+	if c.format == printer.PrintAsTable {
+		_, err = fmt.Fprintf(
+			c.outputWriter,
+			"product file %d successfully removed from file group %d\n",
+			productFileID,
+			fileGroupID,
+		)
+
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

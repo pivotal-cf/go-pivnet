@@ -183,12 +183,16 @@ func (c Client) AddProductFileToRelease(productSlug string, releaseID int, produ
 	return c.client.ProductFiles.AddToRelease(productSlug, releaseID, productFileID)
 }
 
-func (c Client) RemoveProductFile(productSlug string, releaseID int, productFileID int) error {
+func (c Client) RemoveProductFileFromRelease(productSlug string, releaseID int, productFileID int) error {
 	return c.client.ProductFiles.RemoveFromRelease(productSlug, releaseID, productFileID)
 }
 
 func (c Client) AddProductFileToFileGroup(productSlug string, fileGroupID int, productFileID int) error {
 	return c.client.ProductFiles.AddToFileGroup(productSlug, fileGroupID, productFileID)
+}
+
+func (c Client) RemoveProductFileFromFileGroup(productSlug string, fileGroupID int, productFileID int) error {
+	return c.client.ProductFiles.RemoveFromFileGroup(productSlug, fileGroupID, productFileID)
 }
 
 func (c Client) ReleaseDependencies(productSlug string, releaseID int) ([]pivnet.ReleaseDependency, error) {

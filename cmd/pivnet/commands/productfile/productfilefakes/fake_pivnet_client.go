@@ -70,14 +70,14 @@ type FakePivnetClient struct {
 	addProductFileToReleaseReturns struct {
 		result1 error
 	}
-	RemoveProductFileStub        func(productSlug string, releaseID int, productFileID int) error
-	removeProductFileMutex       sync.RWMutex
-	removeProductFileArgsForCall []struct {
+	RemoveProductFileFromReleaseStub        func(productSlug string, releaseID int, productFileID int) error
+	removeProductFileFromReleaseMutex       sync.RWMutex
+	removeProductFileFromReleaseArgsForCall []struct {
 		productSlug   string
 		releaseID     int
 		productFileID int
 	}
-	removeProductFileReturns struct {
+	removeProductFileFromReleaseReturns struct {
 		result1 error
 	}
 	AddProductFileToFileGroupStub        func(productSlug string, fileGroupID int, productFileID int) error
@@ -88,6 +88,16 @@ type FakePivnetClient struct {
 		productFileID int
 	}
 	addProductFileToFileGroupReturns struct {
+		result1 error
+	}
+	RemoveProductFileFromFileGroupStub        func(productSlug string, fileGroupID int, productFileID int) error
+	removeProductFileFromFileGroupMutex       sync.RWMutex
+	removeProductFileFromFileGroupArgsForCall []struct {
+		productSlug   string
+		fileGroupID   int
+		productFileID int
+	}
+	removeProductFileFromFileGroupReturns struct {
 		result1 error
 	}
 	DeleteProductFileStub        func(productSlug string, releaseID int) (go_pivnet.ProductFile, error)
@@ -332,37 +342,37 @@ func (fake *FakePivnetClient) AddProductFileToReleaseReturns(result1 error) {
 	}{result1}
 }
 
-func (fake *FakePivnetClient) RemoveProductFile(productSlug string, releaseID int, productFileID int) error {
-	fake.removeProductFileMutex.Lock()
-	fake.removeProductFileArgsForCall = append(fake.removeProductFileArgsForCall, struct {
+func (fake *FakePivnetClient) RemoveProductFileFromRelease(productSlug string, releaseID int, productFileID int) error {
+	fake.removeProductFileFromReleaseMutex.Lock()
+	fake.removeProductFileFromReleaseArgsForCall = append(fake.removeProductFileFromReleaseArgsForCall, struct {
 		productSlug   string
 		releaseID     int
 		productFileID int
 	}{productSlug, releaseID, productFileID})
-	fake.recordInvocation("RemoveProductFile", []interface{}{productSlug, releaseID, productFileID})
-	fake.removeProductFileMutex.Unlock()
-	if fake.RemoveProductFileStub != nil {
-		return fake.RemoveProductFileStub(productSlug, releaseID, productFileID)
+	fake.recordInvocation("RemoveProductFileFromRelease", []interface{}{productSlug, releaseID, productFileID})
+	fake.removeProductFileFromReleaseMutex.Unlock()
+	if fake.RemoveProductFileFromReleaseStub != nil {
+		return fake.RemoveProductFileFromReleaseStub(productSlug, releaseID, productFileID)
 	} else {
-		return fake.removeProductFileReturns.result1
+		return fake.removeProductFileFromReleaseReturns.result1
 	}
 }
 
-func (fake *FakePivnetClient) RemoveProductFileCallCount() int {
-	fake.removeProductFileMutex.RLock()
-	defer fake.removeProductFileMutex.RUnlock()
-	return len(fake.removeProductFileArgsForCall)
+func (fake *FakePivnetClient) RemoveProductFileFromReleaseCallCount() int {
+	fake.removeProductFileFromReleaseMutex.RLock()
+	defer fake.removeProductFileFromReleaseMutex.RUnlock()
+	return len(fake.removeProductFileFromReleaseArgsForCall)
 }
 
-func (fake *FakePivnetClient) RemoveProductFileArgsForCall(i int) (string, int, int) {
-	fake.removeProductFileMutex.RLock()
-	defer fake.removeProductFileMutex.RUnlock()
-	return fake.removeProductFileArgsForCall[i].productSlug, fake.removeProductFileArgsForCall[i].releaseID, fake.removeProductFileArgsForCall[i].productFileID
+func (fake *FakePivnetClient) RemoveProductFileFromReleaseArgsForCall(i int) (string, int, int) {
+	fake.removeProductFileFromReleaseMutex.RLock()
+	defer fake.removeProductFileFromReleaseMutex.RUnlock()
+	return fake.removeProductFileFromReleaseArgsForCall[i].productSlug, fake.removeProductFileFromReleaseArgsForCall[i].releaseID, fake.removeProductFileFromReleaseArgsForCall[i].productFileID
 }
 
-func (fake *FakePivnetClient) RemoveProductFileReturns(result1 error) {
-	fake.RemoveProductFileStub = nil
-	fake.removeProductFileReturns = struct {
+func (fake *FakePivnetClient) RemoveProductFileFromReleaseReturns(result1 error) {
+	fake.RemoveProductFileFromReleaseStub = nil
+	fake.removeProductFileFromReleaseReturns = struct {
 		result1 error
 	}{result1}
 }
@@ -398,6 +408,41 @@ func (fake *FakePivnetClient) AddProductFileToFileGroupArgsForCall(i int) (strin
 func (fake *FakePivnetClient) AddProductFileToFileGroupReturns(result1 error) {
 	fake.AddProductFileToFileGroupStub = nil
 	fake.addProductFileToFileGroupReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakePivnetClient) RemoveProductFileFromFileGroup(productSlug string, fileGroupID int, productFileID int) error {
+	fake.removeProductFileFromFileGroupMutex.Lock()
+	fake.removeProductFileFromFileGroupArgsForCall = append(fake.removeProductFileFromFileGroupArgsForCall, struct {
+		productSlug   string
+		fileGroupID   int
+		productFileID int
+	}{productSlug, fileGroupID, productFileID})
+	fake.recordInvocation("RemoveProductFileFromFileGroup", []interface{}{productSlug, fileGroupID, productFileID})
+	fake.removeProductFileFromFileGroupMutex.Unlock()
+	if fake.RemoveProductFileFromFileGroupStub != nil {
+		return fake.RemoveProductFileFromFileGroupStub(productSlug, fileGroupID, productFileID)
+	} else {
+		return fake.removeProductFileFromFileGroupReturns.result1
+	}
+}
+
+func (fake *FakePivnetClient) RemoveProductFileFromFileGroupCallCount() int {
+	fake.removeProductFileFromFileGroupMutex.RLock()
+	defer fake.removeProductFileFromFileGroupMutex.RUnlock()
+	return len(fake.removeProductFileFromFileGroupArgsForCall)
+}
+
+func (fake *FakePivnetClient) RemoveProductFileFromFileGroupArgsForCall(i int) (string, int, int) {
+	fake.removeProductFileFromFileGroupMutex.RLock()
+	defer fake.removeProductFileFromFileGroupMutex.RUnlock()
+	return fake.removeProductFileFromFileGroupArgsForCall[i].productSlug, fake.removeProductFileFromFileGroupArgsForCall[i].fileGroupID, fake.removeProductFileFromFileGroupArgsForCall[i].productFileID
+}
+
+func (fake *FakePivnetClient) RemoveProductFileFromFileGroupReturns(result1 error) {
+	fake.RemoveProductFileFromFileGroupStub = nil
+	fake.removeProductFileFromFileGroupReturns = struct {
 		result1 error
 	}{result1}
 }
@@ -520,10 +565,12 @@ func (fake *FakePivnetClient) Invocations() map[string][][]interface{} {
 	defer fake.getProductFileForReleaseMutex.RUnlock()
 	fake.addProductFileToReleaseMutex.RLock()
 	defer fake.addProductFileToReleaseMutex.RUnlock()
-	fake.removeProductFileMutex.RLock()
-	defer fake.removeProductFileMutex.RUnlock()
+	fake.removeProductFileFromReleaseMutex.RLock()
+	defer fake.removeProductFileFromReleaseMutex.RUnlock()
 	fake.addProductFileToFileGroupMutex.RLock()
 	defer fake.addProductFileToFileGroupMutex.RUnlock()
+	fake.removeProductFileFromFileGroupMutex.RLock()
+	defer fake.removeProductFileFromFileGroupMutex.RUnlock()
 	fake.deleteProductFileMutex.RLock()
 	defer fake.deleteProductFileMutex.RUnlock()
 	fake.acceptEULAMutex.RLock()

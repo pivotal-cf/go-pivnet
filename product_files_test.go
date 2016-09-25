@@ -584,7 +584,7 @@ var _ = Describe("PivnetClient - product files", func() {
 		})
 	})
 
-	Describe("Remove Product File", func() {
+	Describe("Remove Product File from release", func() {
 		var (
 			productSlug   = "some-product"
 			releaseID     = 2345
@@ -693,6 +693,63 @@ var _ = Describe("PivnetClient - product files", func() {
 				)
 
 				err := client.ProductFiles.AddToFileGroup(productSlug, fileGroupID, productFileID)
+				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+	})
+
+	Describe("Remove Product File from file group", func() {
+		var (
+			productSlug   = "some-product"
+			fileGroupID   = 2345
+			productFileID = 3456
+
+			expectedRequestBody = `{"product_file":{"id":3456}}`
+		)
+
+		Context("when the server responds with a 204 status code", func() {
+			It("returns without error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/file_groups/%d/remove_product_file",
+							apiPrefix,
+							productSlug,
+							fileGroupID,
+						)),
+						ghttp.VerifyJSON(expectedRequestBody),
+						ghttp.RespondWith(http.StatusNoContent, nil),
+					),
+				)
+
+				err := client.ProductFiles.RemoveFromFileGroup(productSlug, fileGroupID, productFileID)
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+
+		Context("when the server responds with a non-204 status code", func() {
+			var (
+				response interface{}
+			)
+
+			BeforeEach(func() {
+				response = pivnetErr{Message: "foo message"}
+			})
+
+			It("returns an error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/file_groups/%d/remove_product_file",
+							apiPrefix,
+							productSlug,
+							fileGroupID,
+						)),
+						ghttp.RespondWithJSONEncoded(http.StatusTeapot, response),
+					),
+				)
+
+				err := client.ProductFiles.RemoveFromFileGroup(productSlug, fileGroupID, productFileID)
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
