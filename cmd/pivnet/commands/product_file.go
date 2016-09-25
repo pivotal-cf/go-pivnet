@@ -1,6 +1,10 @@
 package commands
 
-import "github.com/pivotal-cf/go-pivnet/cmd/pivnet/commands/productfile"
+import (
+	"errors"
+
+	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/commands/productfile"
+)
 
 type ProductFilesCommand struct {
 	ProductSlug    string `long:"product-slug" short:"p" description:"Product slug e.g. p-mysql" required:"true"`
@@ -14,9 +18,10 @@ type ProductFileCommand struct {
 }
 
 type AddProductFileCommand struct {
-	ProductSlug    string `long:"product-slug" short:"p" description:"Product slug e.g. p-mysql" required:"true"`
-	ReleaseVersion string `long:"release-version" short:"r" description:"Release version e.g. 0.1.2-rc1" required:"true"`
-	ProductFileID  int    `long:"product-file-id" short:"i" description:"Product file ID e.g. 1234" required:"true"`
+	ProductSlug    string  `long:"product-slug" short:"p" description:"Product slug e.g. p-mysql" required:"true"`
+	ReleaseVersion *string `long:"release-version" short:"r" description:"Release version e.g. 0.1.2-rc1"`
+	ProductFileID  int     `long:"product-file-id" short:"i" description:"Product file ID e.g. 1234" required:"true"`
+	FileGroupID    *int    `long:"file-group-id" short:"f" description:"File group ID e.g. 1234"`
 }
 
 type RemoveProductFileCommand struct {
@@ -44,6 +49,7 @@ type ProductFileClient interface {
 	Get(productSlug string, releaseVersion string, productFileID int) error
 	AddToRelease(productSlug string, releaseVersion string, productFileID int) error
 	RemoveFromRelease(productSlug string, releaseVersion string, productFileID int) error
+	AddToFileGroup(productSlug string, fileGroupID int, productFileID int) error
 	Delete(productSlug string, productFileID int) error
 	Download(productSlug string, releaseVersion string, productFileID int, filepath string, acceptEULA bool) error
 }
@@ -72,7 +78,19 @@ func (command *ProductFileCommand) Execute([]string) error {
 
 func (command *AddProductFileCommand) Execute([]string) error {
 	Init()
-	return NewProductFileClient().AddToRelease(command.ProductSlug, command.ReleaseVersion, command.ProductFileID)
+
+	if command.ReleaseVersion == nil && command.FileGroupID == nil {
+		return errors.New("one of release-version or file-group-id must be provided")
+	}
+	if command.ReleaseVersion != nil && command.FileGroupID != nil {
+		return errors.New("only one of release-version or file-group-id must be provided")
+	}
+
+	if command.ReleaseVersion != nil {
+		return NewProductFileClient().AddToRelease(command.ProductSlug, *command.ReleaseVersion, command.ProductFileID)
+	}
+
+	return NewProductFileClient().AddToFileGroup(command.ProductSlug, *command.FileGroupID, command.ProductFileID)
 }
 
 func (command *RemoveProductFileCommand) Execute([]string) error {

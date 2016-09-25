@@ -47,6 +47,16 @@ type FakeProductFileClient struct {
 	removeFromReleaseReturns struct {
 		result1 error
 	}
+	AddToFileGroupStub        func(productSlug string, fileGroupID int, productFileID int) error
+	addToFileGroupMutex       sync.RWMutex
+	addToFileGroupArgsForCall []struct {
+		productSlug   string
+		fileGroupID   int
+		productFileID int
+	}
+	addToFileGroupReturns struct {
+		result1 error
+	}
 	DeleteStub        func(productSlug string, productFileID int) error
 	deleteMutex       sync.RWMutex
 	deleteArgsForCall []struct {
@@ -211,6 +221,41 @@ func (fake *FakeProductFileClient) RemoveFromReleaseReturns(result1 error) {
 	}{result1}
 }
 
+func (fake *FakeProductFileClient) AddToFileGroup(productSlug string, fileGroupID int, productFileID int) error {
+	fake.addToFileGroupMutex.Lock()
+	fake.addToFileGroupArgsForCall = append(fake.addToFileGroupArgsForCall, struct {
+		productSlug   string
+		fileGroupID   int
+		productFileID int
+	}{productSlug, fileGroupID, productFileID})
+	fake.recordInvocation("AddToFileGroup", []interface{}{productSlug, fileGroupID, productFileID})
+	fake.addToFileGroupMutex.Unlock()
+	if fake.AddToFileGroupStub != nil {
+		return fake.AddToFileGroupStub(productSlug, fileGroupID, productFileID)
+	} else {
+		return fake.addToFileGroupReturns.result1
+	}
+}
+
+func (fake *FakeProductFileClient) AddToFileGroupCallCount() int {
+	fake.addToFileGroupMutex.RLock()
+	defer fake.addToFileGroupMutex.RUnlock()
+	return len(fake.addToFileGroupArgsForCall)
+}
+
+func (fake *FakeProductFileClient) AddToFileGroupArgsForCall(i int) (string, int, int) {
+	fake.addToFileGroupMutex.RLock()
+	defer fake.addToFileGroupMutex.RUnlock()
+	return fake.addToFileGroupArgsForCall[i].productSlug, fake.addToFileGroupArgsForCall[i].fileGroupID, fake.addToFileGroupArgsForCall[i].productFileID
+}
+
+func (fake *FakeProductFileClient) AddToFileGroupReturns(result1 error) {
+	fake.AddToFileGroupStub = nil
+	fake.addToFileGroupReturns = struct {
+		result1 error
+	}{result1}
+}
+
 func (fake *FakeProductFileClient) Delete(productSlug string, productFileID int) error {
 	fake.deleteMutex.Lock()
 	fake.deleteArgsForCall = append(fake.deleteArgsForCall, struct {
@@ -293,6 +338,8 @@ func (fake *FakeProductFileClient) Invocations() map[string][][]interface{} {
 	defer fake.addToReleaseMutex.RUnlock()
 	fake.removeFromReleaseMutex.RLock()
 	defer fake.removeFromReleaseMutex.RUnlock()
+	fake.addToFileGroupMutex.RLock()
+	defer fake.addToFileGroupMutex.RUnlock()
 	fake.deleteMutex.RLock()
 	defer fake.deleteMutex.RUnlock()
 	fake.downloadMutex.RLock()

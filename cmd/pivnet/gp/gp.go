@@ -179,12 +179,16 @@ func (c Client) CreateProductFile(config pivnet.CreateProductFileConfig) (pivnet
 	return c.client.ProductFiles.Create(config)
 }
 
-func (c Client) AddProductFile(productSlug string, releaseID int, productFileID int) error {
+func (c Client) AddProductFileToRelease(productSlug string, releaseID int, productFileID int) error {
 	return c.client.ProductFiles.AddToRelease(productSlug, releaseID, productFileID)
 }
 
 func (c Client) RemoveProductFile(productSlug string, releaseID int, productFileID int) error {
 	return c.client.ProductFiles.RemoveFromRelease(productSlug, releaseID, productFileID)
+}
+
+func (c Client) AddProductFileToFileGroup(productSlug string, fileGroupID int, productFileID int) error {
+	return c.client.ProductFiles.AddToFileGroup(productSlug, fileGroupID, productFileID)
 }
 
 func (c Client) ReleaseDependencies(productSlug string, releaseID int) ([]pivnet.ReleaseDependency, error) {

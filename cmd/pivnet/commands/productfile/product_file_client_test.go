@@ -278,7 +278,7 @@ var _ = Describe("productfile commands", func() {
 			releaseVersion = "release-version"
 			productFileID = productfiles[0].ID
 
-			fakePivnetClient.AddProductFileReturns(nil)
+			fakePivnetClient.AddProductFileToReleaseReturns(nil)
 		})
 
 		It("adds ProductFile", func() {
@@ -312,7 +312,7 @@ var _ = Describe("productfile commands", func() {
 
 			BeforeEach(func() {
 				expectedErr = errors.New("productfile error")
-				fakePivnetClient.AddProductFileReturns(expectedErr)
+				fakePivnetClient.AddProductFileToReleaseReturns(expectedErr)
 			})
 
 			It("invokes the error handler", func() {
@@ -376,6 +376,46 @@ var _ = Describe("productfile commands", func() {
 
 			It("invokes the error handler", func() {
 				err := client.RemoveFromRelease(productSlug, releaseVersion, productFileID)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(fakeErrorHandler.HandleErrorArgsForCall(0)).To(Equal(expectedErr))
+			})
+		})
+	})
+
+	Describe("AddToFileGroup", func() {
+		var (
+			productSlug   string
+			fileGroupID   int
+			productFileID int
+		)
+
+		BeforeEach(func() {
+			productSlug = "some-product-slug"
+			fileGroupID = 5432
+			productFileID = productfiles[0].ID
+
+			fakePivnetClient.AddProductFileToFileGroupReturns(nil)
+		})
+
+		It("adds ProductFile", func() {
+			err := client.AddToFileGroup(productSlug, fileGroupID, productFileID)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Context("when there is an error", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("productfile error")
+				fakePivnetClient.AddProductFileToFileGroupReturns(expectedErr)
+			})
+
+			It("invokes the error handler", func() {
+				err := client.AddToFileGroup(productSlug, fileGroupID, productFileID)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
