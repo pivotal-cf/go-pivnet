@@ -58,33 +58,42 @@ var _ = Describe("pivnet cli", func() {
 	}
 
 	Describe("Displaying help", func() {
-		It("displays help with '-h'", func() {
+		It("displays help to stdout with '-h'", func() {
 			session := runMainWithArgs("-h")
 
 			Eventually(session, executableTimeout).Should(gexec.Exit())
-			Expect(session.Err).Should(gbytes.Say("Usage"))
+			Expect(session.Out).Should(gbytes.Say("Usage"))
 		})
 
-		It("displays help with '--help'", func() {
+		It("displays help to stdout with '--help'", func() {
 			session := runMainWithArgs("--help")
 
 			Eventually(session, executableTimeout).Should(gexec.Exit())
-			Expect(session.Err).Should(gbytes.Say("Usage"))
+			Expect(session.Out).Should(gbytes.Say("Usage"))
 		})
 
-		It("displays help with '--help'", func() {
-			session := runMainWithArgs("--help")
-
-			Eventually(session, executableTimeout).Should(gexec.Exit())
-			Expect(session.Err).Should(gbytes.Say("Usage"))
-		})
-
-		It("displays help with 'help'", func() {
+		It("displays help to stdout with 'help'", func() {
 			session := runMainWithArgs("help")
 
 			Eventually(session, executableTimeout).Should(gexec.Exit())
-			Expect(session.Err).Should(gbytes.Say("Usage:"))
-			Expect(session.Err).Should(gbytes.Say("network.pivotal.io"))
+			Expect(session.Out).Should(gbytes.Say("Usage:"))
+			Expect(session.Out).Should(gbytes.Say("network.pivotal.io"))
+		})
+
+		It("displays help of a command to stdout with '--help'", func() {
+			session := runMainWithArgs("product", "--help")
+
+			Eventually(session, executableTimeout).Should(gexec.Exit())
+			Expect(session.Out).Should(gbytes.Say("Usage"))
+			Expect(session.Out).Should(gbytes.Say("-product-slug"))
+		})
+
+		It("displays help of a command to stdout with '-h'", func() {
+			session := runMainWithArgs("product", "-h")
+
+			Eventually(session, executableTimeout).Should(gexec.Exit())
+			Expect(session.Out).Should(gbytes.Say("Usage"))
+			Expect(session.Out).Should(gbytes.Say("-product-slug"))
 		})
 	})
 
