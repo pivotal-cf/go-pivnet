@@ -290,6 +290,20 @@ var _ = Describe("Pivnet commands", func() {
 		})
 	})
 
+	Describe("CreateProductFile command", func() {
+		BeforeEach(func() {
+			field = fieldFor(commands.Pivnet, "CreateProductFile")
+		})
+
+		It("contains command", func() {
+			Expect(command(field)).To(Equal("create-product-file"))
+		})
+
+		It("contains alias", func() {
+			Expect(alias(field)).To(Equal("cpf"))
+		})
+	})
+
 	Describe("AddProductFile command", func() {
 		BeforeEach(func() {
 			field = fieldFor(commands.Pivnet, "AddProductFile")

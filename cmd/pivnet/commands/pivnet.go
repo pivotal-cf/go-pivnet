@@ -51,6 +51,7 @@ type PivnetCommand struct {
 
 	ProductFiles      ProductFilesCommand      `command:"product-files" alias:"pfs" description:"List product files"`
 	ProductFile       ProductFileCommand       `command:"product-file" alias:"pf" description:"Show product file"`
+	CreateProductFile CreateProductFileCommand `command:"create-product-file" alias:"cpf" description:"Create product file"`
 	AddProductFile    AddProductFileCommand    `command:"add-product-file" alias:"apf" description:"Add product file to release"`
 	RemoveProductFile RemoveProductFileCommand `command:"remove-product-file" alias:"rpf" description:"Remove product file from release"`
 	DeleteProductFile DeleteProductFileCommand `command:"delete-product-file" alias:"dpf" description:"Delete product file"`

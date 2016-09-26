@@ -4,6 +4,7 @@ package commandsfakes
 import (
 	"sync"
 
+	go_pivnet "github.com/pivotal-cf/go-pivnet"
 	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/commands"
 )
 
@@ -25,6 +26,14 @@ type FakeProductFileClient struct {
 		productFileID  int
 	}
 	getReturns struct {
+		result1 error
+	}
+	CreateStub        func(config go_pivnet.CreateProductFileConfig) error
+	createMutex       sync.RWMutex
+	createArgsForCall []struct {
+		config go_pivnet.CreateProductFileConfig
+	}
+	createReturns struct {
 		result1 error
 	}
 	AddToReleaseStub        func(productSlug string, releaseVersion string, productFileID int) error
@@ -157,6 +166,39 @@ func (fake *FakeProductFileClient) GetArgsForCall(i int) (string, string, int) {
 func (fake *FakeProductFileClient) GetReturns(result1 error) {
 	fake.GetStub = nil
 	fake.getReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeProductFileClient) Create(config go_pivnet.CreateProductFileConfig) error {
+	fake.createMutex.Lock()
+	fake.createArgsForCall = append(fake.createArgsForCall, struct {
+		config go_pivnet.CreateProductFileConfig
+	}{config})
+	fake.recordInvocation("Create", []interface{}{config})
+	fake.createMutex.Unlock()
+	if fake.CreateStub != nil {
+		return fake.CreateStub(config)
+	} else {
+		return fake.createReturns.result1
+	}
+}
+
+func (fake *FakeProductFileClient) CreateCallCount() int {
+	fake.createMutex.RLock()
+	defer fake.createMutex.RUnlock()
+	return len(fake.createArgsForCall)
+}
+
+func (fake *FakeProductFileClient) CreateArgsForCall(i int) go_pivnet.CreateProductFileConfig {
+	fake.createMutex.RLock()
+	defer fake.createMutex.RUnlock()
+	return fake.createArgsForCall[i].config
+}
+
+func (fake *FakeProductFileClient) CreateReturns(result1 error) {
+	fake.CreateStub = nil
+	fake.createReturns = struct {
 		result1 error
 	}{result1}
 }
@@ -379,6 +421,8 @@ func (fake *FakeProductFileClient) Invocations() map[string][][]interface{} {
 	defer fake.listMutex.RUnlock()
 	fake.getMutex.RLock()
 	defer fake.getMutex.RUnlock()
+	fake.createMutex.RLock()
+	defer fake.createMutex.RUnlock()
 	fake.addToReleaseMutex.RLock()
 	defer fake.addToReleaseMutex.RUnlock()
 	fake.removeFromReleaseMutex.RLock()

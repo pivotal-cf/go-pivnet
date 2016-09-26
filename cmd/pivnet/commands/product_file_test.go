@@ -6,6 +6,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	pivnet "github.com/pivotal-cf/go-pivnet"
 	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/commands"
 	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/commands/commandsfakes"
 )
@@ -181,6 +182,162 @@ var _ = Describe("product file commands", func() {
 
 			It("contains long name", func() {
 				Expect(longTag(field)).To(Equal("product-file-id"))
+			})
+		})
+	})
+
+	Describe("CreateProductFileCommand", func() {
+		var (
+			productSlug  string
+			name         string
+			awsObjectKey string
+			fileType     string
+			fileVersion  string
+			md5          string
+
+			config pivnet.CreateProductFileConfig
+
+			cmd commands.CreateProductFileCommand
+		)
+
+		BeforeEach(func() {
+			productSlug = "some product slug"
+			name = "some product file"
+			awsObjectKey = "some aws object key"
+			fileType = "some file type"
+			fileVersion = "some file version"
+			md5 = "some md5"
+
+			cmd = commands.CreateProductFileCommand{
+				ProductSlug:  productSlug,
+				Name:         name,
+				AWSObjectKey: awsObjectKey,
+				FileType:     fileType,
+				FileVersion:  fileVersion,
+				MD5:          md5,
+			}
+
+			config = pivnet.CreateProductFileConfig{
+				ProductSlug:  productSlug,
+				Name:         name,
+				AWSObjectKey: awsObjectKey,
+				FileType:     fileType,
+				FileVersion:  fileVersion,
+				MD5:          md5,
+			}
+		})
+
+		It("invokes the ProductFile client", func() {
+			err := cmd.Execute(nil)
+
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(fakeProductFileClient.CreateCallCount()).To(Equal(1))
+			Expect(fakeProductFileClient.CreateArgsForCall(0)).To(Equal(config))
+		})
+
+		Context("when the ProductFile client returns an error", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("expected error")
+				fakeProductFileClient.CreateReturns(expectedErr)
+			})
+
+			It("forwards the error", func() {
+				err := cmd.Execute(nil)
+
+				Expect(err).To(Equal(expectedErr))
+			})
+		})
+
+		Describe("ProductSlug flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(cmd, "ProductSlug")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("p"))
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("product-slug"))
+			})
+		})
+
+		Describe("Name flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(cmd, "Name")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("name"))
+			})
+		})
+
+		Describe("AWSObjectKey flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(cmd, "AWSObjectKey")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("aws-object-key"))
+			})
+		})
+
+		Describe("FileType flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(cmd, "FileType")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("file-type"))
+			})
+		})
+
+		Describe("FileVersion flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(cmd, "FileVersion")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("file-version"))
+			})
+		})
+
+		Describe("MD5 flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(cmd, "MD5")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("md5"))
 			})
 		})
 	})

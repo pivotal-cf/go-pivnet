@@ -164,6 +164,51 @@ var _ = Describe("productfile commands", func() {
 		})
 	})
 
+	Describe("Create", func() {
+		var (
+			config pivnet.CreateProductFileConfig
+		)
+
+		BeforeEach(func() {
+			config = pivnet.CreateProductFileConfig{
+				Name: "some-name",
+			}
+
+			fakePivnetClient.CreateProductFileReturns(productfiles[0], nil)
+		})
+
+		It("creates ProductFile", func() {
+			err := client.Create(config)
+			Expect(err).NotTo(HaveOccurred())
+
+			var returnedProductFile pivnet.ProductFile
+			err = json.Unmarshal(outBuffer.Bytes(), &returnedProductFile)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(returnedProductFile).To(Equal(productfiles[0]))
+			Expect(fakePivnetClient.CreateProductFileArgsForCall(0)).To(Equal(config))
+		})
+
+		Context("when there is an error", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("productfile error")
+				fakePivnetClient.CreateProductFileReturns(pivnet.ProductFile{}, expectedErr)
+			})
+
+			It("invokes the error handler", func() {
+				err := client.Create(config)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(fakeErrorHandler.HandleErrorArgsForCall(0)).To(Equal(expectedErr))
+			})
+		})
+	})
+
 	Describe("Get", func() {
 		var (
 			productSlug    string

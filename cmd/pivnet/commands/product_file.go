@@ -3,6 +3,7 @@ package commands
 import (
 	"errors"
 
+	pivnet "github.com/pivotal-cf/go-pivnet"
 	"github.com/pivotal-cf/go-pivnet/cmd/pivnet/commands/productfile"
 )
 
@@ -15,6 +16,15 @@ type ProductFileCommand struct {
 	ProductSlug    string `long:"product-slug" short:"p" description:"Product slug e.g. p-mysql" required:"true"`
 	ReleaseVersion string `long:"release-version" short:"r" description:"Release version e.g. 0.1.2-rc1"`
 	ProductFileID  int    `long:"product-file-id" short:"i" description:"Product file ID e.g. 1234" required:"true"`
+}
+
+type CreateProductFileCommand struct {
+	ProductSlug  string `long:"product-slug" short:"p" description:"Product slug e.g. p-mysql" required:"true"`
+	Name         string `long:"name" description:"Name e.g. p-mysql 1.7.13" required:"true"`
+	AWSObjectKey string `long:"aws-object-key" description:"AWS Object Key e.g. product_files/P-MySQL/p-mysql-1.7.13.pivotal" required:"true"`
+	FileType     string `long:"file-type" description:"File Type e.g. 'Software'" required:"true"`
+	FileVersion  string `long:"file-version" description:"File Version e.g. '1.7.13'" required:"true"`
+	MD5          string `long:"md5" description:"MD5 of file" required:"true"`
 }
 
 type AddProductFileCommand struct {
@@ -48,6 +58,7 @@ type DownloadProductFileCommand struct {
 type ProductFileClient interface {
 	List(productSlug string, releaseVersion string) error
 	Get(productSlug string, releaseVersion string, productFileID int) error
+	Create(config pivnet.CreateProductFileConfig) error
 	AddToRelease(productSlug string, releaseVersion string, productFileID int) error
 	RemoveFromRelease(productSlug string, releaseVersion string, productFileID int) error
 	AddToFileGroup(productSlug string, fileGroupID int, productFileID int) error
@@ -76,6 +87,21 @@ func (command *ProductFilesCommand) Execute([]string) error {
 func (command *ProductFileCommand) Execute([]string) error {
 	Init()
 	return NewProductFileClient().Get(command.ProductSlug, command.ReleaseVersion, command.ProductFileID)
+}
+
+func (command *CreateProductFileCommand) Execute([]string) error {
+	Init()
+
+	config := pivnet.CreateProductFileConfig{
+		ProductSlug:  command.ProductSlug,
+		Name:         command.Name,
+		AWSObjectKey: command.AWSObjectKey,
+		FileType:     command.FileType,
+		FileVersion:  command.FileVersion,
+		MD5:          command.MD5,
+	}
+
+	return NewProductFileClient().Create(config)
 }
 
 func (command *AddProductFileCommand) Execute([]string) error {

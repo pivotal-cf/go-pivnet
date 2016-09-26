@@ -21,6 +21,7 @@ type PivnetClient interface {
 	GetProductFilesForRelease(productSlug string, releaseID int) ([]pivnet.ProductFile, error)
 	GetProductFile(productSlug string, productFileID int) (pivnet.ProductFile, error)
 	GetProductFileForRelease(productSlug string, releaseID int, productFileID int) (pivnet.ProductFile, error)
+	CreateProductFile(config pivnet.CreateProductFileConfig) (pivnet.ProductFile, error)
 	AddProductFileToRelease(productSlug string, releaseID int, productFileID int) error
 	RemoveProductFileFromRelease(productSlug string, releaseID int, productFileID int) error
 	AddProductFileToFileGroup(productSlug string, fileGroupID int, productFileID int) error
@@ -181,6 +182,15 @@ func (c *ProductFileClient) Get(
 		release.ID,
 		productFileID,
 	)
+	if err != nil {
+		return c.eh.HandleError(err)
+	}
+
+	return c.printProductFile(productFile)
+}
+
+func (c *ProductFileClient) Create(config pivnet.CreateProductFileConfig) error {
+	productFile, err := c.pivnetClient.CreateProductFile(config)
 	if err != nil {
 		return c.eh.HandleError(err)
 	}
