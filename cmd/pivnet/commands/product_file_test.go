@@ -342,6 +342,189 @@ var _ = Describe("product file commands", func() {
 		})
 	})
 
+	Describe("UpdateProductFileCommand", func() {
+		var (
+			productSlug   string
+			productFileID int
+
+			description string
+			fileType    string
+			fileVersion string
+			md5         string
+			name        string
+
+			cmd commands.UpdateProductFileCommand
+		)
+
+		BeforeEach(func() {
+			productSlug = "some product slug"
+			productFileID = 1234
+
+			description = "some description"
+			fileType = "some file type"
+			fileVersion = "some file version"
+			md5 = "some md5"
+			name = "some product file"
+
+			cmd = commands.UpdateProductFileCommand{
+				ProductSlug:   productSlug,
+				ProductFileID: productFileID,
+				Name:          &name,
+				Description:   &description,
+				FileType:      &fileType,
+				FileVersion:   &fileVersion,
+				MD5:           &md5,
+			}
+		})
+
+		It("invokes the ProductFile client", func() {
+			err := cmd.Execute(nil)
+
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(fakeProductFileClient.UpdateCallCount()).To(Equal(1))
+
+			invokedProductFileID,
+				invokedProductSlug,
+				invokedName,
+				invokedFileType,
+				invokedFileVersion,
+				invokedMD5,
+				invokedDescription := fakeProductFileClient.UpdateArgsForCall(0)
+
+			Expect(invokedProductFileID).To(Equal(productFileID))
+			Expect(invokedProductSlug).To(Equal(productSlug))
+			Expect(*invokedName).To(Equal(name))
+			Expect(*invokedFileType).To(Equal(fileType))
+			Expect(*invokedFileVersion).To(Equal(fileVersion))
+			Expect(*invokedMD5).To(Equal(md5))
+			Expect(*invokedDescription).To(Equal(description))
+		})
+
+		Context("when the ProductFile client returns an error", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("expected error")
+				fakeProductFileClient.UpdateReturns(expectedErr)
+			})
+
+			It("forwards the error", func() {
+				err := cmd.Execute(nil)
+
+				Expect(err).To(Equal(expectedErr))
+			})
+		})
+
+		Describe("ProductSlug flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(cmd, "ProductSlug")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("p"))
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("product-slug"))
+			})
+		})
+
+		Describe("ProductFileID flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(cmd, "ProductFileID")
+			})
+
+			It("is required", func() {
+				Expect(isRequired(field)).To(BeTrue())
+			})
+
+			It("contains short name", func() {
+				Expect(shortTag(field)).To(Equal("i"))
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("product-file-id"))
+			})
+		})
+
+		Describe("Name flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(cmd, "Name")
+			})
+
+			It("is not required", func() {
+				Expect(isRequired(field)).To(BeFalse())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("name"))
+			})
+		})
+
+		Describe("Description flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(cmd, "Description")
+			})
+
+			It("is not required", func() {
+				Expect(isRequired(field)).To(BeFalse())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("description"))
+			})
+		})
+
+		Describe("FileType flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(cmd, "FileType")
+			})
+
+			It("is not required", func() {
+				Expect(isRequired(field)).To(BeFalse())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("file-type"))
+			})
+		})
+
+		Describe("FileVersion flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(cmd, "FileVersion")
+			})
+
+			It("is not required", func() {
+				Expect(isRequired(field)).To(BeFalse())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("file-version"))
+			})
+		})
+
+		Describe("MD5 flag", func() {
+			BeforeEach(func() {
+				field = fieldFor(cmd, "MD5")
+			})
+
+			It("is not required", func() {
+				Expect(isRequired(field)).To(BeFalse())
+			})
+
+			It("contains long name", func() {
+				Expect(longTag(field)).To(Equal("md5"))
+			})
+		})
+	})
+
 	Describe("AddProductFileCommand", func() {
 		var (
 			cmd commands.AddProductFileCommand

@@ -179,6 +179,10 @@ func (c Client) CreateProductFile(config pivnet.CreateProductFileConfig) (pivnet
 	return c.client.ProductFiles.Create(config)
 }
 
+func (c Client) UpdateProductFile(productSlug string, productFile pivnet.ProductFile) (pivnet.ProductFile, error) {
+	return c.client.ProductFiles.Update(productSlug, productFile)
+}
+
 func (c Client) AddProductFileToRelease(productSlug string, releaseID int, productFileID int) error {
 	return c.client.ProductFiles.AddToRelease(productSlug, releaseID, productFileID)
 }

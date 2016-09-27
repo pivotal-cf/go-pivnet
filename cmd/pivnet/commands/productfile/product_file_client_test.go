@@ -311,6 +311,141 @@ var _ = Describe("productfile commands", func() {
 		})
 	})
 
+	Describe("Update", func() {
+		var (
+			productFileID int
+			productSlug   string
+
+			existingName        string
+			existingFileType    string
+			existingFileVersion string
+			existingMD5         string
+			existingDescription string
+
+			name        string
+			fileType    string
+			fileVersion string
+			md5         string
+			description string
+
+			existingProductFile pivnet.ProductFile
+		)
+
+		BeforeEach(func() {
+			productSlug = "some-product-slug"
+			productFileID = productfiles[0].ID
+
+			existingName = "some-name"
+			existingFileType = "some-file-type"
+			existingFileVersion = "some-file-type"
+			existingMD5 = "some-md5"
+			existingDescription = "some-description"
+
+			name = "some-new-name"
+			fileType = "some-new-file-type"
+			fileVersion = "some-new-file-type"
+			md5 = "some-new-md5"
+			description = "some-new-description"
+
+			existingProductFile = pivnet.ProductFile{
+				ID:          productFileID,
+				Name:        existingName,
+				FileType:    existingFileType,
+				FileVersion: existingFileVersion,
+				MD5:         existingMD5,
+				Description: existingDescription,
+			}
+
+			fakePivnetClient.GetProductFileReturns(existingProductFile, nil)
+			fakePivnetClient.UpdateProductFileReturns(productfiles[0], nil)
+		})
+
+		It("updates ProductFile", func() {
+			err := client.Update(
+				productFileID,
+				productSlug,
+				&name,
+				&fileType,
+				&fileVersion,
+				&md5,
+				&description,
+			)
+			Expect(err).NotTo(HaveOccurred())
+
+			var returnedProductFile pivnet.ProductFile
+			err = json.Unmarshal(outBuffer.Bytes(), &returnedProductFile)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(returnedProductFile).To(Equal(productfiles[0]))
+
+			invokedProductSlug, invokedProductFile := fakePivnetClient.UpdateProductFileArgsForCall(0)
+			Expect(invokedProductSlug).To(Equal(productSlug))
+			Expect(invokedProductFile.ID).To(Equal(productFileID))
+			Expect(invokedProductFile.Name).To(Equal(name))
+			Expect(invokedProductFile.FileType).To(Equal(fileType))
+			Expect(invokedProductFile.FileVersion).To(Equal(fileVersion))
+			Expect(invokedProductFile.MD5).To(Equal(md5))
+			Expect(invokedProductFile.Description).To(Equal(description))
+		})
+
+		Context("when optional fields are nil", func() {
+			It("updates ProductFile with previous values", func() {
+				err := client.Update(
+					productFileID,
+					productSlug,
+					nil,
+					nil,
+					nil,
+					nil,
+					nil,
+				)
+				Expect(err).NotTo(HaveOccurred())
+
+				var returnedProductFile pivnet.ProductFile
+				err = json.Unmarshal(outBuffer.Bytes(), &returnedProductFile)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(returnedProductFile).To(Equal(productfiles[0]))
+
+				invokedProductSlug, invokedProductFile := fakePivnetClient.UpdateProductFileArgsForCall(0)
+				Expect(invokedProductSlug).To(Equal(productSlug))
+				Expect(invokedProductFile.ID).To(Equal(productFileID))
+				Expect(invokedProductFile.Name).To(Equal(existingName))
+				Expect(invokedProductFile.FileType).To(Equal(existingFileType))
+				Expect(invokedProductFile.FileVersion).To(Equal(existingFileVersion))
+				Expect(invokedProductFile.MD5).To(Equal(existingMD5))
+				Expect(invokedProductFile.Description).To(Equal(existingDescription))
+			})
+		})
+
+		Context("when there is an error", func() {
+			var (
+				expectedErr error
+			)
+
+			BeforeEach(func() {
+				expectedErr = errors.New("productfile error")
+				fakePivnetClient.UpdateProductFileReturns(pivnet.ProductFile{}, expectedErr)
+			})
+
+			It("invokes the error handler", func() {
+				err := client.Update(
+					productFileID,
+					productSlug,
+					&name,
+					&fileType,
+					&fileVersion,
+					&md5,
+					&description,
+				)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(fakeErrorHandler.HandleErrorCallCount()).To(Equal(1))
+				Expect(fakeErrorHandler.HandleErrorArgsForCall(0)).To(Equal(expectedErr))
+			})
+		})
+	})
+
 	Describe("AddToRelease", func() {
 		var (
 			productSlug    string

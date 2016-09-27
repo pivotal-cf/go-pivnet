@@ -27,6 +27,16 @@ type CreateProductFileCommand struct {
 	MD5          string `long:"md5" description:"MD5 of file" required:"true"`
 }
 
+type UpdateProductFileCommand struct {
+	ProductSlug   string  `long:"product-slug" short:"p" description:"Product slug e.g. p-mysql" required:"true"`
+	ProductFileID int     `long:"product-file-id" short:"i" description:"Product file ID e.g. 1234" required:"true"`
+	Name          *string `long:"name" description:"Name e.g. p-mysql 1.7.13"`
+	FileType      *string `long:"file-type" description:"File Type e.g. 'Software'"`
+	FileVersion   *string `long:"file-version" description:"File Version e.g. '1.7.13'"`
+	MD5           *string `long:"md5" description:"MD5 of file"`
+	Description   *string `long:"description" description:"File description e.g. 'This is a file description.'"`
+}
+
 type AddProductFileCommand struct {
 	ProductSlug    string  `long:"product-slug" short:"p" description:"Product slug e.g. p-mysql" required:"true"`
 	ReleaseVersion *string `long:"release-version" short:"r" description:"Release version e.g. 0.1.2-rc1"`
@@ -59,6 +69,15 @@ type ProductFileClient interface {
 	List(productSlug string, releaseVersion string) error
 	Get(productSlug string, releaseVersion string, productFileID int) error
 	Create(config pivnet.CreateProductFileConfig) error
+	Update(
+		productFileID int,
+		productSlug string,
+		name *string,
+		fileType *string,
+		fileVersion *string,
+		md5 *string,
+		description *string,
+	) error
 	AddToRelease(productSlug string, releaseVersion string, productFileID int) error
 	RemoveFromRelease(productSlug string, releaseVersion string, productFileID int) error
 	AddToFileGroup(productSlug string, fileGroupID int, productFileID int) error
@@ -102,6 +121,20 @@ func (command *CreateProductFileCommand) Execute([]string) error {
 	}
 
 	return NewProductFileClient().Create(config)
+}
+
+func (command *UpdateProductFileCommand) Execute([]string) error {
+	Init()
+
+	return NewProductFileClient().Update(
+		command.ProductFileID,
+		command.ProductSlug,
+		command.Name,
+		command.FileType,
+		command.FileVersion,
+		command.MD5,
+		command.Description,
+	)
 }
 
 func (command *AddProductFileCommand) Execute([]string) error {

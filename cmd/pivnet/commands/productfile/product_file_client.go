@@ -22,6 +22,7 @@ type PivnetClient interface {
 	GetProductFile(productSlug string, productFileID int) (pivnet.ProductFile, error)
 	GetProductFileForRelease(productSlug string, releaseID int, productFileID int) (pivnet.ProductFile, error)
 	CreateProductFile(config pivnet.CreateProductFileConfig) (pivnet.ProductFile, error)
+	UpdateProductFile(productSlug string, productFile pivnet.ProductFile) (pivnet.ProductFile, error)
 	AddProductFileToRelease(productSlug string, releaseID int, productFileID int) error
 	RemoveProductFileFromRelease(productSlug string, releaseID int, productFileID int) error
 	AddProductFileToFileGroup(productSlug string, fileGroupID int, productFileID int) error
@@ -196,6 +197,51 @@ func (c *ProductFileClient) Create(config pivnet.CreateProductFileConfig) error 
 	}
 
 	return c.printProductFile(productFile)
+}
+
+func (c *ProductFileClient) Update(
+	productFileID int,
+	productSlug string,
+	name *string,
+	fileType *string,
+	fileVersion *string,
+	md5 *string,
+	description *string,
+) error {
+	productFile, err := c.pivnetClient.GetProductFile(
+		productSlug,
+		productFileID,
+	)
+	if err != nil {
+		return c.eh.HandleError(err)
+	}
+
+	if name != nil {
+		productFile.Name = *name
+	}
+
+	if fileType != nil {
+		productFile.FileType = *fileType
+	}
+
+	if fileVersion != nil {
+		productFile.FileVersion = *fileVersion
+	}
+
+	if md5 != nil {
+		productFile.MD5 = *md5
+	}
+
+	if description != nil {
+		productFile.Description = *description
+	}
+
+	updatedProductFile, err := c.pivnetClient.UpdateProductFile(productSlug, productFile)
+	if err != nil {
+		return c.eh.HandleError(err)
+	}
+
+	return c.printProductFile(updatedProductFile)
 }
 
 func (c *ProductFileClient) AddToRelease(

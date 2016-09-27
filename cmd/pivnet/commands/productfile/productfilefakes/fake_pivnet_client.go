@@ -69,6 +69,16 @@ type FakePivnetClient struct {
 		result1 go_pivnet.ProductFile
 		result2 error
 	}
+	UpdateProductFileStub        func(productSlug string, productFile go_pivnet.ProductFile) (go_pivnet.ProductFile, error)
+	updateProductFileMutex       sync.RWMutex
+	updateProductFileArgsForCall []struct {
+		productSlug string
+		productFile go_pivnet.ProductFile
+	}
+	updateProductFileReturns struct {
+		result1 go_pivnet.ProductFile
+		result2 error
+	}
 	AddProductFileToReleaseStub        func(productSlug string, releaseID int, productFileID int) error
 	addProductFileToReleaseMutex       sync.RWMutex
 	addProductFileToReleaseArgsForCall []struct {
@@ -350,6 +360,41 @@ func (fake *FakePivnetClient) CreateProductFileReturns(result1 go_pivnet.Product
 	}{result1, result2}
 }
 
+func (fake *FakePivnetClient) UpdateProductFile(productSlug string, productFile go_pivnet.ProductFile) (go_pivnet.ProductFile, error) {
+	fake.updateProductFileMutex.Lock()
+	fake.updateProductFileArgsForCall = append(fake.updateProductFileArgsForCall, struct {
+		productSlug string
+		productFile go_pivnet.ProductFile
+	}{productSlug, productFile})
+	fake.recordInvocation("UpdateProductFile", []interface{}{productSlug, productFile})
+	fake.updateProductFileMutex.Unlock()
+	if fake.UpdateProductFileStub != nil {
+		return fake.UpdateProductFileStub(productSlug, productFile)
+	} else {
+		return fake.updateProductFileReturns.result1, fake.updateProductFileReturns.result2
+	}
+}
+
+func (fake *FakePivnetClient) UpdateProductFileCallCount() int {
+	fake.updateProductFileMutex.RLock()
+	defer fake.updateProductFileMutex.RUnlock()
+	return len(fake.updateProductFileArgsForCall)
+}
+
+func (fake *FakePivnetClient) UpdateProductFileArgsForCall(i int) (string, go_pivnet.ProductFile) {
+	fake.updateProductFileMutex.RLock()
+	defer fake.updateProductFileMutex.RUnlock()
+	return fake.updateProductFileArgsForCall[i].productSlug, fake.updateProductFileArgsForCall[i].productFile
+}
+
+func (fake *FakePivnetClient) UpdateProductFileReturns(result1 go_pivnet.ProductFile, result2 error) {
+	fake.UpdateProductFileStub = nil
+	fake.updateProductFileReturns = struct {
+		result1 go_pivnet.ProductFile
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *FakePivnetClient) AddProductFileToRelease(productSlug string, releaseID int, productFileID int) error {
 	fake.addProductFileToReleaseMutex.Lock()
 	fake.addProductFileToReleaseArgsForCall = append(fake.addProductFileToReleaseArgsForCall, struct {
@@ -608,6 +653,8 @@ func (fake *FakePivnetClient) Invocations() map[string][][]interface{} {
 	defer fake.getProductFileForReleaseMutex.RUnlock()
 	fake.createProductFileMutex.RLock()
 	defer fake.createProductFileMutex.RUnlock()
+	fake.updateProductFileMutex.RLock()
+	defer fake.updateProductFileMutex.RUnlock()
 	fake.addProductFileToReleaseMutex.RLock()
 	defer fake.addProductFileToReleaseMutex.RUnlock()
 	fake.removeProductFileFromReleaseMutex.RLock()

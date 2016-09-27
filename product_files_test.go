@@ -479,6 +479,87 @@ var _ = Describe("PivnetClient - product files", func() {
 		})
 	})
 
+	Describe("Update Product File", func() {
+		type requestBody struct {
+			ProductFile pivnet.ProductFile `json:"product_file"`
+		}
+
+		var (
+			expectedRequestBody requestBody
+
+			productFile pivnet.ProductFile
+
+			validResponse = `{"product_file":{"id":1234}}`
+		)
+
+		BeforeEach(func() {
+			productFile = pivnet.ProductFile{
+				ID:          1234,
+				Description: "some-description",
+				FileVersion: "some-file-version",
+				FileType:    "some-file-type",
+				MD5:         "some-md5",
+				Name:        "some-file-name",
+			}
+
+			expectedRequestBody = requestBody{
+				ProductFile: pivnet.ProductFile{
+					Description: productFile.Description,
+					FileType:    productFile.FileType,
+					FileVersion: productFile.FileVersion,
+					MD5:         productFile.MD5,
+					Name:        productFile.Name,
+				},
+			}
+		})
+
+		It("updates the product file with the provided fields", func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+						"%s/products/%s/product_files/%d",
+						apiPrefix,
+						productSlug,
+						productFile.ID,
+					)),
+					ghttp.VerifyJSONRepresenting(&expectedRequestBody),
+					ghttp.RespondWith(http.StatusOK, validResponse),
+				),
+			)
+
+			updatedProductFile, err := client.ProductFiles.Update(productSlug, productFile)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(updatedProductFile.ID).To(Equal(productFile.ID))
+		})
+
+		Context("when the server responds with a non-200 status code", func() {
+			var (
+				response interface{}
+			)
+
+			BeforeEach(func() {
+				response = pivnetErr{Message: "foo message"}
+			})
+
+			It("returns an error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/product_files/%d",
+							apiPrefix,
+							productSlug,
+							productFile.ID,
+						)),
+						ghttp.RespondWithJSONEncoded(http.StatusTeapot, response),
+					),
+				)
+
+				_, err := client.ProductFiles.Update(productSlug, productFile)
+				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+	})
+
 	Describe("Delete Product File", func() {
 		var (
 			id = 1234

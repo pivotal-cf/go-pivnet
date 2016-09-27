@@ -133,7 +133,7 @@ func (p ProductFilesService) Create(config CreateProductFileConfig) (ProductFile
 
 	url := fmt.Sprintf("/products/%s/product_files", config.ProductSlug)
 
-	body := createProductFileBody{
+	body := createUpdateProductFileBody{
 		ProductFile: ProductFile{
 			MD5:          config.MD5,
 			FileType:     config.FileType,
@@ -166,7 +166,42 @@ func (p ProductFilesService) Create(config CreateProductFileConfig) (ProductFile
 	return response.ProductFile, nil
 }
 
-type createProductFileBody struct {
+func (p ProductFilesService) Update(productSlug string, productFile ProductFile) (ProductFile, error) {
+	url := fmt.Sprintf("/products/%s/product_files/%d", productSlug, productFile.ID)
+
+	body := createUpdateProductFileBody{
+		ProductFile: ProductFile{
+			Description: productFile.Description,
+			FileType:    productFile.FileType,
+			FileVersion: productFile.FileVersion,
+			MD5:         productFile.MD5,
+			Name:        productFile.Name,
+		},
+	}
+
+	b, err := json.Marshal(body)
+	if err != nil {
+		// Untested as we cannot force an error because we are marshalling
+		// a known-good body
+		return ProductFile{}, err
+	}
+
+	var response ProductFileResponse
+	_, err = p.client.MakeRequest(
+		"PATCH",
+		url,
+		http.StatusOK,
+		bytes.NewReader(b),
+		&response,
+	)
+	if err != nil {
+		return ProductFile{}, err
+	}
+
+	return response.ProductFile, nil
+}
+
+type createUpdateProductFileBody struct {
 	ProductFile ProductFile `json:"product_file"`
 }
 
@@ -203,7 +238,7 @@ func (p ProductFilesService) AddToRelease(
 		releaseID,
 	)
 
-	body := createProductFileBody{
+	body := createUpdateProductFileBody{
 		ProductFile: ProductFile{
 			ID: productFileID,
 		},
@@ -241,7 +276,7 @@ func (p ProductFilesService) RemoveFromRelease(
 		releaseID,
 	)
 
-	body := createProductFileBody{
+	body := createUpdateProductFileBody{
 		ProductFile: ProductFile{
 			ID: productFileID,
 		},
@@ -279,7 +314,7 @@ func (p ProductFilesService) AddToFileGroup(
 		fileGroupID,
 	)
 
-	body := createProductFileBody{
+	body := createUpdateProductFileBody{
 		ProductFile: ProductFile{
 			ID: productFileID,
 		},
@@ -317,7 +352,7 @@ func (p ProductFilesService) RemoveFromFileGroup(
 		fileGroupID,
 	)
 
-	body := createProductFileBody{
+	body := createUpdateProductFileBody{
 		ProductFile: ProductFile{
 			ID: productFileID,
 		},
