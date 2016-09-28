@@ -40,6 +40,8 @@ type PivnetCommand struct {
 	Help    HelpCommand    `command:"help" alias:"h" description:"Print this help message"`
 	Version VersionCommand `command:"version" alias:"v" description:"Print the version of this CLI and exit"`
 
+	Curl CurlCommand `command:"curl" alias:"c" description:"Curl an endpoint"`
+
 	ReleaseTypes ReleaseTypesCommand `command:"release-types" alias:"rts" description:"List release types"`
 
 	EULAs      EULAsCommand      `command:"eulas" alias:"es" description:"List EULAs"`

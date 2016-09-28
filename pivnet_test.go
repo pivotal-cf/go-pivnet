@@ -71,7 +71,7 @@ var _ = Describe("PivnetClient", func() {
 			),
 		)
 
-		_, err := client.MakeRequest(
+		_, _, err := client.MakeRequest(
 			"GET",
 			"/foo",
 			http.StatusOK,
@@ -94,7 +94,7 @@ var _ = Describe("PivnetClient", func() {
 			),
 		)
 
-		_, err := client.MakeRequest(
+		_, _, err := client.MakeRequest(
 			"GET",
 			"/foo",
 			http.StatusOK,
@@ -116,7 +116,7 @@ var _ = Describe("PivnetClient", func() {
 			),
 		)
 
-		_, err := client.MakeRequest(
+		_, _, err := client.MakeRequest(
 			"GET",
 			"/foo",
 			http.StatusOK,
@@ -131,7 +131,7 @@ var _ = Describe("PivnetClient", func() {
 			newClientConfig.Host = "%%%"
 			client = pivnet.NewClient(newClientConfig, fakeLogger)
 
-			_, err := client.MakeRequest(
+			_, _, err := client.MakeRequest(
 				"GET",
 				"/foo",
 				http.StatusOK,
@@ -148,7 +148,7 @@ var _ = Describe("PivnetClient", func() {
 			newClientConfig.Host = "https://not-a-real-url.com"
 			client = pivnet.NewClient(newClientConfig, fakeLogger)
 
-			_, err := client.MakeRequest(
+			_, _, err := client.MakeRequest(
 				"GET",
 				"/foo",
 				http.StatusOK,
@@ -179,7 +179,7 @@ var _ = Describe("PivnetClient", func() {
 				),
 			)
 
-			_, err := client.MakeRequest(
+			_, _, err := client.MakeRequest(
 				"GET",
 				"/foo",
 				http.StatusOK,
@@ -216,7 +216,7 @@ var _ = Describe("PivnetClient", func() {
 				),
 			)
 
-			_, err := client.MakeRequest(
+			_, _, err := client.MakeRequest(
 				"GET",
 				"/foo",
 				http.StatusOK,
@@ -253,7 +253,7 @@ var _ = Describe("PivnetClient", func() {
 				),
 			)
 
-			_, err := client.MakeRequest(
+			_, _, err := client.MakeRequest(
 				"GET",
 				"/foo",
 				http.StatusOK,
@@ -276,7 +276,7 @@ var _ = Describe("PivnetClient", func() {
 					),
 				)
 
-				_, err := client.MakeRequest(
+				_, _, err := client.MakeRequest(
 					"GET",
 					"/foo",
 					http.StatusOK,
@@ -287,6 +287,30 @@ var _ = Describe("PivnetClient", func() {
 				Expect(err.Error()).To(ContainSubstring("JSON"))
 			})
 		})
+
+		Context("when an expectedResponseCode of 0 is provided", func() {
+			It("does not return an error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(
+							"GET",
+							fmt.Sprintf("%s/foo", apiPrefix),
+						),
+						ghttp.RespondWith(http.StatusTeapot, body),
+					),
+				)
+
+				_, _, err := client.MakeRequest(
+					"GET",
+					"/foo",
+					0,
+					nil,
+					nil,
+				)
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+
 	})
 
 	Context("when the json unmarshalling fails with error", func() {
@@ -301,7 +325,7 @@ var _ = Describe("PivnetClient", func() {
 				),
 			)
 
-			_, err := client.MakeRequest(
+			_, _, err := client.MakeRequest(
 				"GET",
 				"/foo",
 				http.StatusOK,
@@ -322,7 +346,7 @@ var _ = Describe("PivnetClient", func() {
 				),
 			)
 
-			_, err := client.MakeRequest(
+			_, _, err := client.MakeRequest(
 				"GET",
 				"/some/endpoint",
 				http.StatusOK,

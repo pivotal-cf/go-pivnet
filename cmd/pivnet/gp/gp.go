@@ -255,7 +255,7 @@ func (c Client) RemoveFileGroupFromRelease(productSlug string, fileGroupID int, 
 	return c.client.FileGroups.RemoveFromRelease(productSlug, fileGroupID, releaseID)
 }
 
-func (c Client) MakeRequest(method string, url string, expectedResponseCode int, body io.Reader, data interface{}) (*http.Response, error) {
+func (c Client) MakeRequest(method string, url string, expectedResponseCode int, body io.Reader, data interface{}) (*http.Response, []byte, error) {
 	return c.client.MakeRequest(method, url, expectedResponseCode, body, data)
 }
 

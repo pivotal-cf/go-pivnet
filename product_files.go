@@ -45,7 +45,7 @@ func (p ProductFilesService) List(productSlug string) ([]ProductFile, error) {
 	url := fmt.Sprintf("/products/%s/product_files", productSlug)
 
 	var response ProductFilesResponse
-	_, err := p.client.MakeRequest(
+	_, _, err := p.client.MakeRequest(
 		"GET",
 		url,
 		http.StatusOK,
@@ -67,7 +67,7 @@ func (p ProductFilesService) ListForRelease(productSlug string, releaseID int) (
 	)
 
 	var response ProductFilesResponse
-	_, err := p.client.MakeRequest(
+	_, _, err := p.client.MakeRequest(
 		"GET",
 		url,
 		http.StatusOK,
@@ -89,7 +89,7 @@ func (p ProductFilesService) Get(productSlug string, productFileID int) (Product
 	)
 
 	var response ProductFileResponse
-	_, err := p.client.MakeRequest(
+	_, _, err := p.client.MakeRequest(
 		"GET",
 		url,
 		http.StatusOK,
@@ -112,7 +112,7 @@ func (p ProductFilesService) GetForRelease(productSlug string, releaseID int, pr
 	)
 
 	var response ProductFileResponse
-	_, err := p.client.MakeRequest(
+	_, _, err := p.client.MakeRequest(
 		"GET",
 		url,
 		http.StatusOK,
@@ -152,7 +152,7 @@ func (p ProductFilesService) Create(config CreateProductFileConfig) (ProductFile
 	}
 
 	var response ProductFileResponse
-	_, err = p.client.MakeRequest(
+	_, _, err = p.client.MakeRequest(
 		"POST",
 		url,
 		http.StatusCreated,
@@ -187,7 +187,7 @@ func (p ProductFilesService) Update(productSlug string, productFile ProductFile)
 	}
 
 	var response ProductFileResponse
-	_, err = p.client.MakeRequest(
+	_, _, err = p.client.MakeRequest(
 		"PATCH",
 		url,
 		http.StatusOK,
@@ -213,7 +213,7 @@ func (p ProductFilesService) Delete(productSlug string, id int) (ProductFile, er
 	)
 
 	var response ProductFileResponse
-	_, err := p.client.MakeRequest(
+	_, _, err := p.client.MakeRequest(
 		"DELETE",
 		url,
 		http.StatusOK,
@@ -251,7 +251,7 @@ func (p ProductFilesService) AddToRelease(
 		return err
 	}
 
-	_, err = p.client.MakeRequest(
+	_, _, err = p.client.MakeRequest(
 		"PATCH",
 		url,
 		http.StatusNoContent,
@@ -289,7 +289,7 @@ func (p ProductFilesService) RemoveFromRelease(
 		return err
 	}
 
-	_, err = p.client.MakeRequest(
+	_, _, err = p.client.MakeRequest(
 		"PATCH",
 		url,
 		http.StatusNoContent,
@@ -327,7 +327,7 @@ func (p ProductFilesService) AddToFileGroup(
 		return err
 	}
 
-	_, err = p.client.MakeRequest(
+	_, _, err = p.client.MakeRequest(
 		"PATCH",
 		url,
 		http.StatusNoContent,
@@ -365,7 +365,7 @@ func (p ProductFilesService) RemoveFromFileGroup(
 		return err
 	}
 
-	_, err = p.client.MakeRequest(
+	_, _, err = p.client.MakeRequest(
 		"PATCH",
 		url,
 		http.StatusNoContent,
