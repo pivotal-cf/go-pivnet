@@ -108,7 +108,7 @@ var _ = Describe("release commands", func() {
 			releaseVersion = "some-release-version"
 			releaseID = releases[0].ID
 
-			fakePivnetClient.ReleaseForProductVersionReturns(releases[0], nil)
+			fakePivnetClient.ReleaseForVersionReturns(releases[0], nil)
 			fakePivnetClient.ReleaseETagReturns("some-etag", nil)
 		})
 
@@ -130,7 +130,7 @@ var _ = Describe("release commands", func() {
 
 			BeforeEach(func() {
 				expectedErr = errors.New("release error")
-				fakePivnetClient.ReleaseForProductVersionReturns(pivnet.Release{}, expectedErr)
+				fakePivnetClient.ReleaseForVersionReturns(pivnet.Release{}, expectedErr)
 			})
 
 			It("invokes the error handler", func() {
@@ -176,7 +176,7 @@ var _ = Describe("release commands", func() {
 			releaseType = "some-release-type"
 			eulaSlug = "some-eula-slug"
 
-			fakePivnetClient.ReleaseForProductVersionReturns(releases[0], nil)
+			fakePivnetClient.ReleaseForVersionReturns(releases[0], nil)
 			fakePivnetClient.CreateReleaseReturns(releases[0], nil)
 		})
 
@@ -249,7 +249,7 @@ var _ = Describe("release commands", func() {
 			productSlug = "some-product-slug"
 			releaseVersion = releases[0].Version
 
-			fakePivnetClient.ReleaseForProductVersionReturns(releases[0], nil)
+			fakePivnetClient.ReleaseForVersionReturns(releases[0], nil)
 			fakePivnetClient.DeleteReleaseReturns(nil)
 		})
 
@@ -284,7 +284,7 @@ var _ = Describe("release commands", func() {
 
 			BeforeEach(func() {
 				expectedErr = errors.New("release error")
-				fakePivnetClient.ReleaseForProductVersionReturns(pivnet.Release{}, expectedErr)
+				fakePivnetClient.ReleaseForVersionReturns(pivnet.Release{}, expectedErr)
 			})
 
 			It("invokes the error handler", func() {

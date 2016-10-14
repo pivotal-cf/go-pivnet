@@ -37,7 +37,7 @@ var _ = Describe("Client", func() {
 		client = gp.NewClient(config, fakeLogger)
 	})
 
-	Describe("ReleaseForProductVersion", func() {
+	Describe("ReleaseForVersion", func() {
 		var (
 			productSlug    string
 			releaseVersion string
@@ -99,7 +99,7 @@ var _ = Describe("Client", func() {
 		})
 
 		It("returns release", func() {
-			returnedRelease, err := client.ReleaseForProductVersion(productSlug, releaseVersion)
+			returnedRelease, err := client.ReleaseForVersion(productSlug, releaseVersion)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(returnedRelease.ID).To(Equal(release.ID))
@@ -112,7 +112,7 @@ var _ = Describe("Client", func() {
 			})
 
 			It("returns an error", func() {
-				_, err := client.ReleaseForProductVersion(productSlug, releaseVersion)
+				_, err := client.ReleaseForVersion(productSlug, releaseVersion)
 				Expect(err).To(HaveOccurred())
 			})
 		})
@@ -126,7 +126,7 @@ var _ = Describe("Client", func() {
 			})
 
 			It("returns an error", func() {
-				_, err := client.ReleaseForProductVersion(productSlug, releaseVersion)
+				_, err := client.ReleaseForVersion(productSlug, releaseVersion)
 				Expect(err).To(HaveOccurred())
 			})
 		})
@@ -137,7 +137,7 @@ var _ = Describe("Client", func() {
 			})
 
 			It("returns an error", func() {
-				_, err := client.ReleaseForProductVersion(productSlug, releaseVersion)
+				_, err := client.ReleaseForVersion(productSlug, releaseVersion)
 				Expect(err).To(HaveOccurred())
 			})
 		})

@@ -126,18 +126,18 @@ var _ = Describe("PivnetClient - product files", func() {
 
 	Describe("Create", func() {
 		var (
-			productVersion      string
+			releaseVersion      string
 			createReleaseConfig pivnet.CreateReleaseConfig
 		)
 
 		BeforeEach(func() {
-			productVersion = "1.2.3.4"
+			releaseVersion = "1.2.3.4"
 
 			createReleaseConfig = pivnet.CreateReleaseConfig{
-				EULASlug:       "some_eula",
-				ReleaseType:    "Not a real release",
-				ProductVersion: productVersion,
-				ProductSlug:    productSlug,
+				EULASlug:    "some_eula",
+				ReleaseType: "Not a real release",
+				Version:     releaseVersion,
+				ProductSlug: productSlug,
 			}
 		})
 
@@ -165,7 +165,7 @@ var _ = Describe("PivnetClient - product files", func() {
 						EULA: &pivnet.EULA{
 							Slug: createReleaseConfig.EULASlug,
 						},
-						Version: createReleaseConfig.ProductVersion,
+						Version: createReleaseConfig.Version,
 					},
 				}
 
@@ -183,7 +183,7 @@ var _ = Describe("PivnetClient - product files", func() {
 
 				release, err := client.Releases.Create(createReleaseConfig)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(release.Version).To(Equal(productVersion))
+				Expect(release.Version).To(Equal(releaseVersion))
 			})
 
 			Context("when the optional release date is present", func() {
@@ -209,7 +209,7 @@ var _ = Describe("PivnetClient - product files", func() {
 
 					release, err := client.Releases.Create(createReleaseConfig)
 					Expect(err).NotTo(HaveOccurred())
-					Expect(release.Version).To(Equal(productVersion))
+					Expect(release.Version).To(Equal(releaseVersion))
 				})
 			})
 
@@ -237,7 +237,7 @@ var _ = Describe("PivnetClient - product files", func() {
 
 						release, err := client.Releases.Create(createReleaseConfig)
 						Expect(err).NotTo(HaveOccurred())
-						Expect(release.Version).To(Equal(productVersion))
+						Expect(release.Version).To(Equal(releaseVersion))
 					})
 				})
 
@@ -260,7 +260,7 @@ var _ = Describe("PivnetClient - product files", func() {
 
 						release, err := client.Releases.Create(createReleaseConfig)
 						Expect(err).NotTo(HaveOccurred())
-						Expect(release.Version).To(Equal(productVersion))
+						Expect(release.Version).To(Equal(releaseVersion))
 					})
 				})
 			})
@@ -289,7 +289,7 @@ var _ = Describe("PivnetClient - product files", func() {
 
 						release, err := client.Releases.Create(createReleaseConfig)
 						Expect(err).NotTo(HaveOccurred())
-						Expect(release.Version).To(Equal(productVersion))
+						Expect(release.Version).To(Equal(releaseVersion))
 					})
 				})
 
@@ -312,7 +312,7 @@ var _ = Describe("PivnetClient - product files", func() {
 
 						release, err := client.Releases.Create(createReleaseConfig)
 						Expect(err).NotTo(HaveOccurred())
-						Expect(release.Version).To(Equal(productVersion))
+						Expect(release.Version).To(Equal(releaseVersion))
 					})
 				})
 			})

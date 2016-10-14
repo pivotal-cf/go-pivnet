@@ -131,7 +131,7 @@ var _ = Describe("productfile commands", func() {
 
 				BeforeEach(func() {
 					expectedErr = errors.New("releases error")
-					fakePivnetClient.ReleaseForProductVersionReturns(pivnet.Release{}, expectedErr)
+					fakePivnetClient.ReleaseForVersionReturns(pivnet.Release{}, expectedErr)
 				})
 
 				It("invokes the error handler", func() {
@@ -278,7 +278,7 @@ var _ = Describe("productfile commands", func() {
 
 				BeforeEach(func() {
 					expectedErr = errors.New("releases error")
-					fakePivnetClient.ReleaseForProductVersionReturns(pivnet.Release{}, expectedErr)
+					fakePivnetClient.ReleaseForVersionReturns(pivnet.Release{}, expectedErr)
 				})
 
 				It("invokes the error handler", func() {
@@ -473,7 +473,7 @@ var _ = Describe("productfile commands", func() {
 
 			BeforeEach(func() {
 				expectedErr = errors.New("releases error")
-				fakePivnetClient.ReleaseForProductVersionReturns(pivnet.Release{}, expectedErr)
+				fakePivnetClient.ReleaseForVersionReturns(pivnet.Release{}, expectedErr)
 			})
 
 			It("invokes the error handler", func() {
@@ -532,7 +532,7 @@ var _ = Describe("productfile commands", func() {
 
 			BeforeEach(func() {
 				expectedErr = errors.New("releases error")
-				fakePivnetClient.ReleaseForProductVersionReturns(pivnet.Release{}, expectedErr)
+				fakePivnetClient.ReleaseForVersionReturns(pivnet.Release{}, expectedErr)
 			})
 
 			It("invokes the error handler", func() {
@@ -677,7 +677,7 @@ var _ = Describe("productfile commands", func() {
 				Version: releaseVersion,
 			}
 
-			fakePivnetClient.ReleaseForProductVersionReturns(returnedRelease, nil)
+			fakePivnetClient.ReleaseForVersionReturns(returnedRelease, nil)
 			fakePivnetClient.DownloadFileStub = func(writer io.Writer, downloadLink string) error {
 				_, err := fmt.Fprintf(writer, fileContents)
 				return err
@@ -747,7 +747,7 @@ var _ = Describe("productfile commands", func() {
 
 			BeforeEach(func() {
 				expectedErr = errors.New("releases error")
-				fakePivnetClient.ReleaseForProductVersionReturns(pivnet.Release{}, expectedErr)
+				fakePivnetClient.ReleaseForVersionReturns(pivnet.Release{}, expectedErr)
 			})
 
 			It("invokes the error handler", func() {

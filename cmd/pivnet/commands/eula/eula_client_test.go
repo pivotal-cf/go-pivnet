@@ -172,7 +172,7 @@ var _ = Describe("eula commands", func() {
 
 			BeforeEach(func() {
 				expectedErr = errors.New("releases error")
-				fakePivnetClient.ReleaseForProductVersionReturns(pivnet.Release{}, expectedErr)
+				fakePivnetClient.ReleaseForVersionReturns(pivnet.Release{}, expectedErr)
 			})
 
 			It("invokes the error handler", func() {

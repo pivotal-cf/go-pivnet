@@ -106,7 +106,7 @@ var _ = Describe("releasedependency commands", func() {
 
 			BeforeEach(func() {
 				expectedErr = errors.New("releases error")
-				fakePivnetClient.ReleaseForProductVersionReturns(pivnet.Release{}, expectedErr)
+				fakePivnetClient.ReleaseForVersionReturns(pivnet.Release{}, expectedErr)
 			})
 
 			It("invokes the error handler", func() {
@@ -175,7 +175,7 @@ var _ = Describe("releasedependency commands", func() {
 
 			BeforeEach(func() {
 				expectedErr = errors.New("releases error")
-				fakePivnetClient.ReleaseForProductVersionReturns(pivnet.Release{}, expectedErr)
+				fakePivnetClient.ReleaseForVersionReturns(pivnet.Release{}, expectedErr)
 			})
 
 			It("invokes the error handler", func() {
@@ -199,7 +199,7 @@ var _ = Describe("releasedependency commands", func() {
 
 			BeforeEach(func() {
 				expectedErr = errors.New("releases error")
-				fakePivnetClient.ReleaseForProductVersionStub = func(productSlug string, releaseVersion string) (pivnet.Release, error) {
+				fakePivnetClient.ReleaseForVersionStub = func(productSlug string, releaseVersion string) (pivnet.Release, error) {
 					if releaseVersion == dependentReleaseVersion {
 						return pivnet.Release{}, expectedErr
 					}
@@ -278,7 +278,7 @@ var _ = Describe("releasedependency commands", func() {
 
 			BeforeEach(func() {
 				expectedErr = errors.New("releases error")
-				fakePivnetClient.ReleaseForProductVersionReturns(pivnet.Release{}, expectedErr)
+				fakePivnetClient.ReleaseForVersionReturns(pivnet.Release{}, expectedErr)
 			})
 
 			It("invokes the error handler", func() {
@@ -302,7 +302,7 @@ var _ = Describe("releasedependency commands", func() {
 
 			BeforeEach(func() {
 				expectedErr = errors.New("releases error")
-				fakePivnetClient.ReleaseForProductVersionStub = func(productSlug string, releaseVersion string) (pivnet.Release, error) {
+				fakePivnetClient.ReleaseForVersionStub = func(productSlug string, releaseVersion string) (pivnet.Release, error) {
 					if releaseVersion == dependentReleaseVersion {
 						return pivnet.Release{}, expectedErr
 					}
