@@ -413,7 +413,7 @@ var _ = Describe("PivnetClient - product files", func() {
 				),
 			)
 
-			err := client.Releases.Delete(release, "banana")
+			err := client.Releases.Delete("banana", release)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
@@ -434,7 +434,7 @@ var _ = Describe("PivnetClient - product files", func() {
 					),
 				)
 
-				err := client.Releases.Delete(release, "banana")
+				err := client.Releases.Delete("banana", release)
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
