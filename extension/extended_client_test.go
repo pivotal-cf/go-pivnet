@@ -54,6 +54,10 @@ var _ = Describe("ExtendedClient", func() {
 			upgradePathsResponseStatusCode int
 			upgradePathsResponseBody       []byte
 			upgradePathsETagHeader         http.Header
+
+			dependenciesResponseStatusCode int
+			dependenciesResponseBody       []byte
+			dependenciesETagHeader         http.Header
 		)
 
 		BeforeEach(func() {
@@ -72,6 +76,10 @@ var _ = Describe("ExtendedClient", func() {
 			upgradePathsResponseStatusCode = http.StatusOK
 			upgradePathsResponseBody = []byte(`{"message":"upgrade paths message"}`)
 			upgradePathsETagHeader = http.Header{"ETag": []string{`"upgrade-paths-etag"`}}
+
+			dependenciesResponseStatusCode = http.StatusOK
+			dependenciesResponseBody = []byte(`{"message":"dependencies message"}`)
+			dependenciesETagHeader = http.Header{"ETag": []string{`"dependencies-etag"`}}
 		})
 
 		JustBeforeEach(func() {
@@ -120,14 +128,29 @@ var _ = Describe("ExtendedClient", func() {
 						upgradePathsETagHeader),
 				),
 			)
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", fmt.Sprintf(
+						"%s/products/%s/releases/%d/dependencies",
+						apiPrefix,
+						productSlug,
+						release.ID,
+					)),
+					ghttp.RespondWith(
+						dependenciesResponseStatusCode,
+						dependenciesResponseBody,
+						dependenciesETagHeader),
+				),
+			)
 		})
 
 		It("returns the Fingerprint for the specified release", func() {
 			fingerprint, err := client.ReleaseFingerprint(productSlug, release.ID)
 			Expect(err).NotTo(HaveOccurred())
 
-			// MD5 of string: "releases-etagproduct-files-etagupgrade-paths-etag"
-			Expect(fingerprint).To(Equal("f91fdcf49e804c6a5741447af3d86061"))
+			// MD5 of string: "releases-etagproduct-files-etagupgrade-paths-etagdependencies-etag"
+			Expect(fingerprint).To(Equal("372f8cb139e05339337895f5e1e4271c"))
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
@@ -188,6 +211,17 @@ var _ = Describe("ExtendedClient", func() {
 			It("returns an error", func() {
 				_, err := client.ReleaseFingerprint(productSlug, release.ID)
 				Expect(err.Error()).To(Equal("418 - upgrade paths message. Errors: "))
+			})
+		})
+
+		Context("when getting the dependencies fails", func() {
+			BeforeEach(func() {
+				dependenciesResponseStatusCode = http.StatusTeapot
+			})
+
+			It("returns an error", func() {
+				_, err := client.ReleaseFingerprint(productSlug, release.ID)
+				Expect(err.Error()).To(Equal("418 - dependencies message. Errors: "))
 			})
 		})
 	})
