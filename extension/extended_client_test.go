@@ -39,7 +39,7 @@ var _ = Describe("ExtendedClient", func() {
 		client = extension.NewExtendedClient(c, fakeLogger)
 	})
 
-	Describe("ReleaseETag", func() {
+	Describe("ReleaseFingerprint", func() {
 		var (
 			release pivnet.Release
 		)
@@ -50,7 +50,7 @@ var _ = Describe("ExtendedClient", func() {
 			}
 		})
 
-		It("returns the ETag for the specified release", func() {
+		It("returns the Fingerprint for the specified release", func() {
 			etagHeader := http.Header{"ETag": []string{`"etag-0"`}}
 
 			server.AppendHandlers(
@@ -65,9 +65,9 @@ var _ = Describe("ExtendedClient", func() {
 				),
 			)
 
-			etag, err := client.ReleaseETag(productSlug, release.ID)
+			fingerprint, err := client.ReleaseFingerprint(productSlug, release.ID)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(etag).To(Equal("etag-0"))
+			Expect(fingerprint).To(Equal("etag-0"))
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
@@ -92,12 +92,12 @@ var _ = Describe("ExtendedClient", func() {
 					),
 				)
 
-				_, err := client.ReleaseETag(productSlug, release.ID)
+				_, err := client.ReleaseFingerprint(productSlug, release.ID)
 				Expect(err.Error()).To(Equal("418 - foo message. Errors: "))
 			})
 		})
 
-		Context("when the etag is missing", func() {
+		Context("when the etag header is missing", func() {
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
@@ -111,13 +111,13 @@ var _ = Describe("ExtendedClient", func() {
 					),
 				)
 
-				_, err := client.ReleaseETag(productSlug, release.ID)
+				_, err := client.ReleaseFingerprint(productSlug, release.ID)
 				Expect(err).To(MatchError(errors.New(
 					"ETag header not present")))
 			})
 		})
 
-		Context("when the etag is malformed", func() {
+		Context("when the etag header is malformed", func() {
 			It("returns an error", func() {
 				malformedETag := "malformed-etag-without-double-quotes"
 				etagHeader := http.Header{"ETag": []string{malformedETag}}
@@ -134,7 +134,7 @@ var _ = Describe("ExtendedClient", func() {
 					),
 				)
 
-				_, err := client.ReleaseETag(productSlug, release.ID)
+				_, err := client.ReleaseFingerprint(productSlug, release.ID)
 				Expect(err).To(MatchError(fmt.Errorf("ETag header malformed: %s", malformedETag)))
 			})
 		})

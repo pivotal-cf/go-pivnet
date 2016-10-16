@@ -109,7 +109,7 @@ var _ = Describe("release commands", func() {
 			releaseID = releases[0].ID
 
 			fakePivnetClient.ReleaseForVersionReturns(releases[0], nil)
-			fakePivnetClient.ReleaseETagReturns("some-etag", nil)
+			fakePivnetClient.ReleaseFingerprintReturns("some-fingerprint", nil)
 		})
 
 		It("gets Release", func() {
@@ -142,14 +142,14 @@ var _ = Describe("release commands", func() {
 			})
 		})
 
-		Context("when there is an error getting etag", func() {
+		Context("when there is an error getting fingerprint", func() {
 			var (
 				expectedErr error
 			)
 
 			BeforeEach(func() {
 				expectedErr = errors.New("release error")
-				fakePivnetClient.ReleaseETagReturns("", expectedErr)
+				fakePivnetClient.ReleaseFingerprintReturns("", expectedErr)
 			})
 
 			It("invokes the error handler", func() {
