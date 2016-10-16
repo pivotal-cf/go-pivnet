@@ -41,12 +41,16 @@ var _ = Describe("ExtendedClient", func() {
 
 	Describe("ReleaseFingerprint", func() {
 		var (
-			release      pivnet.Release
-			responseCode int
+			release pivnet.Release
 
-			body []byte
+			releasesResponseStatusCode int
+			releasesResponseBody       []byte
 
-			etagHeader http.Header
+			productFilesResponseStatusCode int
+			productFilesResponseBody       []byte
+
+			releasesETagHeader     http.Header
+			productFilesETagHeader http.Header
 		)
 
 		BeforeEach(func() {
@@ -54,14 +58,17 @@ var _ = Describe("ExtendedClient", func() {
 				ID: 1234,
 			}
 
-			responseCode = http.StatusOK
-			body = []byte(`{"message":"foo message"}`)
+			releasesResponseStatusCode = http.StatusOK
+			releasesResponseBody = []byte(`{"message":"releases message"}`)
 
-			etagHeader = http.Header{"ETag": []string{`"etag-0"`}}
+			productFilesResponseStatusCode = http.StatusOK
+			productFilesResponseBody = []byte(`{"message":"product files message"}`)
+
+			releasesETagHeader = http.Header{"ETag": []string{`"releases-etag"`}}
+			productFilesETagHeader = http.Header{"ETag": []string{`"product-files-etag"`}}
 		})
 
 		JustBeforeEach(func() {
-
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", fmt.Sprintf(
@@ -70,7 +77,26 @@ var _ = Describe("ExtendedClient", func() {
 						productSlug,
 						release.ID,
 					)),
-					ghttp.RespondWith(responseCode, body, etagHeader),
+					ghttp.RespondWith(
+						releasesResponseStatusCode,
+						releasesResponseBody,
+						releasesETagHeader,
+					),
+				),
+			)
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", fmt.Sprintf(
+						"%s/products/%s/releases/%d/product_files",
+						apiPrefix,
+						productSlug,
+						release.ID,
+					)),
+					ghttp.RespondWith(
+						productFilesResponseStatusCode,
+						productFilesResponseBody,
+						productFilesETagHeader),
 				),
 			)
 		})
@@ -78,23 +104,25 @@ var _ = Describe("ExtendedClient", func() {
 		It("returns the Fingerprint for the specified release", func() {
 			fingerprint, err := client.ReleaseFingerprint(productSlug, release.ID)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(fingerprint).To(Equal("etag-0"))
+
+			// MD5 of string: "releases-etagproduct-files-etag"
+			Expect(fingerprint).To(Equal("b82043598f3c26f909c42006f0b87c41"))
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
 			BeforeEach(func() {
-				responseCode = http.StatusTeapot
+				releasesResponseStatusCode = http.StatusTeapot
 			})
 
 			It("returns an error", func() {
 				_, err := client.ReleaseFingerprint(productSlug, release.ID)
-				Expect(err.Error()).To(Equal("418 - foo message. Errors: "))
+				Expect(err.Error()).To(Equal("418 - releases message. Errors: "))
 			})
 		})
 
 		Context("when the etag header is missing", func() {
 			BeforeEach(func() {
-				etagHeader = nil
+				releasesETagHeader = nil
 			})
 
 			It("returns an error", func() {
@@ -111,12 +139,23 @@ var _ = Describe("ExtendedClient", func() {
 
 			BeforeEach(func() {
 				malformedETag = "malformed-etag-without-double-quotes"
-				etagHeader = http.Header{"ETag": []string{malformedETag}}
+				releasesETagHeader = http.Header{"ETag": []string{malformedETag}}
 			})
 
 			It("returns an error", func() {
 				_, err := client.ReleaseFingerprint(productSlug, release.ID)
 				Expect(err).To(MatchError(fmt.Errorf("ETag header malformed: %s", malformedETag)))
+			})
+		})
+
+		Context("when getting the product files fails", func() {
+			BeforeEach(func() {
+				productFilesResponseStatusCode = http.StatusTeapot
+			})
+
+			It("returns an error", func() {
+				_, err := client.ReleaseFingerprint(productSlug, release.ID)
+				Expect(err.Error()).To(Equal("418 - product files message. Errors: "))
 			})
 		})
 	})

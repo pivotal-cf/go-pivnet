@@ -1,6 +1,8 @@
 package extension
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -37,7 +39,21 @@ func (c ExtendedClient) ReleaseFingerprint(productSlug string, releaseID int) (s
 		return "", err
 	}
 
-	return releaseETag, nil
+	productFilesURL := fmt.Sprintf(
+		"/products/%s/releases/%d/product_files",
+		productSlug,
+		releaseID,
+	)
+	productFilesETag, err := c.etag(productFilesURL)
+	if err != nil {
+		return "", err
+	}
+
+	hasher := md5.New()
+	hasher.Write([]byte(releaseETag + productFilesETag))
+	fingerprint := hex.EncodeToString(hasher.Sum(nil))
+
+	return fingerprint, nil
 }
 
 func (c ExtendedClient) etag(url string) (string, error) {
