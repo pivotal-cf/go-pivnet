@@ -51,6 +51,10 @@ var _ = Describe("ExtendedClient", func() {
 			productFilesResponseBody       []byte
 			productFilesETagHeader         http.Header
 
+			fileGroupsResponseStatusCode int
+			fileGroupsResponseBody       []byte
+			fileGroupsETagHeader         http.Header
+
 			upgradePathsResponseStatusCode int
 			upgradePathsResponseBody       []byte
 			upgradePathsETagHeader         http.Header
@@ -72,6 +76,10 @@ var _ = Describe("ExtendedClient", func() {
 			productFilesResponseStatusCode = http.StatusOK
 			productFilesResponseBody = []byte(`{"message":"product files message"}`)
 			productFilesETagHeader = http.Header{"ETag": []string{`"product-files-etag"`}}
+
+			fileGroupsResponseStatusCode = http.StatusOK
+			fileGroupsResponseBody = []byte(`{"message":"file groups message"}`)
+			fileGroupsETagHeader = http.Header{"ETag": []string{`"file-groups-etag"`}}
 
 			upgradePathsResponseStatusCode = http.StatusOK
 			upgradePathsResponseBody = []byte(`{"message":"upgrade paths message"}`)
@@ -110,7 +118,24 @@ var _ = Describe("ExtendedClient", func() {
 					ghttp.RespondWith(
 						productFilesResponseStatusCode,
 						productFilesResponseBody,
-						productFilesETagHeader),
+						productFilesETagHeader,
+					),
+				),
+			)
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", fmt.Sprintf(
+						"%s/products/%s/releases/%d/file_groups",
+						apiPrefix,
+						productSlug,
+						release.ID,
+					)),
+					ghttp.RespondWith(
+						fileGroupsResponseStatusCode,
+						fileGroupsResponseBody,
+						fileGroupsETagHeader,
+					),
 				),
 			)
 
@@ -125,7 +150,8 @@ var _ = Describe("ExtendedClient", func() {
 					ghttp.RespondWith(
 						upgradePathsResponseStatusCode,
 						upgradePathsResponseBody,
-						upgradePathsETagHeader),
+						upgradePathsETagHeader,
+					),
 				),
 			)
 
@@ -140,7 +166,8 @@ var _ = Describe("ExtendedClient", func() {
 					ghttp.RespondWith(
 						dependenciesResponseStatusCode,
 						dependenciesResponseBody,
-						dependenciesETagHeader),
+						dependenciesETagHeader,
+					),
 				),
 			)
 		})
@@ -149,8 +176,9 @@ var _ = Describe("ExtendedClient", func() {
 			fingerprint, err := client.ReleaseFingerprint(productSlug, release.ID)
 			Expect(err).NotTo(HaveOccurred())
 
-			// MD5 of string: "releases-etagproduct-files-etagupgrade-paths-etagdependencies-etag"
-			Expect(fingerprint).To(Equal("372f8cb139e05339337895f5e1e4271c"))
+			// MD5 of string:
+			// "releases-etagproduct-files-etagfile-groups-etagupgrade-paths-etagdependencies-etag"
+			Expect(fingerprint).To(Equal("03eeb677506e9a778e00eaf34c731770"))
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
