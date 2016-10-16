@@ -30,8 +30,17 @@ func NewExtendedClient(client Client, logger logger.Logger) ExtendedClient {
 }
 
 func (c ExtendedClient) ReleaseFingerprint(productSlug string, releaseID int) (string, error) {
-	url := fmt.Sprintf("/products/%s/releases/%d", productSlug, releaseID)
+	releaseURL := fmt.Sprintf("/products/%s/releases/%d", productSlug, releaseID)
 
+	releaseETag, err := c.etag(releaseURL)
+	if err != nil {
+		return "", err
+	}
+
+	return releaseETag, nil
+}
+
+func (c ExtendedClient) etag(url string) (string, error) {
 	resp, _, err := c.c.MakeRequest("GET", url, http.StatusOK, nil, nil)
 	if err != nil {
 		return "", err
@@ -46,6 +55,7 @@ func (c ExtendedClient) ReleaseFingerprint(productSlug string, releaseID int) (s
 	c.logger.Debug("Received ETag", logger.Data{"etag": rawEtag})
 
 	// Weak ETag looks like: W/"my-etag"; strong ETag looks like: "my-etag"
+	// both are guaranteed to have double-quotes.
 	splitRawEtag := strings.SplitN(rawEtag, `"`, -1)
 
 	if len(splitRawEtag) < 2 {
@@ -53,6 +63,7 @@ func (c ExtendedClient) ReleaseFingerprint(productSlug string, releaseID int) (s
 	}
 
 	etag := splitRawEtag[1]
+
 	return etag, nil
 }
 

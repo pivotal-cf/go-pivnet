@@ -41,17 +41,26 @@ var _ = Describe("ExtendedClient", func() {
 
 	Describe("ReleaseFingerprint", func() {
 		var (
-			release pivnet.Release
+			release      pivnet.Release
+			responseCode int
+
+			body []byte
+
+			etagHeader http.Header
 		)
 
 		BeforeEach(func() {
 			release = pivnet.Release{
 				ID: 1234,
 			}
+
+			responseCode = http.StatusOK
+			body = []byte(`{"message":"foo message"}`)
+
+			etagHeader = http.Header{"ETag": []string{`"etag-0"`}}
 		})
 
-		It("returns the Fingerprint for the specified release", func() {
-			etagHeader := http.Header{"ETag": []string{`"etag-0"`}}
+		JustBeforeEach(func() {
 
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
@@ -61,56 +70,34 @@ var _ = Describe("ExtendedClient", func() {
 						productSlug,
 						release.ID,
 					)),
-					ghttp.RespondWith(http.StatusOK, nil, etagHeader),
+					ghttp.RespondWith(responseCode, body, etagHeader),
 				),
 			)
+		})
 
+		It("returns the Fingerprint for the specified release", func() {
 			fingerprint, err := client.ReleaseFingerprint(productSlug, release.ID)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(fingerprint).To(Equal("etag-0"))
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
-			var (
-				body []byte
-			)
-
 			BeforeEach(func() {
-				body = []byte(`{"message":"foo message"}`)
+				responseCode = http.StatusTeapot
 			})
 
 			It("returns an error", func() {
-				server.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest("GET", fmt.Sprintf(
-							"%s/products/%s/releases/%d",
-							apiPrefix,
-							productSlug,
-							release.ID,
-						)),
-						ghttp.RespondWith(http.StatusTeapot, body),
-					),
-				)
-
 				_, err := client.ReleaseFingerprint(productSlug, release.ID)
 				Expect(err.Error()).To(Equal("418 - foo message. Errors: "))
 			})
 		})
 
 		Context("when the etag header is missing", func() {
-			It("returns an error", func() {
-				server.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest("GET", fmt.Sprintf(
-							"%s/products/%s/releases/%d",
-							apiPrefix,
-							productSlug,
-							release.ID,
-						)),
-						ghttp.RespondWith(http.StatusOK, nil),
-					),
-				)
+			BeforeEach(func() {
+				etagHeader = nil
+			})
 
+			It("returns an error", func() {
 				_, err := client.ReleaseFingerprint(productSlug, release.ID)
 				Expect(err).To(MatchError(errors.New(
 					"ETag header not present")))
@@ -118,22 +105,16 @@ var _ = Describe("ExtendedClient", func() {
 		})
 
 		Context("when the etag header is malformed", func() {
+			var (
+				malformedETag string
+			)
+
+			BeforeEach(func() {
+				malformedETag = "malformed-etag-without-double-quotes"
+				etagHeader = http.Header{"ETag": []string{malformedETag}}
+			})
+
 			It("returns an error", func() {
-				malformedETag := "malformed-etag-without-double-quotes"
-				etagHeader := http.Header{"ETag": []string{malformedETag}}
-
-				server.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest("GET", fmt.Sprintf(
-							"%s/products/%s/releases/%d",
-							apiPrefix,
-							productSlug,
-							release.ID,
-						)),
-						ghttp.RespondWith(http.StatusOK, nil, etagHeader),
-					),
-				)
-
 				_, err := client.ReleaseFingerprint(productSlug, release.ID)
 				Expect(err).To(MatchError(fmt.Errorf("ETag header malformed: %s", malformedETag)))
 			})
