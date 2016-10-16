@@ -49,8 +49,18 @@ func (c ExtendedClient) ReleaseFingerprint(productSlug string, releaseID int) (s
 		return "", err
 	}
 
+	upgradePathsURL := fmt.Sprintf(
+		"/products/%s/releases/%d/upgrade_paths",
+		productSlug,
+		releaseID,
+	)
+	upgradePathsETag, err := c.etag(upgradePathsURL)
+	if err != nil {
+		return "", err
+	}
+
 	hasher := md5.New()
-	hasher.Write([]byte(releaseETag + productFilesETag))
+	hasher.Write([]byte(releaseETag + productFilesETag + upgradePathsETag))
 	fingerprint := hex.EncodeToString(hasher.Sum(nil))
 
 	return fingerprint, nil

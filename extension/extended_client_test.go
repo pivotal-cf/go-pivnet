@@ -45,12 +45,15 @@ var _ = Describe("ExtendedClient", func() {
 
 			releasesResponseStatusCode int
 			releasesResponseBody       []byte
+			releasesETagHeader         http.Header
 
 			productFilesResponseStatusCode int
 			productFilesResponseBody       []byte
+			productFilesETagHeader         http.Header
 
-			releasesETagHeader     http.Header
-			productFilesETagHeader http.Header
+			upgradePathsResponseStatusCode int
+			upgradePathsResponseBody       []byte
+			upgradePathsETagHeader         http.Header
 		)
 
 		BeforeEach(func() {
@@ -60,12 +63,15 @@ var _ = Describe("ExtendedClient", func() {
 
 			releasesResponseStatusCode = http.StatusOK
 			releasesResponseBody = []byte(`{"message":"releases message"}`)
+			releasesETagHeader = http.Header{"ETag": []string{`"releases-etag"`}}
 
 			productFilesResponseStatusCode = http.StatusOK
 			productFilesResponseBody = []byte(`{"message":"product files message"}`)
-
-			releasesETagHeader = http.Header{"ETag": []string{`"releases-etag"`}}
 			productFilesETagHeader = http.Header{"ETag": []string{`"product-files-etag"`}}
+
+			upgradePathsResponseStatusCode = http.StatusOK
+			upgradePathsResponseBody = []byte(`{"message":"upgrade paths message"}`)
+			upgradePathsETagHeader = http.Header{"ETag": []string{`"upgrade-paths-etag"`}}
 		})
 
 		JustBeforeEach(func() {
@@ -99,14 +105,29 @@ var _ = Describe("ExtendedClient", func() {
 						productFilesETagHeader),
 				),
 			)
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", fmt.Sprintf(
+						"%s/products/%s/releases/%d/upgrade_paths",
+						apiPrefix,
+						productSlug,
+						release.ID,
+					)),
+					ghttp.RespondWith(
+						upgradePathsResponseStatusCode,
+						upgradePathsResponseBody,
+						upgradePathsETagHeader),
+				),
+			)
 		})
 
 		It("returns the Fingerprint for the specified release", func() {
 			fingerprint, err := client.ReleaseFingerprint(productSlug, release.ID)
 			Expect(err).NotTo(HaveOccurred())
 
-			// MD5 of string: "releases-etagproduct-files-etag"
-			Expect(fingerprint).To(Equal("b82043598f3c26f909c42006f0b87c41"))
+			// MD5 of string: "releases-etagproduct-files-etagupgrade-paths-etag"
+			Expect(fingerprint).To(Equal("f91fdcf49e804c6a5741447af3d86061"))
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
@@ -156,6 +177,17 @@ var _ = Describe("ExtendedClient", func() {
 			It("returns an error", func() {
 				_, err := client.ReleaseFingerprint(productSlug, release.ID)
 				Expect(err.Error()).To(Equal("418 - product files message. Errors: "))
+			})
+		})
+
+		Context("when getting the upgrade paths fails", func() {
+			BeforeEach(func() {
+				upgradePathsResponseStatusCode = http.StatusTeapot
+			})
+
+			It("returns an error", func() {
+				_, err := client.ReleaseFingerprint(productSlug, release.ID)
+				Expect(err.Error()).To(Equal("418 - upgrade paths message. Errors: "))
 			})
 		})
 	})
