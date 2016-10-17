@@ -287,8 +287,9 @@ var _ = Describe("ExtendedClient", func() {
 		It("writes file contents to provided writer", func() {
 			writer := bytes.NewBuffer(nil)
 
-			err := client.DownloadFile(writer, downloadLink)
+			err, retryable := client.DownloadFile(writer, downloadLink)
 			Expect(err).NotTo(HaveOccurred())
+			Expect(retryable).To(BeTrue())
 
 			Expect(writer.Bytes()).To(Equal(fileContents))
 		})
@@ -307,8 +308,13 @@ var _ = Describe("ExtendedClient", func() {
 			})
 
 			It("forwards the error", func() {
-				err := client.DownloadFile(nil, downloadLink)
+				err, _ := client.DownloadFile(nil, downloadLink)
 				Expect(err).To(Equal(expectedErr))
+			})
+
+			It("is not retryable", func() {
+				_, retryable := client.DownloadFile(nil, downloadLink)
+				Expect(retryable).To(BeFalse())
 			})
 		})
 
@@ -328,8 +334,13 @@ var _ = Describe("ExtendedClient", func() {
 			})
 
 			It("forwards the error", func() {
-				err := client.DownloadFile(nil, downloadLink)
+				err, _ := client.DownloadFile(nil, downloadLink)
 				Expect(err).To(HaveOccurred())
+			})
+
+			It("is not retryable", func() {
+				_, retryable := client.DownloadFile(nil, downloadLink)
+				Expect(retryable).To(BeFalse())
 			})
 		})
 
@@ -350,8 +361,13 @@ var _ = Describe("ExtendedClient", func() {
 			})
 
 			It("forwards the error", func() {
-				err := client.DownloadFile(nil, downloadLink)
+				err, _ := client.DownloadFile(nil, downloadLink)
 				Expect(err).To(HaveOccurred())
+			})
+
+			It("is not retryable", func() {
+				_, retryable := client.DownloadFile(nil, downloadLink)
+				Expect(retryable).To(BeFalse())
 			})
 		})
 
@@ -361,10 +377,15 @@ var _ = Describe("ExtendedClient", func() {
 			})
 
 			It("returns an error", func() {
-				err := client.DownloadFile(nil, downloadLink)
+				err, _ := client.DownloadFile(nil, downloadLink)
 				Expect(err).To(HaveOccurred())
 
 				Expect(err.Error()).To(ContainSubstring("EULA"))
+			})
+
+			It("is not retryable", func() {
+				_, retryable := client.DownloadFile(nil, downloadLink)
+				Expect(retryable).To(BeFalse())
 			})
 		})
 
@@ -374,10 +395,15 @@ var _ = Describe("ExtendedClient", func() {
 			})
 
 			It("returns an error", func() {
-				err := client.DownloadFile(nil, downloadLink)
+				err, _ := client.DownloadFile(nil, downloadLink)
 				Expect(err).To(HaveOccurred())
 
 				Expect(err.Error()).To(ContainSubstring("418"))
+			})
+
+			It("is not retryable", func() {
+				_, retryable := client.DownloadFile(nil, downloadLink)
+				Expect(retryable).To(BeFalse())
 			})
 		})
 
@@ -391,10 +417,15 @@ var _ = Describe("ExtendedClient", func() {
 			})
 
 			It("returns an error", func() {
-				err := client.DownloadFile(writer, downloadLink)
+				err, _ := client.DownloadFile(writer, downloadLink)
 				Expect(err).To(HaveOccurred())
 
 				Expect(err.Error()).To(ContainSubstring("error writing"))
+			})
+
+			It("is retryable", func() {
+				_, retryable := client.DownloadFile(writer, downloadLink)
+				Expect(retryable).To(BeTrue())
 			})
 		})
 	})

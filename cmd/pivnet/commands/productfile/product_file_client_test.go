@@ -678,9 +678,9 @@ var _ = Describe("productfile commands", func() {
 			}
 
 			fakePivnetClient.ReleaseForVersionReturns(returnedRelease, nil)
-			fakePivnetClient.DownloadFileStub = func(writer io.Writer, downloadLink string) error {
-				_, err := fmt.Fprintf(writer, fileContents)
-				return err
+			fakePivnetClient.DownloadFileStub = func(writer io.Writer, downloadLink string) (err error, retryable bool) {
+				_, err = fmt.Fprintf(writer, fileContents)
+				return err, false
 			}
 		})
 
@@ -722,7 +722,7 @@ var _ = Describe("productfile commands", func() {
 
 			BeforeEach(func() {
 				expectedErr = errors.New("productfile error")
-				fakePivnetClient.DownloadFileReturns(expectedErr)
+				fakePivnetClient.DownloadFileReturns(expectedErr, false)
 			})
 
 			It("invokes the error handler", func() {
