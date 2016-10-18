@@ -2,76 +2,37 @@
 	"version": 0,
 	"dependencies": [
 		{
-			"importpath": "github.com/fatih/color",
-			"repository": "https://github.com/fatih/color",
-			"vcs": "git",
-			"revision": "533cd7fd8a85905f67a1753afb4deddc85ea174f",
-			"branch": "master",
-			"notests": true
-		},
-		{
 			"importpath": "github.com/golang/protobuf/proto",
 			"repository": "https://github.com/golang/protobuf",
 			"vcs": "git",
-			"revision": "cd85f19845cc96cc6e5269c894d8cd3c67e9ed83",
+			"revision": "98fa357170587e470c5f27d3c3ea0947b71eb455",
 			"branch": "master",
 			"path": "/proto",
 			"notests": true
 		},
 		{
-			"importpath": "github.com/golang/protobuf/ptypes/any",
+			"importpath": "github.com/golang/protobuf/protoc-gen-go/descriptor",
 			"repository": "https://github.com/golang/protobuf",
 			"vcs": "git",
-			"revision": "cd85f19845cc96cc6e5269c894d8cd3c67e9ed83",
+			"revision": "98fa357170587e470c5f27d3c3ea0947b71eb455",
 			"branch": "master",
-			"path": "ptypes/any",
+			"path": "protoc-gen-go/descriptor",
 			"notests": true
 		},
 		{
-			"importpath": "github.com/jessevdk/go-flags",
-			"repository": "https://github.com/jessevdk/go-flags",
+			"importpath": "github.com/golang/protobuf/ptypes",
+			"repository": "https://github.com/golang/protobuf",
 			"vcs": "git",
-			"revision": "6b9493b3cb60367edd942144879646604089e3f7",
+			"revision": "98fa357170587e470c5f27d3c3ea0947b71eb455",
 			"branch": "master",
-			"notests": true
-		},
-		{
-			"importpath": "github.com/mattn/go-colorable",
-			"repository": "https://github.com/mattn/go-colorable",
-			"vcs": "git",
-			"revision": "9056b7a9f2d1f2d96498d6d146acd1f9d5ed3d59",
-			"branch": "master",
-			"notests": true
-		},
-		{
-			"importpath": "github.com/mattn/go-isatty",
-			"repository": "https://github.com/mattn/go-isatty",
-			"vcs": "git",
-			"revision": "56b76bdf51f7708750eac80fa38b952bb9f32639",
-			"branch": "master",
-			"notests": true
-		},
-		{
-			"importpath": "github.com/mattn/go-runewidth",
-			"repository": "https://github.com/mattn/go-runewidth",
-			"vcs": "git",
-			"revision": "d6bea18f789704b5f83375793155289da36a3c7f",
-			"branch": "master",
-			"notests": true
-		},
-		{
-			"importpath": "github.com/olekukonko/tablewriter",
-			"repository": "https://github.com/olekukonko/tablewriter",
-			"vcs": "git",
-			"revision": "279fecc91ba77130f753d073259d7f9e246acdda",
-			"branch": "master",
+			"path": "ptypes",
 			"notests": true
 		},
 		{
 			"importpath": "github.com/onsi/ginkgo",
 			"repository": "https://github.com/onsi/ginkgo",
 			"vcs": "git",
-			"revision": "5437a97bf824dec14e58d68c56ee36e772670c2e",
+			"revision": "39549e585f5005ce588e6217d4538a4c99a472c9",
 			"branch": "master",
 			"notests": true
 		},
@@ -79,15 +40,7 @@
 			"importpath": "github.com/onsi/gomega",
 			"repository": "https://github.com/onsi/gomega",
 			"vcs": "git",
-			"revision": "c73e51675ad2455a4515b6213eb7145eaade4824",
-			"branch": "master",
-			"notests": true
-		},
-		{
-			"importpath": "github.com/robdimsdale/sanitizer",
-			"repository": "https://github.com/robdimsdale/sanitizer",
-			"vcs": "git",
-			"revision": "ab2334cb7539a2ce27b7aea53b7d693087b10cd9",
+			"revision": "d59fa0ac68bb5dd932ee8d24eed631cdd519efc3",
 			"branch": "master",
 			"notests": true
 		},
@@ -95,7 +48,7 @@
 			"importpath": "golang.org/x/sys/unix",
 			"repository": "https://go.googlesource.com/sys",
 			"vcs": "git",
-			"revision": "d4feaf1a7e61e1d9e79e6c4e76c6349e9cab0a03",
+			"revision": "002cbb5f952456d0c50e0d2aff17ea5eca716979",
 			"branch": "master",
 			"path": "/unix",
 			"notests": true
@@ -109,18 +62,10 @@
 			"notests": true
 		},
 		{
-			"importpath": "gopkg.in/cheggaaa/pb.v1",
-			"repository": "https://gopkg.in/cheggaaa/pb.v1",
-			"vcs": "git",
-			"revision": "9453b2db37f4d8bc63751daca63bbe7049eb5e74",
-			"branch": "master",
-			"notests": true
-		},
-		{
 			"importpath": "gopkg.in/yaml.v2",
 			"repository": "https://gopkg.in/yaml.v2",
 			"vcs": "git",
-			"revision": "a83829b6f1293c91addabc89d0571c246397bbf4",
+			"revision": "a5b47d31c556af34a302ce5d659e6fea44d90de0",
 			"branch": "v2",
 			"notests": true
 		}
