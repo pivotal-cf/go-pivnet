@@ -452,7 +452,11 @@ func (c *ProductFileClient) Download(
 		var retryable bool
 		err, retryable = c.pivnetClient.DownloadFile(multiWriter, downloadLink)
 
-		if err != nil && retryable {
+		if err != nil {
+			if !retryable {
+				break
+			}
+
 			c.l.Debug(
 				fmt.Sprintf("Download failed; retrying... (%d attempt(s) left)", i),
 				logger.Data{
@@ -461,10 +465,6 @@ func (c *ProductFileClient) Download(
 			)
 
 			continue
-		}
-
-		if err != nil {
-			break
 		}
 
 		progress.Finish()
