@@ -443,7 +443,8 @@ func (c *ProductFileClient) Download(
 		},
 	)
 
-	for i := 3; i > 0; i-- {
+	totalAttempts := 3
+	for i := 0; i < totalAttempts; i++ {
 		progress := newProgressBar(productFile.Size, c.logWriter)
 		onDemandProgress := &startOnDemandProgressBar{progress, false}
 
@@ -457,8 +458,9 @@ func (c *ProductFileClient) Download(
 				break
 			}
 
+			attemptsRemaining := totalAttempts - i - 1
 			c.l.Debug(
-				fmt.Sprintf("Download failed; retrying... (%d attempt(s) left)", i),
+				fmt.Sprintf("Download failed; retrying... (%d attempt(s) left)", attemptsRemaining),
 				logger.Data{
 					"Error": err,
 				},
