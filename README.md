@@ -1,13 +1,37 @@
-## HEAVILY UNDER CONSTRUCTION
+# go-pivnet API library
 
-Presently, you are using this at your own risk.
+A golang libary for [Pivotal Network](https://network.pivotal.io).
 
-There are definitely some improvements forth coming:
+Looking for the Pivnet CLI? See [here](https://github.com/pivotal-cf/pivnet-cli).
 
-- [ ] godoc all the things
-- [ ] refactor the client method, the interface will not change though 
-- [ ] work though adding all of the pivnet methods (this will take awhile)
+## Usage
 
+See [example](https://github.com/pivotal-cf/pivnet-cli/blob/master/example/main.go)
+for an executable example.
+
+```go
+import github.com/pivotal-cf/pivnet
+
+[...]
+
+config := pivnet.ClientConfig{
+  Host:      pivnet.DefaultHost,
+  Token:     "token-from-pivnet",
+  UserAgent: "user-agent",
+}
+
+stdoutLogger := log.New(os.Stdout, "", log.LstdFlags)
+stderrLogger := log.New(os.Stderr, "", log.LstdFlags)
+
+verbose := false
+logger := logshim.NewLogShim(stdoutLogger, stderrLogger, verbose)
+
+client := pivnet.NewClient(config, logger)
+
+products, _ := client.Products.List()
+
+fmt.Printf("products: %v", products)
+```
 
 ### Running the tests
 
