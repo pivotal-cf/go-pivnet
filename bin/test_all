@@ -3,10 +3,10 @@
 set -eu
 
 set +x
-API_TOKEN="${API_TOKEN:?"API_TOKEN must be provided"}"
+: "${API_TOKEN}"
 set -x
 
-HOST="${HOST:?"HOST must be provided"}"
+: "${HOST}"
 
 my_dir="$( cd "$( dirname "${0}" )" && pwd )"
 
