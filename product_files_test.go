@@ -380,6 +380,7 @@ var _ = Describe("PivnetClient - product files", func() {
 
 			expectedRequestBody = requestBody{
 				ProductFile: pivnet.ProductFile{
+					AWSObjectKey:       createProductFileConfig.AWSObjectKey,
 					Description:        createProductFileConfig.Description,
 					DocsURL:            createProductFileConfig.DocsURL,
 					FileType:           createProductFileConfig.FileType,
@@ -396,6 +397,7 @@ var _ = Describe("PivnetClient - product files", func() {
 			productFileResponse = pivnet.ProductFileResponse{
 				ProductFile: pivnet.ProductFile{
 					ID:                 1234,
+					AWSObjectKey:       createProductFileConfig.AWSObjectKey,
 					Description:        createProductFileConfig.Description,
 					DocsURL:            createProductFileConfig.DocsURL,
 					FileType:           createProductFileConfig.FileType,

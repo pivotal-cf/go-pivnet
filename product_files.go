@@ -154,6 +154,7 @@ func (p ProductFilesService) Create(config CreateProductFileConfig) (ProductFile
 
 	body := createUpdateProductFileBody{
 		ProductFile: ProductFile{
+			AWSObjectKey:       config.AWSObjectKey,
 			Description:        config.Description,
 			DocsURL:            config.DocsURL,
 			FileType:           config.FileType,
