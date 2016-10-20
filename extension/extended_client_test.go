@@ -177,8 +177,8 @@ var _ = Describe("ExtendedClient", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			// MD5 of string:
-			// "releases-etagproduct-files-etagfile-groups-etagupgrade-paths-etagdependencies-etag"
-			Expect(fingerprint).To(Equal("03eeb677506e9a778e00eaf34c731770"))
+			// "releases-etag
+			Expect(fingerprint).To(Equal("4bd76775c107b704cff430aad62c5a43"))
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
@@ -217,39 +217,6 @@ var _ = Describe("ExtendedClient", func() {
 			It("returns an error", func() {
 				_, err := client.ReleaseFingerprint(productSlug, release.ID)
 				Expect(err).To(MatchError(fmt.Errorf("ETag header malformed: %s", malformedETag)))
-			})
-		})
-
-		Context("when getting the product files fails", func() {
-			BeforeEach(func() {
-				productFilesResponseStatusCode = http.StatusTeapot
-			})
-
-			It("returns an error", func() {
-				_, err := client.ReleaseFingerprint(productSlug, release.ID)
-				Expect(err.Error()).To(Equal("418 - product files message. Errors: "))
-			})
-		})
-
-		Context("when getting the upgrade paths fails", func() {
-			BeforeEach(func() {
-				upgradePathsResponseStatusCode = http.StatusTeapot
-			})
-
-			It("returns an error", func() {
-				_, err := client.ReleaseFingerprint(productSlug, release.ID)
-				Expect(err.Error()).To(Equal("418 - upgrade paths message. Errors: "))
-			})
-		})
-
-		Context("when getting the dependencies fails", func() {
-			BeforeEach(func() {
-				dependenciesResponseStatusCode = http.StatusTeapot
-			})
-
-			It("returns an error", func() {
-				_, err := client.ReleaseFingerprint(productSlug, release.ID)
-				Expect(err.Error()).To(Equal("418 - dependencies message. Errors: "))
 			})
 		})
 	})
