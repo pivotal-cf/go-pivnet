@@ -350,92 +350,82 @@ var _ = Describe("PivnetClient - product files", func() {
 	})
 
 	Describe("Create Product File", func() {
+		type requestBody struct {
+			ProductFile pivnet.ProductFile `json:"product_file"`
+		}
+
 		var (
 			createProductFileConfig pivnet.CreateProductFileConfig
+
+			expectedRequestBody requestBody
+
+			productFileResponse pivnet.ProductFileResponse
 		)
 
 		BeforeEach(func() {
 			createProductFileConfig = pivnet.CreateProductFileConfig{
-				ProductSlug:  productSlug,
-				Name:         "some-file-name",
-				FileVersion:  "some-file-version",
-				AWSObjectKey: "some-aws-object-key",
-				FileType:     "some-file-type",
+				ProductSlug:        productSlug,
+				AWSObjectKey:       "some-aws-object-key",
+				Description:        "some\nmulti-line\ndescription",
+				DocsURL:            "some-docs-url",
+				FileType:           "some-file-type",
+				FileVersion:        "some-file-version",
+				IncludedFiles:      []string{"file1", "file2"},
+				MD5:                "some-md5",
+				Name:               "some-file-name",
+				Platforms:          []string{"platform-1", "platform-2"},
+				ReleasedAt:         "released-at",
+				SystemRequirements: []string{"system-1", "system-2"},
 			}
+
+			expectedRequestBody = requestBody{
+				ProductFile: pivnet.ProductFile{
+					Description:        createProductFileConfig.Description,
+					DocsURL:            createProductFileConfig.DocsURL,
+					FileType:           createProductFileConfig.FileType,
+					FileVersion:        createProductFileConfig.FileVersion,
+					IncludedFiles:      createProductFileConfig.IncludedFiles,
+					MD5:                createProductFileConfig.MD5,
+					Name:               createProductFileConfig.Name,
+					Platforms:          createProductFileConfig.Platforms,
+					ReleasedAt:         createProductFileConfig.ReleasedAt,
+					SystemRequirements: createProductFileConfig.SystemRequirements,
+				},
+			}
+
+			productFileResponse = pivnet.ProductFileResponse{
+				ProductFile: pivnet.ProductFile{
+					ID:                 1234,
+					Description:        createProductFileConfig.Description,
+					DocsURL:            createProductFileConfig.DocsURL,
+					FileType:           createProductFileConfig.FileType,
+					FileVersion:        createProductFileConfig.FileVersion,
+					IncludedFiles:      createProductFileConfig.IncludedFiles,
+					MD5:                createProductFileConfig.MD5,
+					Name:               createProductFileConfig.Name,
+					Platforms:          createProductFileConfig.Platforms,
+					ReleasedAt:         createProductFileConfig.ReleasedAt,
+					SystemRequirements: createProductFileConfig.SystemRequirements,
+				}}
 		})
 
-		Context("when the config is valid", func() {
-			type requestBody struct {
-				ProductFile pivnet.ProductFile `json:"product_file"`
-			}
-
-			var (
-				expectedRequestBody requestBody
-
-				validResponse = `{"product_file":{"id":1234}}`
+		It("creates the product file", func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("POST", fmt.Sprintf(
+						"%s/products/%s/product_files",
+						apiPrefix,
+						productSlug,
+					)),
+					ghttp.VerifyJSONRepresenting(&expectedRequestBody),
+					ghttp.RespondWithJSONEncoded(http.StatusCreated, productFileResponse),
+				),
 			)
 
-			BeforeEach(func() {
-				expectedRequestBody = requestBody{
-					ProductFile: pivnet.ProductFile{
-						FileType:     "some-file-type",
-						FileVersion:  createProductFileConfig.FileVersion,
-						Name:         createProductFileConfig.Name,
-						MD5:          createProductFileConfig.MD5,
-						AWSObjectKey: createProductFileConfig.AWSObjectKey,
-					},
-				}
-			})
-
-			It("creates the product file with the minimum required fields", func() {
-				server.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest("POST", apiPrefix+"/products/"+productSlug+"/product_files"),
-						ghttp.VerifyJSONRepresenting(&expectedRequestBody),
-						ghttp.RespondWith(http.StatusCreated, validResponse),
-					),
-				)
-
-				productFile, err := client.ProductFiles.Create(createProductFileConfig)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(productFile.ID).To(Equal(1234))
-			})
-
-			Context("when the optional description is present", func() {
-				var (
-					description string
-
-					productFileResponse pivnet.ProductFileResponse
-				)
-
-				BeforeEach(func() {
-					description = "some\nmulti-line\ndescription"
-
-					expectedRequestBody.ProductFile.Description = description
-
-					productFileResponse = pivnet.ProductFileResponse{
-						ProductFile: pivnet.ProductFile{
-							ID:          1234,
-							Description: description,
-						}}
-				})
-
-				It("creates the product file with the description field", func() {
-					server.AppendHandlers(
-						ghttp.CombineHandlers(
-							ghttp.VerifyRequest("POST", apiPrefix+"/products/"+productSlug+"/product_files"),
-							ghttp.VerifyJSONRepresenting(&expectedRequestBody),
-							ghttp.RespondWithJSONEncoded(http.StatusCreated, productFileResponse),
-						),
-					)
-
-					createProductFileConfig.Description = description
-
-					productFile, err := client.ProductFiles.Create(createProductFileConfig)
-					Expect(err).NotTo(HaveOccurred())
-					Expect(productFile.Description).To(Equal(description))
-				})
-			})
+			productFile, err := client.ProductFiles.Create(createProductFileConfig)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(productFile.ID).To(Equal(1234))
+			Expect(productFile).To(Equal(productFileResponse.ProductFile))
 		})
 
 		Context("when the server responds with a non-201 status code", func() {
@@ -450,7 +440,11 @@ var _ = Describe("PivnetClient - product files", func() {
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
-						ghttp.VerifyRequest("POST", apiPrefix+"/products/"+productSlug+"/product_files"),
+						ghttp.VerifyRequest("POST", fmt.Sprintf(
+							"%s/products/%s/product_files",
+							apiPrefix,
+							productSlug,
+						)),
 						ghttp.RespondWithJSONEncoded(http.StatusTeapot, response),
 					),
 				)
