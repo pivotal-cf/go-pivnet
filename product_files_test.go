@@ -831,4 +831,50 @@ var _ = Describe("PivnetClient - product files", func() {
 			})
 		})
 	})
+
+	Describe("ProductFile methods", func() {
+		var (
+			productFile pivnet.ProductFile
+		)
+
+		BeforeEach(func() {
+			productFile = pivnet.ProductFile{}
+		})
+
+		Describe("DownloadLink", func() {
+			var (
+				downloadLink string
+			)
+
+			BeforeEach(func() {
+				downloadLink = "some link"
+
+				productFile.Links = &pivnet.Links{
+					Download: map[string]string{
+						"href": downloadLink,
+					},
+				}
+			})
+
+			It("returns download link from links map", func() {
+				dl, err := productFile.DownloadLink()
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(dl).To(Equal(downloadLink))
+			})
+
+			Context("when links are nil", func() {
+				BeforeEach(func() {
+					productFile.Links = nil
+				})
+
+				It("returns error", func() {
+					_, err := productFile.DownloadLink()
+					Expect(err).To(HaveOccurred())
+
+					Expect(err.Error()).To(ContainSubstring("empty"))
+				})
+			})
+		})
+	})
 })
