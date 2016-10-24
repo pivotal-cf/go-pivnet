@@ -196,6 +196,43 @@ var _ = Describe("PivnetClient", func() {
 		})
 	})
 
+	Context("when Pivnet returns a 451", func() {
+		var (
+			body []byte
+		)
+
+		BeforeEach(func() {
+			body = []byte(`{"message":"foo message"}`)
+		})
+
+		It("returns an ErrUnavailableForLegalReasons error with message from Pivnet", func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf("%s/foo", apiPrefix),
+					),
+					ghttp.RespondWith(http.StatusUnavailableForLegalReasons, body),
+				),
+			)
+
+			_, _, err := client.MakeRequest(
+				"GET",
+				"/foo",
+				http.StatusOK,
+				nil,
+				nil,
+			)
+			Expect(err).To(HaveOccurred())
+			Expect(err).To(MatchError(
+				pivnet.ErrUnavailableForLegalReasons{
+					ResponseCode: http.StatusUnavailableForLegalReasons,
+					Message:      "foo message",
+				},
+			))
+		})
+	})
+
 	Context("when Pivnet returns a 404", func() {
 		var (
 			body []byte

@@ -1,6 +1,8 @@
 package pivnet_test
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -877,4 +879,175 @@ var _ = Describe("PivnetClient - product files", func() {
 			})
 		})
 	})
+
+	Describe("DownloadForRelease", func() {
+		var (
+			releaseID     int
+			productFileID int
+
+			downloadLink string
+
+			downloadLinkResponseBody []byte
+
+			getStatusCode int
+			getResponse   interface{}
+
+			downloadLinkResponseStatusCode int
+		)
+
+		BeforeEach(func() {
+			releaseID = 1234
+			productFileID = 2345
+
+			downloadLink = "/some/download/link"
+
+			downloadLinkResponseBody = []byte("some file contents")
+
+			getStatusCode = http.StatusOK
+			getResponse = pivnet.ProductFileResponse{
+				pivnet.ProductFile{
+					ID:           1234,
+					AWSObjectKey: "something",
+					Links: &pivnet.Links{
+						Download: map[string]string{
+							"href": downloadLink,
+						},
+					},
+				},
+			}
+
+			downloadLinkResponseStatusCode = http.StatusOK
+		})
+
+		JustBeforeEach(func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf(
+							"%s/products/%s/releases/%d/product_files/%d",
+							apiPrefix,
+							productSlug,
+							releaseID,
+							productFileID,
+						),
+					),
+					ghttp.RespondWithJSONEncoded(getStatusCode, getResponse),
+				),
+			)
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("POST", fmt.Sprintf(
+						"%s%s",
+						apiPrefix,
+						downloadLink,
+					)),
+					ghttp.RespondWith(downloadLinkResponseStatusCode, downloadLinkResponseBody),
+				),
+			)
+		})
+
+		It("writes file contents to provided writer", func() {
+			writer := bytes.NewBuffer(nil)
+
+			err := client.ProductFiles.DownloadForRelease(
+				writer,
+				productSlug,
+				releaseID,
+				productFileID,
+			)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(writer.Bytes()).To(Equal(downloadLinkResponseBody))
+		})
+
+		Context("when productFile.DownloadLink() returns an error", func() {
+			BeforeEach(func() {
+				getResponse = pivnet.ProductFileResponse{
+					pivnet.ProductFile{
+						ID: 1234,
+					},
+				}
+			})
+
+			It("returns the error", func() {
+				writer := bytes.NewBuffer(nil)
+
+				err := client.ProductFiles.DownloadForRelease(
+					writer,
+					productSlug,
+					releaseID,
+					productFileID,
+				)
+				Expect(err).To(HaveOccurred())
+			})
+		})
+
+		Context("when making the request returns an error", func() {
+			BeforeEach(func() {
+				downloadLinkResponseStatusCode = http.StatusTeapot
+			})
+
+			It("forwards the error", func() {
+				writer := bytes.NewBuffer(nil)
+
+				err := client.ProductFiles.DownloadForRelease(
+					writer,
+					productSlug,
+					releaseID,
+					productFileID,
+				)
+				Expect(err).To(HaveOccurred())
+			})
+		})
+
+		Context("when there is an error copying the contents", func() {
+			var (
+				writer errWriter
+			)
+
+			BeforeEach(func() {
+				writer = errWriter{}
+			})
+
+			It("returns an error", func() {
+				err := client.ProductFiles.DownloadForRelease(
+					writer,
+					productSlug,
+					releaseID,
+					productFileID,
+				)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("error writing"))
+			})
+		})
+
+		Context("when there is an error getting the release", func() {
+			BeforeEach(func() {
+				getStatusCode = http.StatusTeapot
+			})
+
+			It("forwards the error", func() {
+				writer := bytes.NewBuffer(nil)
+
+				err := client.ProductFiles.DownloadForRelease(
+					writer,
+					productSlug,
+					releaseID,
+					productFileID,
+				)
+
+				Expect(err).To(HaveOccurred())
+			})
+		})
+	})
 })
+
+type errWriter struct {
+}
+
+func (e errWriter) Write([]byte) (int, error) {
+	return 0, errors.New("error writing")
+}
