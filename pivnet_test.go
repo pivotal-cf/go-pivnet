@@ -202,7 +202,7 @@ var _ = Describe("PivnetClient", func() {
 		)
 
 		BeforeEach(func() {
-			body = []byte(`{"message":"foo message"}`)
+			body = []byte(`{"message":"ignore me"}`)
 		})
 
 		It("returns an ErrUnavailableForLegalReasons error with message from Pivnet", func() {
@@ -227,7 +227,7 @@ var _ = Describe("PivnetClient", func() {
 			Expect(err).To(MatchError(
 				pivnet.ErrUnavailableForLegalReasons{
 					ResponseCode: http.StatusUnavailableForLegalReasons,
-					Message:      "foo message",
+					Message:      "The EULA has not been accepted.",
 				},
 			))
 		})

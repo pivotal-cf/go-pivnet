@@ -80,10 +80,10 @@ func (e ErrUnavailableForLegalReasons) Error() string {
 	return e.Message
 }
 
-func newErrUnavailableForLegalReasons(message string) ErrUnavailableForLegalReasons {
+func newErrUnavailableForLegalReasons() ErrUnavailableForLegalReasons {
 	return ErrUnavailableForLegalReasons{
 		ResponseCode: http.StatusUnavailableForLegalReasons,
-		Message:      message,
+		Message:      "The EULA has not been accepted.",
 	}
 }
 
@@ -210,7 +210,7 @@ func (c Client) MakeRequest(
 		case http.StatusNotFound:
 			return nil, nil, newErrNotFound(pErr.Message)
 		case http.StatusUnavailableForLegalReasons:
-			return nil, nil, newErrUnavailableForLegalReasons(pErr.Message)
+			return nil, nil, newErrUnavailableForLegalReasons()
 		}
 
 		return nil, nil, ErrPivnetOther{
