@@ -270,6 +270,71 @@ var _ = Describe("PivnetClient", func() {
 		})
 	})
 
+	Context("when Pivnet returns a 500", func() {
+		var (
+			body []byte
+		)
+
+		BeforeEach(func() {
+			body = []byte(`{"status":"500","error":"foo message"}`)
+		})
+
+		It("returns an error", func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf("%s/foo", apiPrefix),
+					),
+					ghttp.RespondWith(http.StatusInternalServerError, body),
+				),
+			)
+
+			_, _, err := client.MakeRequest(
+				"GET",
+				"/foo",
+				http.StatusOK,
+				nil,
+				nil,
+			)
+			Expect(err).To(HaveOccurred())
+			Expect(err).To(MatchError(
+				pivnet.ErrPivnetOther{
+					ResponseCode: http.StatusInternalServerError,
+					Message:      "foo message",
+				},
+			))
+		})
+
+		Context("when unmarshalling the response from Pivnet returns an error", func() {
+			BeforeEach(func() {
+				body = []byte(`{"error":1234}`)
+			})
+
+			It("returns an error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(
+							"GET",
+							fmt.Sprintf("%s/foo", apiPrefix),
+						),
+						ghttp.RespondWith(http.StatusInternalServerError, body),
+					),
+				)
+
+				_, _, err := client.MakeRequest(
+					"GET",
+					"/foo",
+					http.StatusOK,
+					nil,
+					nil,
+				)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("json: cannot unmarshal"))
+			})
+		})
+	})
+
 	Context("when an unexpected status code comes back from Pivnet", func() {
 		var (
 			body []byte
