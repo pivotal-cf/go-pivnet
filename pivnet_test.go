@@ -71,11 +71,10 @@ var _ = Describe("PivnetClient", func() {
 			),
 		)
 
-		_, _, err := client.MakeRequest(
+		_, err := client.MakeRequest(
 			"GET",
 			"/foo",
 			http.StatusOK,
-			nil,
 			nil,
 		)
 		Expect(err).NotTo(HaveOccurred())
@@ -94,11 +93,10 @@ var _ = Describe("PivnetClient", func() {
 			),
 		)
 
-		_, _, err := client.MakeRequest(
+		_, err := client.MakeRequest(
 			"GET",
 			"/foo",
 			http.StatusOK,
-			nil,
 			nil,
 		)
 		Expect(err).NotTo(HaveOccurred())
@@ -116,11 +114,10 @@ var _ = Describe("PivnetClient", func() {
 			),
 		)
 
-		_, _, err := client.MakeRequest(
+		_, err := client.MakeRequest(
 			"GET",
 			"/foo",
 			http.StatusOK,
-			nil,
 			nil,
 		)
 		Expect(err).NotTo(HaveOccurred())
@@ -131,11 +128,10 @@ var _ = Describe("PivnetClient", func() {
 			newClientConfig.Host = "%%%"
 			client = pivnet.NewClient(newClientConfig, fakeLogger)
 
-			_, _, err := client.MakeRequest(
+			_, err := client.MakeRequest(
 				"GET",
 				"/foo",
 				http.StatusOK,
-				nil,
 				nil,
 			)
 			Expect(err).To(HaveOccurred())
@@ -148,11 +144,10 @@ var _ = Describe("PivnetClient", func() {
 			newClientConfig.Host = "https://not-a-real-url.com"
 			client = pivnet.NewClient(newClientConfig, fakeLogger)
 
-			_, _, err := client.MakeRequest(
+			_, err := client.MakeRequest(
 				"GET",
 				"/foo",
 				http.StatusOK,
-				nil,
 				nil,
 			)
 			Expect(err).To(HaveOccurred())
@@ -179,11 +174,10 @@ var _ = Describe("PivnetClient", func() {
 				),
 			)
 
-			_, _, err := client.MakeRequest(
+			_, err := client.MakeRequest(
 				"GET",
 				"/foo",
 				http.StatusOK,
-				nil,
 				nil,
 			)
 			Expect(err).To(HaveOccurred())
@@ -216,11 +210,10 @@ var _ = Describe("PivnetClient", func() {
 				),
 			)
 
-			_, _, err := client.MakeRequest(
+			_, err := client.MakeRequest(
 				"GET",
 				"/foo",
 				http.StatusOK,
-				nil,
 				nil,
 			)
 			Expect(err).To(HaveOccurred())
@@ -253,11 +246,10 @@ var _ = Describe("PivnetClient", func() {
 				),
 			)
 
-			_, _, err := client.MakeRequest(
+			_, err := client.MakeRequest(
 				"GET",
 				"/foo",
 				http.StatusOK,
-				nil,
 				nil,
 			)
 			Expect(err).To(HaveOccurred())
@@ -290,11 +282,10 @@ var _ = Describe("PivnetClient", func() {
 				),
 			)
 
-			_, _, err := client.MakeRequest(
+			_, err := client.MakeRequest(
 				"GET",
 				"/foo",
 				http.StatusOK,
-				nil,
 				nil,
 			)
 			Expect(err).To(HaveOccurred())
@@ -322,11 +313,10 @@ var _ = Describe("PivnetClient", func() {
 					),
 				)
 
-				_, _, err := client.MakeRequest(
+				_, err := client.MakeRequest(
 					"GET",
 					"/foo",
 					http.StatusOK,
-					nil,
 					nil,
 				)
 				Expect(err).To(HaveOccurred())
@@ -355,11 +345,10 @@ var _ = Describe("PivnetClient", func() {
 				),
 			)
 
-			_, _, err := client.MakeRequest(
+			_, err := client.MakeRequest(
 				"GET",
 				"/foo",
 				http.StatusOK,
-				nil,
 				nil,
 			)
 			Expect(err).To(HaveOccurred())
@@ -378,11 +367,10 @@ var _ = Describe("PivnetClient", func() {
 					),
 				)
 
-				_, _, err := client.MakeRequest(
+				_, err := client.MakeRequest(
 					"GET",
 					"/foo",
 					http.StatusOK,
-					nil,
 					nil,
 				)
 				Expect(err).To(HaveOccurred())
@@ -402,61 +390,16 @@ var _ = Describe("PivnetClient", func() {
 					),
 				)
 
-				_, _, err := client.MakeRequest(
+				_, err := client.MakeRequest(
 					"GET",
 					"/foo",
 					0,
-					nil,
 					nil,
 				)
 				Expect(err).NotTo(HaveOccurred())
 			})
 		})
 
-	})
-
-	Context("when the json unmarshalling fails with error", func() {
-		It("forwards the error", func() {
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(
-						"GET",
-						fmt.Sprintf("%s/foo", apiPrefix),
-					),
-					ghttp.RespondWith(http.StatusOK, "%%%"),
-				),
-			)
-
-			_, _, err := client.MakeRequest(
-				"GET",
-				"/foo",
-				http.StatusOK,
-				nil,
-				struct{}{},
-			)
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("invalid character"))
-		})
-	})
-
-	Context("when nil interface is provided for deserialization", func() {
-		It("skips deserialization", func() {
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/some/endpoint", apiPrefix)),
-					ghttp.RespondWith(http.StatusOK, "{}"),
-				),
-			)
-
-			_, _, err := client.MakeRequest(
-				"GET",
-				"/some/endpoint",
-				http.StatusOK,
-				nil,
-				nil,
-			)
-			Expect(err).NotTo(HaveOccurred())
-		})
 	})
 
 	Describe("CreateRequest", func() {
