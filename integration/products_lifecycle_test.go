@@ -6,7 +6,7 @@ import (
 	"github.com/pivotal-cf/go-pivnet"
 )
 
-var _ = Describe("Proudcts Lifecycle", func() {
+var _ = Describe("Products Lifecycle", func() {
 	Describe("finding a product by slug", func() {
 		It("returns the corresponding product", func() {
 			product, err := client.Products.Get(testProductSlug)
