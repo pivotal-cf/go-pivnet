@@ -83,5 +83,21 @@ var _ = Describe("PivnetClient - release types", func() {
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", fmt.Sprintf("%s/releases/release_types", apiPrefix)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				_, err := client.ReleaseTypes.Get()
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
+			})
+		})
 	})
 })

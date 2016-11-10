@@ -83,13 +83,34 @@ var _ = Describe("PivnetClient - product", func() {
 						ghttp.VerifyRequest("GET", fmt.Sprintf(
 							"%s/products/%s",
 							apiPrefix,
-							slug)),
+							slug,
+						)),
 						ghttp.RespondWith(http.StatusTeapot, body),
 					),
 				)
 
 				_, err := client.Products.Get(slug)
 				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", fmt.Sprintf(
+							"%s/products/%s",
+							apiPrefix,
+							slug,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				_, err := client.Products.Get(slug)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
 			})
 		})
 	})
@@ -134,13 +155,33 @@ var _ = Describe("PivnetClient - product", func() {
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", fmt.Sprintf(
 							"%s/products",
-							apiPrefix)),
+							apiPrefix,
+						)),
 						ghttp.RespondWith(http.StatusTeapot, body),
 					),
 				)
 
 				_, err := client.Products.List()
 				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", fmt.Sprintf(
+							"%s/products",
+							apiPrefix,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				_, err := client.Products.List()
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
 			})
 		})
 	})

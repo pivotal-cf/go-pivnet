@@ -111,6 +111,21 @@ var _ = Describe("PivnetClient - product files", func() {
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			BeforeEach(func() {
+				response = "%%%"
+			})
+
+			It("forwards the error", func() {
+				_, err := client.ProductFiles.List(
+					productSlug,
+				)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("json"))
+			})
+		})
 	})
 
 	Describe("List product files for release", func() {
@@ -192,6 +207,22 @@ var _ = Describe("PivnetClient - product files", func() {
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			BeforeEach(func() {
+				response = "%%%"
+			})
+
+			It("forwards the error", func() {
+				_, err := client.ProductFiles.ListForRelease(
+					productSlug,
+					releaseID,
+				)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("json"))
+			})
+		})
 	})
 
 	Describe("Get Product File", func() {
@@ -258,6 +289,22 @@ var _ = Describe("PivnetClient - product files", func() {
 				Expect(err).To(HaveOccurred())
 
 				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			BeforeEach(func() {
+				response = "%%%"
+			})
+
+			It("forwards the error", func() {
+				_, err := client.ProductFiles.Get(
+					productSlug,
+					productFileID,
+				)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("json"))
 			})
 		})
 	})
@@ -347,6 +394,23 @@ var _ = Describe("PivnetClient - product files", func() {
 				Expect(err).To(HaveOccurred())
 
 				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			BeforeEach(func() {
+				response = "%%%"
+			})
+
+			It("forwards the error", func() {
+				_, err := client.ProductFiles.GetForRelease(
+					productSlug,
+					releaseID,
+					productFileID,
+				)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("json"))
 			})
 		})
 	})
@@ -458,6 +522,26 @@ var _ = Describe("PivnetClient - product files", func() {
 			})
 		})
 
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("POST", fmt.Sprintf(
+							"%s/products/%s/product_files",
+							apiPrefix,
+							productSlug,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				_, err := client.ProductFiles.Create(createProductFileConfig)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
+			})
+		})
+
 		Context("when the aws object key is empty", func() {
 			BeforeEach(func() {
 				createProductFileConfig = pivnet.CreateProductFileConfig{
@@ -556,6 +640,27 @@ var _ = Describe("PivnetClient - product files", func() {
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/product_files/%d",
+							apiPrefix,
+							productSlug,
+							productFile.ID,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				_, err := client.ProductFiles.Update(productSlug, productFile)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
+			})
+		})
 	})
 
 	Describe("Delete Product File", func() {
@@ -602,6 +707,24 @@ var _ = Describe("PivnetClient - product files", func() {
 
 				_, err := client.ProductFiles.Delete(productSlug, id)
 				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(
+							"DELETE",
+							fmt.Sprintf("%s/products/%s/product_files/%d", apiPrefix, productSlug, id)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				_, err := client.ProductFiles.Delete(productSlug, id)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
 			})
 		})
 	})
@@ -661,6 +784,27 @@ var _ = Describe("PivnetClient - product files", func() {
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/releases/%d/add_product_file",
+							apiPrefix,
+							productSlug,
+							releaseID,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				err := client.ProductFiles.AddToRelease(productSlug, releaseID, productFileID)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
+			})
+		})
 	})
 
 	Describe("Remove Product File from release", func() {
@@ -716,6 +860,27 @@ var _ = Describe("PivnetClient - product files", func() {
 
 				err := client.ProductFiles.RemoveFromRelease(productSlug, releaseID, productFileID)
 				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/releases/%d/remove_product_file",
+							apiPrefix,
+							productSlug,
+							releaseID,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				err := client.ProductFiles.RemoveFromRelease(productSlug, releaseID, productFileID)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
 			})
 		})
 	})
@@ -775,6 +940,27 @@ var _ = Describe("PivnetClient - product files", func() {
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/file_groups/%d/add_product_file",
+							apiPrefix,
+							productSlug,
+							fileGroupID,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				err := client.ProductFiles.AddToFileGroup(productSlug, fileGroupID, productFileID)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
+			})
+		})
 	})
 
 	Describe("Remove Product File from file group", func() {
@@ -830,6 +1016,27 @@ var _ = Describe("PivnetClient - product files", func() {
 
 				err := client.ProductFiles.RemoveFromFileGroup(productSlug, fileGroupID, productFileID)
 				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/file_groups/%d/remove_product_file",
+							apiPrefix,
+							productSlug,
+							fileGroupID,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				err := client.ProductFiles.RemoveFromFileGroup(productSlug, fileGroupID, productFileID)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
 			})
 		})
 	})

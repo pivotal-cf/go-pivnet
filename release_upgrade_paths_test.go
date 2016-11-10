@@ -114,6 +114,27 @@ var _ = Describe("PivnetClient - release upgrade paths", func() {
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", fmt.Sprintf(
+							"%s/products/%s/releases/%d/upgrade_paths",
+							apiPrefix,
+							productSlug,
+							releaseID,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				_, err := client.ReleaseUpgradePaths.Get(productSlug, releaseID)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
+			})
+		})
 	})
 
 	Describe("Add", func() {
@@ -181,6 +202,31 @@ var _ = Describe("PivnetClient - release upgrade paths", func() {
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/releases/%d/add_upgrade_path",
+							apiPrefix,
+							productSlug,
+							releaseID,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				err := client.ReleaseUpgradePaths.Add(
+					productSlug,
+					releaseID,
+					previousReleaseID,
+				)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
+			})
+		})
 	})
 
 	Describe("Remove", func() {
@@ -246,6 +292,31 @@ var _ = Describe("PivnetClient - release upgrade paths", func() {
 					previousReleaseID,
 				)
 				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/releases/%d/remove_upgrade_path",
+							apiPrefix,
+							productSlug,
+							releaseID,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				err := client.ReleaseUpgradePaths.Remove(
+					productSlug,
+					releaseID,
+					previousReleaseID,
+				)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
 			})
 		})
 	})

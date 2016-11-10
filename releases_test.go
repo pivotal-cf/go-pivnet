@@ -83,6 +83,22 @@ var _ = Describe("PivnetClient - product files", func() {
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", apiPrefix+"/products/banana/releases"),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				_, err := client.Releases.List("banana")
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
+			})
+		})
 	})
 
 	Describe("Get", func() {
@@ -120,6 +136,22 @@ var _ = Describe("PivnetClient - product files", func() {
 
 				_, err := client.Releases.Get("banana", 3)
 				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", apiPrefix+"/products/banana/releases/3"),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				_, err := client.Releases.Get("banana", 3)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
 			})
 		})
 	})
@@ -339,6 +371,22 @@ var _ = Describe("PivnetClient - product files", func() {
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("POST", apiPrefix+"/products/"+productSlug+"/releases"),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				_, err := client.Releases.Create(createReleaseConfig)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
+			})
+		})
 	})
 
 	Describe("Update", func() {
@@ -392,6 +440,29 @@ var _ = Describe("PivnetClient - product files", func() {
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				release := pivnet.Release{ID: 111}
+
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/releases/%d",
+							apiPrefix,
+							"banana-slug",
+							release.ID,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				_, err := client.Releases.Update("banana-slug", release)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
+			})
+		})
 	})
 
 	Describe("Delete", func() {
@@ -436,6 +507,24 @@ var _ = Describe("PivnetClient - product files", func() {
 
 				err := client.Releases.Delete("banana", release)
 				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				release := pivnet.Release{ID: 111}
+
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("DELETE", fmt.Sprintf("%s/products/banana/releases/%d", apiPrefix, release.ID)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				err := client.Releases.Delete("banana", release)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
 			})
 		})
 	})

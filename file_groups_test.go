@@ -97,6 +97,22 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/%s/file_groups", apiPrefix, productSlug)),
+						ghttp.RespondWith(http.StatusOK, "%%%"),
+					),
+				)
+
+				_, err := client.FileGroups.List(productSlug)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
+			})
+		})
 	})
 
 	Describe("List for release", func() {
@@ -170,6 +186,22 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			BeforeEach(func() {
+				response = "%%%"
+			})
+
+			It("forwards the error", func() {
+				_, err := client.FileGroups.ListForRelease(
+					productSlug,
+					releaseID,
+				)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("json"))
+			})
+		})
 	})
 
 	Describe("Get File group", func() {
@@ -235,6 +267,22 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 				Expect(err).To(HaveOccurred())
 
 				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			BeforeEach(func() {
+				response = "%%%"
+			})
+
+			It("forwards the error", func() {
+				_, err := client.FileGroups.Get(
+					productSlug,
+					fileGroupID,
+				)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("json"))
 			})
 		})
 	})
@@ -310,6 +358,26 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("POST", fmt.Sprintf(
+							"%s/products/%s/file_groups",
+							apiPrefix,
+							productSlug,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				_, err := client.FileGroups.Create(productSlug, name)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
+			})
+		})
 	})
 
 	Describe("Update", func() {
@@ -383,6 +451,27 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/file_groups/%d",
+							apiPrefix,
+							productSlug,
+							fileGroup.ID,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				_, err := client.FileGroups.Update(productSlug, fileGroup)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
+			})
+		})
 	})
 
 	Describe("Delete File Group", func() {
@@ -429,6 +518,24 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 
 				_, err := client.FileGroups.Delete(productSlug, id)
 				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(
+							"DELETE",
+							fmt.Sprintf("%s/products/%s/file_groups/%d", apiPrefix, productSlug, id)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				_, err := client.FileGroups.Delete(productSlug, id)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
 			})
 		})
 	})
@@ -492,6 +599,27 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/releases/%d/add_file_group",
+							apiPrefix,
+							productSlug,
+							releaseID,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				err := client.FileGroups.AddToRelease(productSlug, releaseID, fileGroupID)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
+			})
+		})
 	})
 
 	Describe("Remove File Group", func() {
@@ -551,6 +679,27 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 
 				err := client.FileGroups.RemoveFromRelease(productSlug, releaseID, fileGroupID)
 				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/releases/%d/remove_file_group",
+							apiPrefix,
+							productSlug,
+							releaseID,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				err := client.FileGroups.RemoveFromRelease(productSlug, releaseID, fileGroupID)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
 			})
 		})
 	})

@@ -88,6 +88,22 @@ var _ = Describe("PivnetClient - user groups", func() {
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", fmt.Sprintf("%s/user_groups", apiPrefix)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				_, err := client.UserGroups.List()
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
+			})
+		})
 	})
 
 	Describe("List for release", func() {
@@ -136,6 +152,22 @@ var _ = Describe("PivnetClient - user groups", func() {
 
 				_, err := client.UserGroups.ListForRelease("banana", releaseID)
 				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", fmt.Sprintf("%s/products/banana/releases/%d/user_groups", apiPrefix, releaseID)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				_, err := client.UserGroups.ListForRelease("banana", releaseID)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
 			})
 		})
 	})
@@ -195,6 +227,27 @@ var _ = Describe("PivnetClient - user groups", func() {
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/releases/%d/add_user_group",
+							apiPrefix,
+							productSlug,
+							releaseID,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				err := client.UserGroups.AddToRelease(productSlug, releaseID, userGroupID)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
+			})
+		})
 	})
 
 	Describe("Remove From Release", func() {
@@ -250,6 +303,27 @@ var _ = Describe("PivnetClient - user groups", func() {
 
 				err := client.UserGroups.RemoveFromRelease(productSlug, releaseID, userGroupID)
 				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/releases/%d/remove_user_group",
+							apiPrefix,
+							productSlug,
+							releaseID,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				err := client.UserGroups.RemoveFromRelease(productSlug, releaseID, userGroupID)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
 			})
 		})
 	})
@@ -325,6 +399,19 @@ var _ = Describe("PivnetClient - user groups", func() {
 				Expect(err).To(HaveOccurred())
 
 				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			BeforeEach(func() {
+				response = "%%%"
+			})
+
+			It("forwards the error", func() {
+				_, err := client.UserGroups.Get(userGroupID)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("json"))
 			})
 		})
 	})
@@ -434,6 +521,25 @@ var _ = Describe("PivnetClient - user groups", func() {
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("POST", fmt.Sprintf(
+							"%s/user_groups",
+							apiPrefix,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				_, err := client.UserGroups.Create(name, description, members)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
+			})
+		})
 	})
 
 	Describe("Update", func() {
@@ -508,6 +614,26 @@ var _ = Describe("PivnetClient - user groups", func() {
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/user_groups/%d",
+							apiPrefix,
+							userGroup.ID,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				_, err := client.UserGroups.Update(userGroup)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
+			})
+		})
 	})
 
 	Describe("Delete", func() {
@@ -552,6 +678,22 @@ var _ = Describe("PivnetClient - user groups", func() {
 
 				err := client.UserGroups.Delete(userGroup.ID)
 				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("DELETE", fmt.Sprintf("%s/user_groups/%d", apiPrefix, userGroup.ID)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				err := client.UserGroups.Delete(userGroup.ID)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
 			})
 		})
 	})
@@ -640,6 +782,30 @@ var _ = Describe("PivnetClient - user groups", func() {
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/user_groups/%d/add_member",
+							apiPrefix,
+							userGroup.ID,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				_, err := client.UserGroups.AddMemberToGroup(
+					userGroup.ID,
+					memberEmailAddress,
+					admin,
+				)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
+			})
+		})
 	})
 
 	Describe("RemoveMemberFromGroup", func() {
@@ -714,6 +880,26 @@ var _ = Describe("PivnetClient - user groups", func() {
 				_, err := client.UserGroups.RemoveMemberFromGroup(userGroup.ID, memberEmailAddress)
 
 				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/user_groups/%d/remove_member",
+							apiPrefix,
+							userGroup.ID,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				_, err := client.UserGroups.RemoveMemberFromGroup(userGroup.ID, memberEmailAddress)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
 			})
 		})
 	})

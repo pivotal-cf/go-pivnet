@@ -86,6 +86,22 @@ var _ = Describe("PivnetClient - EULA", func() {
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", fmt.Sprintf("%s/eulas", apiPrefix)),
+						ghttp.RespondWith(http.StatusOK, "%%%"),
+					),
+				)
+
+				_, err := client.EULA.List()
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
+			})
+		})
 	})
 
 	Describe("Get", func() {
@@ -134,6 +150,22 @@ var _ = Describe("PivnetClient - EULA", func() {
 
 				_, err := client.EULA.Get(eulaSlug)
 				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", fmt.Sprintf("%s/eulas/%s", apiPrefix, eulaSlug)),
+						ghttp.RespondWith(http.StatusOK, "%%%"),
+					),
+				)
+
+				_, err := client.EULA.Get(eulaSlug)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
 			})
 		})
 	})
