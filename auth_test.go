@@ -44,7 +44,7 @@ var _ = Describe("PivnetClient - Auth", func() {
 	})
 
 	Describe("Check", func() {
-		It("returns successfully", func() {
+		It("returns true,nil", func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/authentication", apiPrefix)),
@@ -52,11 +52,13 @@ var _ = Describe("PivnetClient - Auth", func() {
 				),
 			)
 
-			err := client.Auth.Check()
+			ok, err := client.Auth.Check()
 			Expect(err).NotTo(HaveOccurred())
+
+			Expect(ok).To(BeTrue())
 		})
 
-		Context("when the server responds with a non-2XX status code", func() {
+		Context("when the server responds with a 401 status code", func() {
 			var (
 				body []byte
 			)
@@ -65,7 +67,55 @@ var _ = Describe("PivnetClient - Auth", func() {
 				body = []byte(`{"message":"foo message"}`)
 			})
 
-			It("returns an error", func() {
+			It("returns false,nil", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", fmt.Sprintf("%s/authentication", apiPrefix)),
+						ghttp.RespondWith(http.StatusUnauthorized, body),
+					),
+				)
+
+				ok, err := client.Auth.Check()
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(ok).To(BeFalse())
+			})
+		})
+
+		Context("when the server responds with a 403 status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
+			It("returns false,nil", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", fmt.Sprintf("%s/authentication", apiPrefix)),
+						ghttp.RespondWith(http.StatusForbidden, body),
+					),
+				)
+
+				ok, err := client.Auth.Check()
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(ok).To(BeFalse())
+			})
+		})
+
+		Context("when the server responds with any other status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
+			It("returns false,err", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", fmt.Sprintf("%s/authentication", apiPrefix)),
@@ -73,8 +123,10 @@ var _ = Describe("PivnetClient - Auth", func() {
 					),
 				)
 
-				err := client.Auth.Check()
+				ok, err := client.Auth.Check()
 				Expect(err.Error()).To(ContainSubstring("foo message"))
+
+				Expect(ok).To(BeFalse())
 			})
 		})
 	})

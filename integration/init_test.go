@@ -43,6 +43,7 @@ var _ = BeforeSuite(func() {
 
 	client = pivnet.NewClient(config, logger)
 
-	err := client.Auth.Check()
+	ok, err := client.Auth.Check()
 	Expect(err).NotTo(HaveOccurred())
+	Expect(ok).To(BeTrue())
 })
