@@ -9,8 +9,10 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"strings"
 
+	"github.com/pivotal-cf/go-pivnet/download"
 	"github.com/pivotal-cf/go-pivnet/logger"
 )
 
@@ -26,6 +28,8 @@ type Client struct {
 	logger    logger.Logger
 
 	HTTP *http.Client
+
+	downloader downloader
 
 	Auth                *AuthService
 	EULA                *EULAsService
@@ -46,6 +50,11 @@ type ClientConfig struct {
 	SkipSSLValidation bool
 }
 
+//go:generate counterfeiter -o ./fakes/downloader.go --fake-name Downloader . downloader
+type downloader interface {
+	Get(location *os.File, contentURL string) error
+}
+
 func NewClient(config ClientConfig, logger logger.Logger) Client {
 	baseURL := fmt.Sprintf("%s%s", config.Host, apiVersion)
 
@@ -55,12 +64,16 @@ func NewClient(config ClientConfig, logger logger.Logger) Client {
 		},
 	}
 
+	ranger := download.NewRanger(10)
+	downloader := download.New(http.DefaultClient, ranger)
+
 	client := Client{
-		baseURL:   baseURL,
-		token:     config.Token,
-		userAgent: config.UserAgent,
-		logger:    logger,
-		HTTP:      httpClient,
+		baseURL:    baseURL,
+		token:      config.Token,
+		userAgent:  config.UserAgent,
+		logger:     logger,
+		downloader: downloader,
+		HTTP:       httpClient,
 	}
 
 	client.Auth = &AuthService{client: client}
