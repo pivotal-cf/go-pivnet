@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"net/http"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
 	"github.com/pivotal-cf/go-pivnet"
 	"github.com/pivotal-cf/go-pivnet/logger"
 	"github.com/pivotal-cf/go-pivnet/logger/loggerfakes"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("PivnetClient - release upgrade paths", func() {
