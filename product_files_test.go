@@ -1,10 +1,11 @@
 package pivnet_test
 
 import (
-	"bytes"
-	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"regexp"
+	"strconv"
 
 	"github.com/onsi/gomega/ghttp"
 	"github.com/pivotal-cf/go-pivnet"
@@ -1090,10 +1091,12 @@ var _ = Describe("PivnetClient - product files", func() {
 
 	Describe("DownloadForRelease", func() {
 		var (
+			cloudfront    *ghttp.Server
 			releaseID     int
 			productFileID int
 
-			downloadLink string
+			downloadLink               string
+			cloudfrontDownloadLocation string
 
 			downloadLinkResponseBody []byte
 
@@ -1111,6 +1114,10 @@ var _ = Describe("PivnetClient - product files", func() {
 
 			downloadLinkResponseBody = []byte("some file contents")
 
+			cloudfront = ghttp.NewServer()
+
+			cloudfrontDownloadLocation = fmt.Sprintf("%s/%s", cloudfront.URL(), "download")
+
 			getStatusCode = http.StatusOK
 			getResponse = pivnet.ProductFileResponse{
 				pivnet.ProductFile{
@@ -1124,7 +1131,11 @@ var _ = Describe("PivnetClient - product files", func() {
 				},
 			}
 
-			downloadLinkResponseStatusCode = http.StatusOK
+			downloadLinkResponseStatusCode = http.StatusFound
+		})
+
+		AfterEach(func() {
+			cloudfront.Close()
 		})
 
 		JustBeforeEach(func() {
@@ -1151,23 +1162,63 @@ var _ = Describe("PivnetClient - product files", func() {
 						apiPrefix,
 						downloadLink,
 					)),
-					ghttp.RespondWith(downloadLinkResponseStatusCode, downloadLinkResponseBody),
+					ghttp.RespondWith(downloadLinkResponseStatusCode, []byte(`{}`),
+						http.Header{
+							"Location": []string{cloudfrontDownloadLocation},
+						},
+					),
 				),
+			)
+
+			cloudfront.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("HEAD", "/download"),
+					ghttp.RespondWith(http.StatusOK, nil,
+						http.Header{
+							"Content-Length": []string{"18"},
+						},
+					),
+				),
+			)
+
+			cloudfront.RouteToHandler("GET", "/download", ghttp.CombineHandlers(
+				http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+					ex := regexp.MustCompile(`bytes=(\d+)-(\d+)`)
+					matches := ex.FindStringSubmatch(req.Header.Get("Range"))
+
+					start, err := strconv.Atoi(matches[1])
+					if err != nil {
+						Fail(err.Error())
+					}
+
+					end, err := strconv.Atoi(matches[2])
+					if err != nil {
+						Fail(err.Error())
+					}
+
+					w.WriteHeader(http.StatusPartialContent)
+					w.Write(downloadLinkResponseBody[start : end+1])
+				}),
+			),
 			)
 		})
 
 		It("writes file contents to provided writer", func() {
-			writer := bytes.NewBuffer(nil)
+			tmpFile, err := ioutil.TempFile("", "")
+			Expect(err).NotTo(HaveOccurred())
 
-			err := client.ProductFiles.DownloadForRelease(
-				writer,
+			err = client.ProductFiles.DownloadForRelease(
+				tmpFile,
 				productSlug,
 				releaseID,
 				productFileID,
 			)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(writer.Bytes()).To(Equal(downloadLinkResponseBody))
+			contents, err := ioutil.ReadFile(tmpFile.Name())
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(contents).To(Equal(downloadLinkResponseBody))
 		})
 
 		Context("when productFile.DownloadLink() returns an error", func() {
@@ -1180,10 +1231,11 @@ var _ = Describe("PivnetClient - product files", func() {
 			})
 
 			It("returns the error", func() {
-				writer := bytes.NewBuffer(nil)
+				tmpFile, err := ioutil.TempFile("", "")
+				Expect(err).NotTo(HaveOccurred())
 
-				err := client.ProductFiles.DownloadForRelease(
-					writer,
+				err = client.ProductFiles.DownloadForRelease(
+					tmpFile,
 					productSlug,
 					releaseID,
 					productFileID,
@@ -1198,37 +1250,16 @@ var _ = Describe("PivnetClient - product files", func() {
 			})
 
 			It("forwards the error", func() {
-				writer := bytes.NewBuffer(nil)
+				tmpFile, err := ioutil.TempFile("", "")
+				Expect(err).NotTo(HaveOccurred())
 
-				err := client.ProductFiles.DownloadForRelease(
-					writer,
+				err = client.ProductFiles.DownloadForRelease(
+					tmpFile,
 					productSlug,
 					releaseID,
 					productFileID,
 				)
 				Expect(err).To(HaveOccurred())
-			})
-		})
-
-		Context("when there is an error copying the contents", func() {
-			var (
-				writer errWriter
-			)
-
-			BeforeEach(func() {
-				writer = errWriter{}
-			})
-
-			It("returns an error", func() {
-				err := client.ProductFiles.DownloadForRelease(
-					writer,
-					productSlug,
-					releaseID,
-					productFileID,
-				)
-				Expect(err).To(HaveOccurred())
-
-				Expect(err.Error()).To(ContainSubstring("error writing"))
 			})
 		})
 
@@ -1238,10 +1269,11 @@ var _ = Describe("PivnetClient - product files", func() {
 			})
 
 			It("forwards the error", func() {
-				writer := bytes.NewBuffer(nil)
+				tmpFile, err := ioutil.TempFile("", "")
+				Expect(err).NotTo(HaveOccurred())
 
-				err := client.ProductFiles.DownloadForRelease(
-					writer,
+				err = client.ProductFiles.DownloadForRelease(
+					tmpFile,
 					productSlug,
 					releaseID,
 					productFileID,
@@ -1252,10 +1284,3 @@ var _ = Describe("PivnetClient - product files", func() {
 		})
 	})
 })
-
-type errWriter struct {
-}
-
-func (e errWriter) Write([]byte) (int, error) {
-	return 0, errors.New("error writing")
-}
