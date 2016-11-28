@@ -190,6 +190,7 @@ func (c Client) MakeRequest(
 	httpClient = &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: c.skipSSLValidation},
+			Proxy: http.ProxyFromEnvironment,
 		},
 	}
 
