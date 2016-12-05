@@ -28,7 +28,7 @@ type Client struct {
 
 	HTTP *http.Client
 
-	downloader *download.Client
+	downloader download.Client
 
 	Auth                *AuthService
 	EULA                *EULAsService
@@ -59,7 +59,7 @@ func NewClient(config ClientConfig, logger logger.Logger) Client {
 	}
 
 	ranger := download.NewRanger(10)
-	downloader := download.New(http.DefaultClient, ranger)
+	downloader := download.New(http.DefaultClient, ranger, download.NewBar())
 
 	client := Client{
 		baseURL:    baseURL,

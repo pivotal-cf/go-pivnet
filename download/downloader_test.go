@@ -38,11 +38,13 @@ var _ = Describe("Downloader", func() {
 	var (
 		httpClient *fakes.HTTPClient
 		ranger     *fakes.Ranger
+		bar        *fakes.Bar
 	)
 
 	BeforeEach(func() {
 		httpClient = &fakes.HTTPClient{}
 		ranger = &fakes.Ranger{}
+		bar = &fakes.Bar{}
 	})
 
 	Describe("Get", func() {
@@ -95,7 +97,7 @@ var _ = Describe("Downloader", func() {
 				return nil, nil
 			}
 
-			downloader := download.New(httpClient, ranger)
+			downloader := download.New(httpClient, ranger, bar)
 
 			tmpFile, err := ioutil.TempFile("", "")
 			Expect(err).NotTo(HaveOccurred())
@@ -110,6 +112,9 @@ var _ = Describe("Downloader", func() {
 
 			Expect(ranger.BuildRangeCallCount()).To(Equal(1))
 			Expect(ranger.BuildRangeArgsForCall(0)).To(Equal(int64(10)))
+
+			Expect(bar.SetTotalArgsForCall(0)).To(Equal(int64(10)))
+			Expect(bar.KickoffCallCount()).To(Equal(1))
 
 			Expect(httpClient.DoCallCount()).To(Equal(3))
 
@@ -131,6 +136,11 @@ var _ = Describe("Downloader", func() {
 			Expect(methods).To(ConsistOf([]string{"HEAD", "GET", "GET"}))
 			Expect(urls).To(ConsistOf([]string{"https://example.com/some-file", "https://example.com/some-file", "https://example.com/some-file"}))
 			Expect(headers).To(ConsistOf([]string{"bytes=0-9", "bytes=10-19"}))
+
+			Expect(bar.AddArgsForCall(0)).To(Equal(10))
+			Expect(bar.AddArgsForCall(1)).To(Equal(10))
+
+			Expect(bar.FinishCallCount()).To(Equal(1))
 		})
 	})
 
@@ -164,7 +174,8 @@ var _ = Describe("Downloader", func() {
 				}
 
 				ranger.BuildRangeReturns([]download.Range{{Lower: 0, Upper: 15}}, nil)
-				downloader := download.New(httpClient, ranger)
+
+				downloader := download.New(httpClient, ranger, bar)
 
 				tmpFile, err := ioutil.TempFile("", "")
 				Expect(err).NotTo(HaveOccurred())
@@ -207,7 +218,8 @@ var _ = Describe("Downloader", func() {
 				}
 
 				ranger.BuildRangeReturns([]download.Range{{Lower: 0, Upper: 15}}, nil)
-				downloader := download.New(httpClient, ranger)
+
+				downloader := download.New(httpClient, ranger, bar)
 
 				tmpFile, err := ioutil.TempFile("", "")
 				Expect(err).NotTo(HaveOccurred())
@@ -226,7 +238,7 @@ var _ = Describe("Downloader", func() {
 	Context("when an error occurs", func() {
 		Context("when the HEAD request cannot be constucted", func() {
 			It("returns an error", func() {
-				downloader := download.New(nil, nil)
+				downloader := download.New(nil, nil, nil)
 
 				err := downloader.Get(nil, "%%%")
 				Expect(err).To(MatchError(ContainSubstring("failed to construct HEAD request")))
@@ -236,7 +248,8 @@ var _ = Describe("Downloader", func() {
 		Context("when the HEAD has an error", func() {
 			It("returns an error", func() {
 				httpClient.DoReturns(&http.Response{}, errors.New("failed request"))
-				downloader := download.New(httpClient, nil)
+
+				downloader := download.New(httpClient, nil, nil)
 
 				err := downloader.Get(nil, "https://example.com/some-file")
 				Expect(err).To(MatchError("failed to make HEAD request: failed request"))
@@ -255,7 +268,8 @@ var _ = Describe("Downloader", func() {
 				}, nil)
 
 				ranger.BuildRangeReturns([]download.Range{}, errors.New("failed range build"))
-				downloader := download.New(httpClient, ranger)
+
+				downloader := download.New(httpClient, ranger, nil)
 
 				err := downloader.Get(nil, "https://example.com/some-file")
 				Expect(err).To(MatchError("failed to construct range: failed range build"))
@@ -284,7 +298,8 @@ var _ = Describe("Downloader", func() {
 				}
 
 				ranger.BuildRangeReturns([]download.Range{{}}, nil)
-				downloader := download.New(httpClient, ranger)
+
+				downloader := download.New(httpClient, ranger, bar)
 
 				err := downloader.Get(nil, "https://example.com/some-file")
 				Expect(err).To(MatchError("failed during retryable request: failed GET"))
@@ -316,7 +331,8 @@ var _ = Describe("Downloader", func() {
 				}
 
 				ranger.BuildRangeReturns([]download.Range{{}}, nil)
-				downloader := download.New(httpClient, ranger)
+
+				downloader := download.New(httpClient, ranger, bar)
 
 				err := downloader.Get(nil, "https://example.com/some-file")
 				Expect(err).To(MatchError("failed during retryable request: during GET unexpected status code was returned: 500"))
@@ -348,7 +364,8 @@ var _ = Describe("Downloader", func() {
 				}
 
 				ranger.BuildRangeReturns([]download.Range{{Lower: 0, Upper: 15}}, nil)
-				downloader := download.New(httpClient, ranger)
+
+				downloader := download.New(httpClient, ranger, bar)
 
 				closedFile, err := ioutil.TempFile("", "")
 				Expect(err).NotTo(HaveOccurred())
