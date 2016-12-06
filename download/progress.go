@@ -7,7 +7,9 @@ type Bar struct {
 }
 
 func NewBar() Bar {
-	return Bar{pb.New(0)}
+	b := pb.New(0)
+	b.SetUnits(pb.U_BYTES)
+	return Bar{b}
 }
 
 func (b Bar) SetTotal(contentLength int64) {

@@ -58,7 +58,7 @@ func NewClient(config ClientConfig, logger logger.Logger) Client {
 		},
 	}
 
-	ranger := download.NewRanger(10)
+	ranger := download.NewRanger(100)
 	downloader := download.New(http.DefaultClient, ranger, download.NewBar())
 
 	client := Client{
