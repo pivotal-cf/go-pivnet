@@ -55,6 +55,7 @@ func NewClient(config ClientConfig, logger logger.Logger) Client {
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: config.SkipSSLValidation},
+			Proxy:           http.ProxyFromEnvironment,
 		},
 	}
 
