@@ -10,6 +10,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/pivotal-cf/go-pivnet/download"
 	"github.com/pivotal-cf/go-pivnet/logger"
@@ -53,6 +54,7 @@ func NewClient(config ClientConfig, logger logger.Logger) Client {
 	baseURL := fmt.Sprintf("%s%s", config.Host, apiVersion)
 
 	httpClient := &http.Client{
+		Timeout: 60 * time.Second,
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: config.SkipSSLValidation},
 			Proxy:           http.ProxyFromEnvironment,
