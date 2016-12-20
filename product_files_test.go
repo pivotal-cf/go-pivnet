@@ -16,7 +16,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = FDescribe("PivnetClient - product files", func() {
+var _ = Describe("PivnetClient - product files", func() {
 	var (
 		server     *ghttp.Server
 		client     pivnet.Client
