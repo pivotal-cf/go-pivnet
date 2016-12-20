@@ -19,6 +19,7 @@ var _ = Describe("Progress", func() {
 
 	BeforeEach(func() {
 		b = download.NewBar()
+		b.SetOutput(GinkgoWriter)
 	})
 
 	It("handles concurrent writes without racing", func() {

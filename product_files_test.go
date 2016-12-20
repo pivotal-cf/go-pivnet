@@ -16,7 +16,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("PivnetClient - product files", func() {
+var _ = FDescribe("PivnetClient - product files", func() {
 	var (
 		server     *ghttp.Server
 		client     pivnet.Client
@@ -1197,7 +1197,8 @@ var _ = Describe("PivnetClient - product files", func() {
 					}
 
 					w.WriteHeader(http.StatusPartialContent)
-					w.Write(downloadLinkResponseBody[start : end+1])
+					_, err = w.Write(downloadLinkResponseBody[start : end+1])
+					Expect(err).NotTo(HaveOccurred())
 				}),
 			),
 			)
@@ -1212,6 +1213,7 @@ var _ = Describe("PivnetClient - product files", func() {
 				productSlug,
 				releaseID,
 				productFileID,
+				GinkgoWriter,
 			)
 			Expect(err).NotTo(HaveOccurred())
 
@@ -1239,6 +1241,7 @@ var _ = Describe("PivnetClient - product files", func() {
 					productSlug,
 					releaseID,
 					productFileID,
+					GinkgoWriter,
 				)
 				Expect(err).To(HaveOccurred())
 			})
@@ -1258,6 +1261,7 @@ var _ = Describe("PivnetClient - product files", func() {
 					productSlug,
 					releaseID,
 					productFileID,
+					GinkgoWriter,
 				)
 				Expect(err).To(HaveOccurred())
 			})
@@ -1277,6 +1281,7 @@ var _ = Describe("PivnetClient - product files", func() {
 					productSlug,
 					releaseID,
 					productFileID,
+					GinkgoWriter,
 				)
 
 				Expect(err).To(HaveOccurred())
