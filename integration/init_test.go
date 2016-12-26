@@ -1,10 +1,12 @@
 package integration_test
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/pivotal-cf/go-pivnet"
-	"github.com/pivotal-cf/go-pivnet/logger/loggerfakes"
+	"github.com/pivotal-cf/go-pivnet/logger"
+	"github.com/robdimsdale/sanitizer"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -33,13 +35,20 @@ var _ = BeforeSuite(func() {
 		Fail("HOST must be set for integration tests to run")
 	}
 
+	By("Sanitizing acceptance test output")
+	sanitized := map[string]string{
+		APIToken: "***sanitized-api-token***",
+	}
+	sanitizedWriter := sanitizer.NewSanitizer(sanitized, GinkgoWriter)
+	GinkgoWriter = sanitizedWriter
+
 	config := pivnet.ClientConfig{
 		Host:      Host,
 		Token:     APIToken,
 		UserAgent: "go-pivnet/integration-test",
 	}
 
-	logger := &loggerfakes.FakeLogger{}
+	logger := GinkgoLogShim{}
 
 	client = pivnet.NewClient(config, logger)
 
@@ -47,3 +56,21 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	Expect(ok).To(BeTrue())
 })
+
+type GinkgoLogShim struct {
+}
+
+func (l GinkgoLogShim) Debug(action string, data ...logger.Data) {
+	l.Info(action, data...)
+}
+
+func (l GinkgoLogShim) Info(action string, data ...logger.Data) {
+	GinkgoWriter.Write([]byte(fmt.Sprintf("%s%s\n", action, appendString(data...))))
+}
+
+func appendString(data ...logger.Data) string {
+	if len(data) > 0 {
+		return fmt.Sprintf(" - %+v", data)
+	}
+	return ""
+}

@@ -53,6 +53,14 @@
 			"notests": true
 		},
 		{
+			"importpath": "github.com/robdimsdale/sanitizer",
+			"repository": "https://github.com/robdimsdale/sanitizer",
+			"vcs": "git",
+			"revision": "ab2334cb7539a2ce27b7aea53b7d693087b10cd9",
+			"branch": "master",
+			"notests": true
+		},
+		{
 			"importpath": "golang.org/x/net/context",
 			"repository": "https://go.googlesource.com/net",
 			"vcs": "git",
