@@ -581,7 +581,6 @@ var _ = Describe("PivnetClient - product files", func() {
 				ID:          1234,
 				Description: "some-description",
 				FileVersion: "some-file-version",
-				FileType:    "some-file-type",
 				MD5:         "some-md5",
 				Name:        "some-file-name",
 			}
@@ -589,7 +588,6 @@ var _ = Describe("PivnetClient - product files", func() {
 			expectedRequestBody = requestBody{
 				ProductFile: pivnet.ProductFile{
 					Description: productFile.Description,
-					FileType:    productFile.FileType,
 					FileVersion: productFile.FileVersion,
 					MD5:         productFile.MD5,
 					Name:        productFile.Name,
