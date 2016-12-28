@@ -1,6 +1,6 @@
 # go-pivnet API library
 
-A golang libary for [Pivotal Network](https://network.pivotal.io).
+A golang library for [Pivotal Network](https://network.pivotal.io).
 
 See also the [pivnet-cli](https://github.com/pivotal-cf/pivnet-cli)
 and the [pivnet-resource](https://github.com/pivotal-cf/pivnet-resource).
