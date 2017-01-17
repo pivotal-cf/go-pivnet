@@ -1101,7 +1101,9 @@ var _ = Describe("PivnetClient - product files", func() {
 			getStatusCode int
 			getResponse   interface{}
 
-			downloadLinkResponseStatusCode int
+			downloadLinkResponseStatusCode   int
+			cloudfrontLinkResponseStatusCode int
+			cloudfrontDownloadPath           string
 		)
 
 		BeforeEach(func() {
@@ -1130,6 +1132,8 @@ var _ = Describe("PivnetClient - product files", func() {
 			}
 
 			downloadLinkResponseStatusCode = http.StatusFound
+			cloudfrontLinkResponseStatusCode = http.StatusOK
+			cloudfrontDownloadPath = "/download"
 		})
 
 		AfterEach(func() {
@@ -1179,7 +1183,7 @@ var _ = Describe("PivnetClient - product files", func() {
 				),
 			)
 
-			cloudfront.RouteToHandler("GET", "/download", ghttp.CombineHandlers(
+			cloudfront.RouteToHandler("GET", cloudfrontDownloadPath, ghttp.CombineHandlers(
 				http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 					ex := regexp.MustCompile(`bytes=(\d+)-(\d+)`)
 					matches := ex.FindStringSubmatch(req.Header.Get("Range"))
@@ -1262,6 +1266,73 @@ var _ = Describe("PivnetClient - product files", func() {
 					GinkgoWriter,
 				)
 				Expect(err).To(HaveOccurred())
+			})
+		})
+
+		Context("when the download link returns a forbidden status code", func() {
+			BeforeEach(func() {
+				cloudfrontDownloadPath = "/valid-download"
+			})
+
+			JustBeforeEach(func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("POST", fmt.Sprintf(
+							"%s%s",
+							apiPrefix,
+							downloadLink,
+						)),
+						ghttp.RespondWith(downloadLinkResponseStatusCode, []byte(`{}`),
+							http.Header{
+								"Location": []string{fmt.Sprintf("%s/%s", cloudfront.URL(), "valid-download")},
+							},
+						),
+					),
+				)
+
+				cloudfront.RouteToHandler("GET", "/download", ghttp.CombineHandlers(
+					http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+						ex := regexp.MustCompile(`bytes=(\d+)-(\d+)`)
+						matches := ex.FindStringSubmatch(req.Header.Get("Range"))
+
+						start, err := strconv.Atoi(matches[1])
+						if err != nil {
+							Fail(err.Error())
+						}
+
+						end, err := strconv.Atoi(matches[2])
+						if err != nil {
+							Fail(err.Error())
+						}
+
+						if start == 1 && end == 1 {
+							w.WriteHeader(http.StatusForbidden)
+						} else {
+							w.WriteHeader(http.StatusPartialContent)
+							_, err = w.Write(downloadLinkResponseBody[start : end+1])
+							Expect(err).NotTo(HaveOccurred())
+						}
+					}),
+				))
+			})
+
+			It("gets a new cloudfront link from pivnet and retries the download", func() {
+				tmpFile, err := ioutil.TempFile("", "")
+				Expect(err).NotTo(HaveOccurred())
+
+				err = client.ProductFiles.DownloadForRelease(
+					tmpFile,
+					productSlug,
+					releaseID,
+					productFileID,
+					GinkgoWriter,
+				)
+				Expect(err).NotTo(HaveOccurred())
+
+				contents, err := ioutil.ReadFile(tmpFile.Name())
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(contents).To(Equal(downloadLinkResponseBody))
 			})
 		})
 

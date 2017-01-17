@@ -39,6 +39,7 @@ var _ = Describe("Downloader", func() {
 		httpClient *fakes.HTTPClient
 		ranger     *fakes.Ranger
 		bar        *fakes.Bar
+		downloadLinkFetcher *fakes.DownloadLinkFetcher
 	)
 
 	BeforeEach(func() {
@@ -47,6 +48,11 @@ var _ = Describe("Downloader", func() {
 		bar = &fakes.Bar{}
 
 		bar.NewProxyReaderStub = func(reader io.Reader) (io.Reader) { return reader }
+
+		downloadLinkFetcher = &fakes.DownloadLinkFetcher{}
+		downloadLinkFetcher.NewDownloadLinkStub = func() (string, error) {
+			return "https://example.com/some-file", nil
+		}
 	})
 
 	Describe("Get", func() {
@@ -106,7 +112,7 @@ var _ = Describe("Downloader", func() {
 			tmpFile, err := ioutil.TempFile("", "")
 			Expect(err).NotTo(HaveOccurred())
 
-			err = downloader.Get(tmpFile, "https://example.com/some-file", GinkgoWriter)
+			err = downloader.Get(tmpFile, downloadLinkFetcher, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 
 			content, err := ioutil.ReadAll(tmpFile)
@@ -185,7 +191,7 @@ var _ = Describe("Downloader", func() {
 				tmpFile, err := ioutil.TempFile("", "")
 				Expect(err).NotTo(HaveOccurred())
 
-				err = downloader.Get(tmpFile, "https://example.com/some-file", GinkgoWriter)
+				err = downloader.Get(tmpFile, downloadLinkFetcher, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
 
 				stats, err := tmpFile.Stat()
@@ -233,7 +239,7 @@ var _ = Describe("Downloader", func() {
 				tmpFile, err := ioutil.TempFile("", "")
 				Expect(err).NotTo(HaveOccurred())
 
-				err = downloader.Get(tmpFile, "https://example.com/some-file", GinkgoWriter)
+				err = downloader.Get(tmpFile, downloadLinkFetcher, GinkgoWriter)
 				Expect(err).NotTo(HaveOccurred())
 
 				stats, err := tmpFile.Stat()
@@ -252,8 +258,11 @@ var _ = Describe("Downloader", func() {
 					Ranger:     nil,
 					Bar:        nil,
 				}
+				downloadLinkFetcher.NewDownloadLinkStub = func() (string, error) {
+					return "%%%", nil
+				}
 
-				err := downloader.Get(nil, "%%%", GinkgoWriter)
+				err := downloader.Get(nil, downloadLinkFetcher, GinkgoWriter)
 				Expect(err).To(MatchError(ContainSubstring("failed to construct HEAD request")))
 			})
 		})
@@ -268,7 +277,7 @@ var _ = Describe("Downloader", func() {
 					Bar:        nil,
 				}
 
-				err := downloader.Get(nil, "https://example.com/some-file", GinkgoWriter)
+				err := downloader.Get(nil, downloadLinkFetcher, GinkgoWriter)
 				Expect(err).To(MatchError("failed to make HEAD request: failed request"))
 			})
 		})
@@ -292,7 +301,7 @@ var _ = Describe("Downloader", func() {
 					Bar:        nil,
 				}
 
-				err := downloader.Get(nil, "https://example.com/some-file", GinkgoWriter)
+				err := downloader.Get(nil, downloadLinkFetcher, GinkgoWriter)
 				Expect(err).To(MatchError("failed to construct range: failed range build"))
 			})
 		})
@@ -329,7 +338,7 @@ var _ = Describe("Downloader", func() {
 				file, err := ioutil.TempFile("", "")
 				Expect(err).NotTo(HaveOccurred())
 
-				err = downloader.Get(file, "https://example.com/some-file", GinkgoWriter)
+				err = downloader.Get(file, downloadLinkFetcher, GinkgoWriter)
 				Expect(err).To(MatchError("failed during retryable request: failed GET"))
 			})
 		})
@@ -369,7 +378,7 @@ var _ = Describe("Downloader", func() {
 				file, err := ioutil.TempFile("", "")
 				Expect(err).NotTo(HaveOccurred())
 
-				err = downloader.Get(file, "https://example.com/some-file", GinkgoWriter)
+				err = downloader.Get(file, downloadLinkFetcher, GinkgoWriter)
 				Expect(err).To(MatchError("failed during retryable request: during GET unexpected status code was returned: 500"))
 			})
 		})
@@ -412,7 +421,7 @@ var _ = Describe("Downloader", func() {
 				err = closedFile.Close()
 				Expect(err).NotTo(HaveOccurred())
 
-				err = downloader.Get(closedFile, "https://example.com/some-file", GinkgoWriter)
+				err = downloader.Get(closedFile, downloadLinkFetcher, GinkgoWriter)
 				Expect(err).To(MatchError(ContainSubstring("failed to write file")))
 			})
 		})
