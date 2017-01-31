@@ -327,7 +327,10 @@ var _ = Describe("Downloader", func() {
 					Bar:        bar,
 				}
 
-				err := downloader.Get(nil, "https://example.com/some-file", GinkgoWriter)
+				file, err := ioutil.TempFile("", "")
+				Expect(err).NotTo(HaveOccurred())
+
+				err = downloader.Get(file, "https://example.com/some-file", GinkgoWriter)
 				Expect(err).To(MatchError("failed during retryable request: failed GET"))
 			})
 		})
@@ -364,7 +367,10 @@ var _ = Describe("Downloader", func() {
 					Bar:        bar,
 				}
 
-				err := downloader.Get(nil, "https://example.com/some-file", GinkgoWriter)
+				file, err := ioutil.TempFile("", "")
+				Expect(err).NotTo(HaveOccurred())
+
+				err = downloader.Get(file, "https://example.com/some-file", GinkgoWriter)
 				Expect(err).To(MatchError("failed during retryable request: during GET unexpected status code was returned: 500"))
 			})
 		})
