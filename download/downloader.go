@@ -6,7 +6,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-
 	"golang.org/x/sync/errgroup"
 )
 
@@ -27,6 +26,7 @@ type bar interface {
 	Add(totalWritten int) int
 	Kickoff()
 	Finish()
+	NewProxyReader(reader io.Reader) io.Reader
 }
 
 type Client struct {
@@ -87,9 +87,6 @@ func (c Client) Get(
 				return fmt.Errorf("failed during retryable request: %s", err)
 			}
 
-			bytesWritten := byteRange.Upper - byteRange.Lower + 1
-			c.Bar.Add(int(bytesWritten))
-
 			return nil
 		})
 	}
@@ -129,7 +126,10 @@ Retry:
 		return fmt.Errorf("during GET unexpected status code was returned: %d", resp.StatusCode)
 	}
 
-	_, err = io.Copy(fileWriter, resp.Body)
+	var proxyReader io.Reader
+	proxyReader = c.Bar.NewProxyReader(resp.Body)
+
+	_, err = io.Copy(fileWriter, proxyReader)
 	if err != nil {
 		if err == io.ErrUnexpectedEOF {
 			goto Retry

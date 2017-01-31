@@ -45,6 +45,8 @@ var _ = Describe("Downloader", func() {
 		httpClient = &fakes.HTTPClient{}
 		ranger = &fakes.Ranger{}
 		bar = &fakes.Bar{}
+
+		bar.NewProxyReaderStub = func(reader io.Reader) (io.Reader) { return reader }
 	})
 
 	Describe("Get", func() {
@@ -138,9 +140,6 @@ var _ = Describe("Downloader", func() {
 			Expect(methods).To(ConsistOf([]string{"HEAD", "GET", "GET"}))
 			Expect(urls).To(ConsistOf([]string{"https://example.com/some-file", "https://example.com/some-file", "https://example.com/some-file"}))
 			Expect(headers).To(ConsistOf([]string{"bytes=0-9", "bytes=10-19"}))
-
-			Expect(bar.AddArgsForCall(0)).To(Equal(10))
-			Expect(bar.AddArgsForCall(1)).To(Equal(10))
 
 			Expect(bar.FinishCallCount()).To(Equal(1))
 		})
