@@ -45,6 +45,8 @@ var _ = Describe("Downloader", func() {
 		httpClient = &fakes.HTTPClient{}
 		ranger = &fakes.Ranger{}
 		bar = &fakes.Bar{}
+
+		bar.NewProxyReaderStub = func(reader io.Reader) (io.Reader) { return reader }
 	})
 
 	Describe("Get", func() {
@@ -138,9 +140,6 @@ var _ = Describe("Downloader", func() {
 			Expect(methods).To(ConsistOf([]string{"HEAD", "GET", "GET"}))
 			Expect(urls).To(ConsistOf([]string{"https://example.com/some-file", "https://example.com/some-file", "https://example.com/some-file"}))
 			Expect(headers).To(ConsistOf([]string{"bytes=0-9", "bytes=10-19"}))
-
-			Expect(bar.AddArgsForCall(0)).To(Equal(10))
-			Expect(bar.AddArgsForCall(1)).To(Equal(10))
 
 			Expect(bar.FinishCallCount()).To(Equal(1))
 		})
@@ -327,7 +326,10 @@ var _ = Describe("Downloader", func() {
 					Bar:        bar,
 				}
 
-				err := downloader.Get(nil, "https://example.com/some-file", GinkgoWriter)
+				file, err := ioutil.TempFile("", "")
+				Expect(err).NotTo(HaveOccurred())
+
+				err = downloader.Get(file, "https://example.com/some-file", GinkgoWriter)
 				Expect(err).To(MatchError("failed during retryable request: failed GET"))
 			})
 		})
@@ -364,7 +366,10 @@ var _ = Describe("Downloader", func() {
 					Bar:        bar,
 				}
 
-				err := downloader.Get(nil, "https://example.com/some-file", GinkgoWriter)
+				file, err := ioutil.TempFile("", "")
+				Expect(err).NotTo(HaveOccurred())
+
+				err = downloader.Get(file, "https://example.com/some-file", GinkgoWriter)
 				Expect(err).To(MatchError("failed during retryable request: during GET unexpected status code was returned: 500"))
 			})
 		})
