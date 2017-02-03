@@ -87,13 +87,8 @@ func (c Client) Get(
 			return fmt.Errorf("failed to write file: %s", err)
 		}
 
-		_, err = fileWriter.Seek(byteRange.Lower, 0)
-		if err != nil {
-			return fmt.Errorf("failed to write file: %s", err)
-		}
-
 		g.Go(func() error {
-			err := c.retryableRequest(contentURL, byteRange.HTTPHeader, fileWriter, downloadLinkFetcher)
+			err := c.retryableRequest(contentURL, byteRange.HTTPHeader, fileWriter, byteRange.Lower, downloadLinkFetcher)
 			if err != nil {
 				return fmt.Errorf("failed during retryable request: %s", err)
 			}
@@ -109,10 +104,17 @@ func (c Client) Get(
 	return nil
 }
 
-func (c Client) retryableRequest(contentURL string, rangeHeader http.Header, fileWriter *os.File, downloadLinkFetcher downloadLinkFetcher) (error) {
+func (c Client) retryableRequest(contentURL string, rangeHeader http.Header, fileWriter *os.File, startingByte int64, downloadLinkFetcher downloadLinkFetcher) (error) {
 	currentURL := contentURL
 	defer fileWriter.Close()
+
+	var err error
 Retry:
+	_, err = fileWriter.Seek(startingByte, 0)
+	if err != nil {
+		return fmt.Errorf("failed to write file: %s", err)
+	}
+
 	req, err := http.NewRequest("GET", currentURL, nil)
 	if err != nil {
 		return err

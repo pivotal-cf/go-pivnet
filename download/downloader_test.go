@@ -166,7 +166,7 @@ var _ = Describe("Downloader", func() {
 					},
 					{
 						StatusCode: http.StatusPartialContent,
-						Body:       ioutil.NopCloser(EOFReader{}),
+						Body:       ioutil.NopCloser(io.MultiReader(strings.NewReader("some"), EOFReader{})),
 					},
 					{
 						StatusCode: http.StatusPartialContent,
@@ -198,6 +198,11 @@ var _ = Describe("Downloader", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(stats.Size()).To(BeNumerically(">", 0))
+
+				content, err := ioutil.ReadAll(tmpFile)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(string(content)).To(Equal("something"))
 			})
 		})
 
