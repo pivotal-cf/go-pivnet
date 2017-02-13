@@ -7,7 +7,7 @@ and the [pivnet-resource](https://github.com/pivotal-cf/pivnet-resource).
 
 ## Usage
 
-See [example](https://github.com/pivotal-cf/pivnet-cli/blob/master/example/main.go)
+See [example](https://github.com/pivotal-cf/go-pivnet/blob/master/example/main.go)
 for an executable example.
 
 ```go
