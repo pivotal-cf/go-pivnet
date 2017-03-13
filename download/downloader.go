@@ -153,9 +153,10 @@ Retry:
 	var proxyReader io.Reader
 	proxyReader = c.Bar.NewProxyReader(resp.Body)
 
-	_, err = io.Copy(fileWriter, proxyReader)
+	bytesWritten, err := io.Copy(fileWriter, proxyReader)
 	if err != nil {
 		if err == io.ErrUnexpectedEOF {
+			c.Bar.Add(int(-1 * bytesWritten))
 			goto Retry
 		}
 		return fmt.Errorf("failed to write file: %s", err)

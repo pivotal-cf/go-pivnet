@@ -198,6 +198,7 @@ var _ = Describe("Downloader", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(stats.Size()).To(BeNumerically(">", 0))
+				Expect(bar.AddArgsForCall(0)).To(Equal(-4))
 
 				content, err := ioutil.ReadAll(tmpFile)
 				Expect(err).NotTo(HaveOccurred())
