@@ -14,12 +14,21 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"net"
+	"syscall"
+	"fmt"
 )
 
 type EOFReader struct{}
 
 func (e EOFReader) Read(p []byte) (int, error) {
 	return 0, io.ErrUnexpectedEOF
+}
+
+type ConnectionResetReader struct{}
+
+func (e ConnectionResetReader) Read(p []byte) (int, error) {
+	return 0, &net.OpError{Err: fmt.Errorf(syscall.ECONNRESET.Error())}
 }
 
 type NetError struct {
@@ -254,6 +263,62 @@ var _ = Describe("Downloader", func() {
 				Expect(stats.Size()).To(BeNumerically(">", 0))
 			})
 		})
+
+		Context("when the connection is reset", func() {
+			It("successfully retries the download", func() {
+				responses := []*http.Response{
+					{
+						Request: &http.Request{
+							URL: &url.URL{
+								Scheme: "https",
+								Host:   "example.com",
+								Path:   "some-file",
+							},
+						},
+					},
+					{
+						StatusCode: http.StatusPartialContent,
+						Body:       ioutil.NopCloser(io.MultiReader(strings.NewReader("some"), ConnectionResetReader{})),
+					},
+					{
+						StatusCode: http.StatusPartialContent,
+						Body:       ioutil.NopCloser(strings.NewReader("something")),
+					},
+				}
+
+				errors := []error{nil, nil, nil}
+
+				httpClient.DoStub = func(req *http.Request) (*http.Response, error) {
+					count := httpClient.DoCallCount() - 1
+					return responses[count], errors[count]
+				}
+
+				ranger.BuildRangeReturns([]download.Range{{Lower: 0, Upper: 15}}, nil)
+
+				downloader := download.Client{
+					HTTPClient: httpClient,
+					Ranger:     ranger,
+					Bar:        bar,
+				}
+
+				tmpFile, err := ioutil.TempFile("", "")
+				Expect(err).NotTo(HaveOccurred())
+
+				err = downloader.Get(tmpFile, downloadLinkFetcher, GinkgoWriter)
+				Expect(err).NotTo(HaveOccurred())
+
+				stats, err := tmpFile.Stat()
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(stats.Size()).To(BeNumerically(">", 0))
+				Expect(bar.AddArgsForCall(0)).To(Equal(-4))
+
+				content, err := ioutil.ReadAll(tmpFile)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(string(content)).To(Equal("something"))
+			})
+		})
 	})
 
 	Context("when an error occurs", func() {
@@ -345,7 +410,7 @@ var _ = Describe("Downloader", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				err = downloader.Get(file, downloadLinkFetcher, GinkgoWriter)
-				Expect(err).To(MatchError("failed during retryable request: failed GET"))
+				Expect(err).To(MatchError("failed during retryable request: download request failed: failed GET"))
 			})
 		})
 
@@ -428,7 +493,7 @@ var _ = Describe("Downloader", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				err = downloader.Get(closedFile, downloadLinkFetcher, GinkgoWriter)
-				Expect(err).To(MatchError(ContainSubstring("failed to write file")))
+				Expect(err).To(MatchError(ContainSubstring("failed to read information from output file")))
 			})
 		})
 	})
