@@ -8,7 +8,7 @@ import (
 
 const (
 	dependentProductSlug = "stemcells"
-	specifier            = "3312.*"
+	dependencySpecifier  = "3312.*"
 )
 
 var _ = Describe("Dependency Specifier Integration", func() {
@@ -42,7 +42,7 @@ var _ = Describe("Dependency Specifier Integration", func() {
 			testProductSlug,
 			newRelease.ID,
 			dependentProductSlug,
-			specifier,
+			dependencySpecifier,
 		)
 		Expect(err).NotTo(HaveOccurred())
 

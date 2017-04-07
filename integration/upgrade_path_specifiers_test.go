@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	specifier = "~>1.2.3"
+	upgradePathSpecifier = "~>1.2.3"
 )
 
 var _ = Describe("Upgrade Path Specifier Integration", func() {
@@ -40,7 +40,7 @@ var _ = Describe("Upgrade Path Specifier Integration", func() {
 		upgradePathSpecifier, err := client.UpgradePathSpecifiers.Create(
 			testProductSlug,
 			newRelease.ID,
-			specifier,
+			upgradePathSpecifier,
 		)
 		Expect(err).NotTo(HaveOccurred())
 
