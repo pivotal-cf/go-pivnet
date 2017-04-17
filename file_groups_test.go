@@ -326,7 +326,8 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 				),
 			)
 
-			fileGroup, err := client.FileGroups.Create(productSlug, name)
+			config := pivnet.CreateFileGroupConfig{productSlug, name}
+			fileGroup, err := client.FileGroups.Create(config)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(fileGroup.ID).To(Equal(returnedFileGroup.ID))
@@ -354,7 +355,8 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 					),
 				)
 
-				_, err := client.FileGroups.Create(productSlug, name)
+				config := pivnet.CreateFileGroupConfig{productSlug, name}
+				_, err := client.FileGroups.Create(config)
 
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
@@ -373,7 +375,8 @@ var _ = Describe("PivnetClient - FileGroup", func() {
 					),
 				)
 
-				_, err := client.FileGroups.Create(productSlug, name)
+				config := pivnet.CreateFileGroupConfig{productSlug, name}
+				_, err := client.FileGroups.Create(config)
 				Expect(err).To(HaveOccurred())
 
 				Expect(err.Error()).To(ContainSubstring("invalid character"))
