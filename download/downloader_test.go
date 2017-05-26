@@ -31,6 +31,13 @@ func (e ConnectionResetReader) Read(p []byte) (int, error) {
 	return 0, &net.OpError{Err: fmt.Errorf(syscall.ECONNRESET.Error())}
 }
 
+type UnknownErrorReader struct{}
+
+func (e UnknownErrorReader) Read(p []byte) (int, error) {
+	return 0, NetError{errors.New("whoops")}
+}
+
+
 type NetError struct {
 	error
 }
@@ -322,6 +329,47 @@ var _ = Describe("Downloader", func() {
 	})
 
 	Context("when an error occurs", func() {
+		Context("when the connection receives an unknown error", func() {
+			It("returns an error", func() {
+				responses := []*http.Response{
+					{
+						Request: &http.Request{
+							URL: &url.URL{
+								Scheme: "https",
+								Host:   "example.com",
+								Path:   "some-file",
+							},
+						},
+					},
+					{
+						StatusCode: http.StatusPartialContent,
+						Body:       ioutil.NopCloser(io.MultiReader(strings.NewReader("some"), UnknownErrorReader{})),
+					},
+				}
+
+				errors := []error{nil, nil, nil}
+
+				httpClient.DoStub = func(req *http.Request) (*http.Response, error) {
+					count := httpClient.DoCallCount() - 1
+					return responses[count], errors[count]
+				}
+
+				ranger.BuildRangeReturns([]download.Range{{Lower: 0, Upper: 15}}, nil)
+
+				downloader := download.Client{
+					HTTPClient: httpClient,
+					Ranger:     ranger,
+					Bar:        bar,
+				}
+
+				tmpFile, err := ioutil.TempFile("", "")
+				Expect(err).NotTo(HaveOccurred())
+
+				err = downloader.Get(tmpFile, downloadLinkFetcher, GinkgoWriter)
+				Expect(err).To(MatchError(ContainSubstring("failed to write file during io.Copy")))
+			})
+		})
+
 		Context("when the HEAD request cannot be constucted", func() {
 			It("returns an error", func() {
 				downloader := download.Client{
