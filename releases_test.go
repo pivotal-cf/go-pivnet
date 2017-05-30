@@ -176,7 +176,8 @@ var _ = Describe("PivnetClient - product files", func() {
 
 		Context("when the config is valid", func() {
 			type requestBody struct {
-				Release pivnet.Release `json:"release"`
+				Release      pivnet.Release `json:"release"`
+				CopyMetadata bool           `json:"copy_metadata"`
 			}
 
 			var (
@@ -200,6 +201,7 @@ var _ = Describe("PivnetClient - product files", func() {
 						},
 						Version: createReleaseConfig.Version,
 					},
+					CopyMetadata: createReleaseConfig.CopyMetadata,
 				}
 
 				validResponse = `{"release": {"id": 3, "version": "1.2.3.4"}}`
@@ -349,6 +351,45 @@ var _ = Describe("PivnetClient - product files", func() {
 					})
 				})
 			})
+
+			Describe("optional copy metadata config", func() {
+				Context("when the copy metadata config is not present", func() {
+					It("creates the release without copying metadata", func() {
+						server.AppendHandlers(
+							ghttp.CombineHandlers(
+								ghttp.VerifyRequest("POST", apiPrefix+"/products/"+productSlug+"/releases"),
+								ghttp.VerifyJSONRepresenting(&expectedRequestBody),
+								ghttp.RespondWith(http.StatusCreated, validResponse),
+							),
+						)
+
+						release, err := client.Releases.Create(createReleaseConfig)
+						Expect(err).NotTo(HaveOccurred())
+						Expect(release.Version).To(Equal(releaseVersion))
+					})
+				})
+
+				Context("when the copy metadata config is true", func() {
+					BeforeEach(func() {
+						createReleaseConfig.CopyMetadata = true
+						expectedRequestBody.CopyMetadata = true
+					})
+
+					It("creates the release and copies the metadata", func() {
+						server.AppendHandlers(
+							ghttp.CombineHandlers(
+								ghttp.VerifyRequest("POST", apiPrefix+"/products/"+productSlug+"/releases"),
+								ghttp.VerifyJSONRepresenting(&expectedRequestBody),
+								ghttp.RespondWith(http.StatusCreated, validResponse),
+							),
+						)
+
+						release, err := client.Releases.Create(createReleaseConfig)
+						Expect(err).NotTo(HaveOccurred())
+						Expect(release.Version).To(Equal(releaseVersion))
+					})
+				})
+			})
 		})
 
 		Context("when the server responds with a non-201 status code", func() {
@@ -407,7 +448,7 @@ var _ = Describe("PivnetClient - product files", func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("PATCH", patchURL),
-					ghttp.VerifyJSON(`{"release":{"id": 42, "version": "1.2.3.4", "eula":{"slug":"some-eula","id":15}, "oss_compliant":"confirm"}}`),
+					ghttp.VerifyJSON(`{"release":{"id": 42, "version": "1.2.3.4", "eula":{"slug":"some-eula","id":15}, "oss_compliant":"confirm"}, "copy_metadata": false}`),
 					ghttp.RespondWith(http.StatusOK, response),
 				),
 			)
