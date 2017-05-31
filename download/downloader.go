@@ -160,8 +160,8 @@ Retry:
 			c.Bar.Add(int(-1 * bytesWritten))
 			goto Retry
 		}
-		operr, _ := err.(*net.OpError)
-		if operr.Err.Error() == syscall.ECONNRESET.Error() {
+		operr, ok := err.(*net.OpError)
+		if ok && operr.Err.Error() == syscall.ECONNRESET.Error() {
 			c.Bar.Add(int(-1 * bytesWritten))
 			goto Retry
 		}
