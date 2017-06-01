@@ -181,7 +181,7 @@ var _ = Describe("PivnetClient - EULA", func() {
 		BeforeEach(func() {
 			productSlug = "banana-slug"
 			releaseID = 42
-			EULAAcceptanceURL = fmt.Sprintf(apiPrefix+"/products/%s/releases/%d/eula_acceptance", productSlug, releaseID)
+			EULAAcceptanceURL = fmt.Sprintf(apiPrefix+"/products/%s/releases/%d/pivnet_resource_eula_acceptance", productSlug, releaseID)
 		})
 
 		It("accepts the EULA for a given release and product ID", func() {
