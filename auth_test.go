@@ -21,6 +21,9 @@ var _ = Describe("PivnetClient - Auth", func() {
 		apiAddress string
 		userAgent  string
 
+		username string
+		password string
+
 		newClientConfig pivnet.ClientConfig
 		fakeLogger      logger.Logger
 	)
@@ -128,6 +131,65 @@ var _ = Describe("PivnetClient - Auth", func() {
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 
 				Expect(ok).To(BeFalse())
+			})
+		})
+	})
+
+	Describe("FetchUAAToken", func() {
+		It("returns the UAA token", func() {
+			username = "some-username"
+			password = "some-password"
+
+			expectedRequestBody := fmt.Sprintf(
+				`{"username":"%s","password":"%s"}`,
+				username,
+				password,
+			)
+
+			response := pivnet.UAATokenResponse{
+				Token: "some-token",
+			}
+
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("POST", fmt.Sprintf(
+						"%s/authentication",
+						apiPrefix,
+					)),
+					ghttp.VerifyJSON(expectedRequestBody),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, response),
+				),
+			)
+
+			tokenResponse, err := client.Auth.FetchUAAToken(username, password)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(tokenResponse.Token).To(Equal("some-token"))
+		})
+
+		Context("When Pivnet returns a 401", func() {
+			It("returns an error", func() {
+				username = "some-username"
+				password = "some-password"
+
+				expectedRequestBody := fmt.Sprintf(
+					`{"username":"%s","password":"%s"}`,
+					username,
+					password,
+				)
+
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("POST", fmt.Sprintf(
+							"%s/authentication",
+							apiPrefix,
+						)),
+						ghttp.VerifyJSON(expectedRequestBody),
+						ghttp.RespondWithJSONEncoded(http.StatusUnauthorized, nil),
+					),
+				)
+
+				_, err := client.Auth.FetchUAAToken(username, password)
+				Expect(err).To(HaveOccurred())
 			})
 		})
 	})
