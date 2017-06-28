@@ -24,6 +24,7 @@ var _ = Describe("PivnetClient", func() {
 		client    pivnet.Client
 		token     string
 		userAgent string
+		usingUAAToken bool
 
 		releases pivnet.ReleasesResponse
 
@@ -46,12 +47,14 @@ var _ = Describe("PivnetClient", func() {
 		server = ghttp.NewServer()
 		token = "my-auth-token"
 		userAgent = "pivnet-resource/0.1.0 (some-url)"
+		usingUAAToken = false
 
 		fakeLogger = &loggerfakes.FakeLogger{}
 		newClientConfig = pivnet.ClientConfig{
 			Host:      server.URL(),
 			Token:     token,
 			UserAgent: userAgent,
+			UsingUAAToken: usingUAAToken,
 		}
 		client = pivnet.NewClient(newClientConfig, fakeLogger)
 	})
@@ -60,25 +63,69 @@ var _ = Describe("PivnetClient", func() {
 		server.Close()
 	})
 
-	It("has authenticated headers for each request", func() {
-		server.AppendHandlers(
-			ghttp.CombineHandlers(
-				ghttp.VerifyRequest(
-					"GET",
-					fmt.Sprintf("%s/foo", apiPrefix),
+	Context("when using a pivnet API token", func(){
+		BeforeEach(func() {
+			newClientConfig = pivnet.ClientConfig{
+				Host:      server.URL(),
+				Token:     token,
+				UserAgent: userAgent,
+				UsingUAAToken: false,
+			}
+			client = pivnet.NewClient(newClientConfig, fakeLogger)
+		})
+		It("uses token authentication header if configured with a pivnet api token", func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf("%s/foo", apiPrefix),
+					),
+					ghttp.VerifyHeaderKV("Authorization", fmt.Sprintf("Token %s", token)),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, releases),
 				),
-				ghttp.VerifyHeaderKV("Authorization", fmt.Sprintf("Token %s", token)),
-				ghttp.RespondWithJSONEncoded(http.StatusOK, releases),
-			),
-		)
+			)
 
-		_, err := client.MakeRequest(
-			"GET",
-			"/foo",
-			http.StatusOK,
-			nil,
-		)
-		Expect(err).NotTo(HaveOccurred())
+			_, err := client.MakeRequest(
+				"GET",
+				"/foo",
+				http.StatusOK,
+				nil,
+			)
+			Expect(err).NotTo(HaveOccurred())
+		})
+	})
+
+	Context("when using a UAA token", func(){
+		BeforeEach(func() {
+			newClientConfig = pivnet.ClientConfig{
+				Host:      server.URL(),
+				Token:     token,
+				UserAgent: userAgent,
+				UsingUAAToken: true,
+			}
+			client = pivnet.NewClient(newClientConfig, fakeLogger)
+		})
+
+		It("uses bearer authentication header", func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf("%s/foo", apiPrefix),
+					),
+					ghttp.VerifyHeaderKV("Authorization", fmt.Sprintf("Bearer %s", token)),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, releases),
+				),
+			)
+
+			_, err := client.MakeRequest(
+				"GET",
+				"/foo",
+				http.StatusOK,
+				nil,
+			)
+			Expect(err).NotTo(HaveOccurred())
+		})
 	})
 
 	It("sets custom user agent", func() {
