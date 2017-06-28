@@ -12,11 +12,11 @@ import (
 	"github.com/pivotal-cf/go-pivnet/download"
 	"github.com/pivotal-cf/go-pivnet/download/fakes"
 
+	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"net"
 	"syscall"
-	"fmt"
 )
 
 type EOFReader struct{}
@@ -45,9 +45,9 @@ func (ne NetError) Timeout() bool {
 
 var _ = Describe("Downloader", func() {
 	var (
-		httpClient *fakes.HTTPClient
-		ranger     *fakes.Ranger
-		bar        *fakes.Bar
+		httpClient          *fakes.HTTPClient
+		ranger              *fakes.Ranger
+		bar                 *fakes.Bar
 		downloadLinkFetcher *fakes.DownloadLinkFetcher
 	)
 
@@ -56,7 +56,7 @@ var _ = Describe("Downloader", func() {
 		ranger = &fakes.Ranger{}
 		bar = &fakes.Bar{}
 
-		bar.NewProxyReaderStub = func(reader io.Reader) (io.Reader) { return reader }
+		bar.NewProxyReaderStub = func(reader io.Reader) io.Reader { return reader }
 
 		downloadLinkFetcher = &fakes.DownloadLinkFetcher{}
 		downloadLinkFetcher.NewDownloadLinkStub = func() (string, error) {
