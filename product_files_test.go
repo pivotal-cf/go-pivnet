@@ -527,6 +527,24 @@ var _ = Describe("PivnetClient - product files", func() {
 			})
 		})
 
+		Context("when the server responds with a 429 status code", func() {
+			It("returns an error indicating the limit was hit", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("POST", fmt.Sprintf(
+							"%s/products/%s/product_files",
+							apiPrefix,
+							productSlug,
+						)),
+						ghttp.RespondWith(http.StatusTooManyRequests, "Retry later"),
+					),
+				)
+
+				_, err := client.ProductFiles.Create(createProductFileConfig)
+				Expect(err.Error()).To(ContainSubstring("You have hit the file creation limit. Please wait before creating more files. Contact pivnet-eng@pivotal.io with additional questions."))
+			})
+		})
+
 		Context("when the json unmarshalling fails with error", func() {
 			It("forwards the error", func() {
 				server.AppendHandlers(

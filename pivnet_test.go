@@ -187,21 +187,6 @@ var _ = Describe("PivnetClient", func() {
 		})
 	})
 
-	Context("when making the request fails with error", func() {
-		It("forwards the error", func() {
-			newClientConfig.Host = "https://not-a-real-url.com"
-			client = pivnet.NewClient(newClientConfig, fakeLogger)
-
-			_, err := client.MakeRequest(
-				"GET",
-				"/foo",
-				http.StatusOK,
-				nil,
-			)
-			Expect(err).To(HaveOccurred())
-		})
-	})
-
 	Context("when Pivnet returns a 401", func() {
 		var (
 			body []byte
@@ -233,6 +218,42 @@ var _ = Describe("PivnetClient", func() {
 				pivnet.ErrUnauthorized{
 					ResponseCode: http.StatusUnauthorized,
 					Message:      "foo message",
+				},
+			))
+		})
+	})
+
+	Context("when Pivnet returns a 429", func() {
+		var (
+			body []byte
+		)
+
+		BeforeEach(func() {
+			body = []byte(`Retry later`)
+		})
+
+		It("returns an ErrUnauthorized error with message from Pivnet", func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf("%s/foo", apiPrefix),
+					),
+					ghttp.RespondWith(http.StatusTooManyRequests, body),
+				),
+			)
+
+			_, err := client.MakeRequest(
+				"GET",
+				"/foo",
+				http.StatusOK,
+				nil,
+			)
+			Expect(err).To(HaveOccurred())
+			Expect(err).To(MatchError(
+				pivnet.ErrTooManyRequests{
+					ResponseCode: http.StatusTooManyRequests,
+					Message:      "You have hit a rate limit for this request",
 				},
 			))
 		})
