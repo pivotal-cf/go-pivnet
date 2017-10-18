@@ -21,8 +21,7 @@ var _ = Describe("PivnetClient - Auth", func() {
 		apiAddress string
 		userAgent  string
 
-		username string
-		password string
+		refresh_token string
 
 		newClientConfig pivnet.ClientConfig
 		fakeLogger      logger.Logger
@@ -137,13 +136,11 @@ var _ = Describe("PivnetClient - Auth", func() {
 
 	Describe("FetchUAAToken", func() {
 		It("returns the UAA token", func() {
-			username = "some-username"
-			password = "some-password"
+			refresh_token = "some-refresh-token"
 
 			expectedRequestBody := fmt.Sprintf(
-				`{"username":"%s","password":"%s"}`,
-				username,
-				password,
+				`{"refresh_token":"%s"}`,
+				refresh_token,
 			)
 
 			response := pivnet.UAATokenResponse{
@@ -161,20 +158,18 @@ var _ = Describe("PivnetClient - Auth", func() {
 				),
 			)
 
-			tokenResponse, err := client.Auth.FetchUAAToken(username, password)
+			tokenResponse, err := client.Auth.FetchUAAToken(refresh_token)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(tokenResponse.Token).To(Equal("some-token"))
 		})
 
 		Context("When Pivnet returns a 401", func() {
 			It("returns an error", func() {
-				username = "some-username"
-				password = "some-password"
+				refresh_token = "some-refresh-token"
 
 				expectedRequestBody := fmt.Sprintf(
-					`{"username":"%s","password":"%s"}`,
-					username,
-					password,
+					`{"refresh_token":"%s"}`,
+					refresh_token,
 				)
 
 				server.AppendHandlers(
@@ -188,7 +183,7 @@ var _ = Describe("PivnetClient - Auth", func() {
 					),
 				)
 
-				_, err := client.Auth.FetchUAAToken(username, password)
+				_, err := client.Auth.FetchUAAToken(refresh_token)
 				Expect(err).To(HaveOccurred())
 			})
 		})
