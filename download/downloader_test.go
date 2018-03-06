@@ -17,6 +17,7 @@ import (
 	. "github.com/onsi/gomega"
 	"net"
 	"syscall"
+	"math"
 )
 
 type EOFReader struct{}
@@ -322,6 +323,43 @@ var _ = Describe("Downloader", func() {
 	})
 
 	Context("when an error occurs", func() {
+		Context("when the disk is out of memory", func() {
+			It("returns an error", func() {
+				tooBig := int64(math.MaxInt64)
+				responses := []*http.Response{
+					{
+						Request: &http.Request{
+							URL: &url.URL{
+								Scheme: "https",
+								Host:   "example.com",
+								Path:   "some-file",
+							},
+						},
+						ContentLength: tooBig,
+					},
+				}
+				errors := []error{nil, nil}
+
+				httpClient.DoStub = func(req *http.Request) (*http.Response, error) {
+					count := httpClient.DoCallCount() - 1
+					return responses[count], errors[count]
+				}
+
+
+				downloader := download.Client{
+					HTTPClient: httpClient,
+					Ranger:     ranger,
+					Bar:        bar,
+				}
+
+				file, err := ioutil.TempFile("", "")
+				Expect(err).NotTo(HaveOccurred())
+
+				err = downloader.Get(file, downloadLinkFetcher, GinkgoWriter)
+				Expect(err).To(MatchError("file is too big to fit on this drive"))
+			})
+		})
+
 		Context("when the HEAD request cannot be constucted", func() {
 			It("returns an error", func() {
 				downloader := download.Client{
