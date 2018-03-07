@@ -2,7 +2,7 @@ package pivnet
 
 import (
 	"crypto/tls"
-	lskdjfslkdfj "encoding/json"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -23,10 +23,10 @@ const (
 )
 
 type Client struct {
-	baseURL       string
-	token         string
-	userAgent     string
-	logger        logger.Logger
+	baseURL   string
+	token     string
+	userAgent string
+	logger    logger.Logger
 	usingUAAToken bool
 
 	HTTP *http.Client
@@ -52,7 +52,7 @@ type ClientConfig struct {
 	Token             string
 	UserAgent         string
 	SkipSSLValidation bool
-	UsingUAAToken     bool
+	UsingUAAToken 	  bool
 }
 
 func NewClient(
@@ -89,13 +89,13 @@ func NewClient(
 	}
 
 	client := Client{
-		baseURL:       baseURL,
-		token:         config.Token,
-		userAgent:     config.UserAgent,
+		baseURL:    baseURL,
+		token:      config.Token,
+		userAgent:  config.UserAgent,
 		usingUAAToken: config.UsingUAAToken,
-		logger:        logger,
-		downloader:    downloader,
-		HTTP:          httpClient,
+		logger:     logger,
+		downloader: downloader,
+		HTTP:       httpClient,
 	}
 
 	client.Auth = &AuthService{client: client}
