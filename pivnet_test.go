@@ -20,11 +20,11 @@ type pivnetErr struct {
 
 var _ = Describe("PivnetClient", func() {
 	var (
-		server    *ghttp.Server
-		client    pivnet.Client
-		token     string
-		userAgent string
-		usingUAAToken bool
+		server       *ghttp.Server
+		client       pivnet.Client
+		refreshToken string
+		userAgent    string
+		token		 string
 
 		releases pivnet.ReleasesResponse
 
@@ -47,14 +47,12 @@ var _ = Describe("PivnetClient", func() {
 		server = ghttp.NewServer()
 		token = "my-auth-token"
 		userAgent = "pivnet-resource/0.1.0 (some-url)"
-		usingUAAToken = false
 
 		fakeLogger = &loggerfakes.FakeLogger{}
 		newClientConfig = pivnet.ClientConfig{
 			Host:      server.URL(),
 			Token:     token,
 			UserAgent: userAgent,
-			UsingUAAToken: usingUAAToken,
 		}
 		client = pivnet.NewClient(newClientConfig, fakeLogger)
 	})
@@ -65,11 +63,11 @@ var _ = Describe("PivnetClient", func() {
 
 	Context("when using a pivnet API token", func(){
 		BeforeEach(func() {
+			token = "my-auth-refreshToken"
 			newClientConfig = pivnet.ClientConfig{
 				Host:      server.URL(),
 				Token:     token,
 				UserAgent: userAgent,
-				UsingUAAToken: false,
 			}
 			client = pivnet.NewClient(newClientConfig, fakeLogger)
 		})
@@ -95,25 +93,36 @@ var _ = Describe("PivnetClient", func() {
 		})
 	})
 
-	Context("when using a UAA token", func(){
+	Context("when using a UAA refreshToken", func(){
 		BeforeEach(func() {
+			refreshToken = "my-uaa-refreshToken-using-bearer"
 			newClientConfig = pivnet.ClientConfig{
 				Host:      server.URL(),
-				Token:     token,
+				Token:     refreshToken,
 				UserAgent: userAgent,
-				UsingUAAToken: true,
 			}
 			client = pivnet.NewClient(newClientConfig, fakeLogger)
 		})
 
 		It("uses bearer authentication header", func() {
+			uaaToken := "my-uaa-token"
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"POST",
+						fmt.Sprintf("%s/authentication/access_tokens", apiPrefix),
+					),
+					ghttp.VerifyJSON(fmt.Sprintf("{\"refresh_token\": \"%s\"}", refreshToken)),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, &pivnet.AuthResp {Token: uaaToken}),
+				),
+			)
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest(
 						"GET",
 						fmt.Sprintf("%s/foo", apiPrefix),
 					),
-					ghttp.VerifyHeaderKV("Authorization", fmt.Sprintf("Bearer %s", token)),
+					ghttp.VerifyHeaderKV("Authorization", fmt.Sprintf("Bearer %s", uaaToken)),
 					ghttp.RespondWithJSONEncoded(http.StatusOK, releases),
 				),
 			)
