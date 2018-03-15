@@ -2,6 +2,22 @@
 	"version": 0,
 	"dependencies": [
 		{
+			"importpath": "github.com/StackExchange/wmi",
+			"repository": "https://github.com/StackExchange/wmi",
+			"vcs": "git",
+			"revision": "5d049714c4a64225c3c79a7cf7d02f7fb5b96338",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/go-ole/go-ole",
+			"repository": "https://github.com/go-ole/go-ole",
+			"vcs": "git",
+			"revision": "a1ec82a652ebc7e784d7df887cfb31061aeabbcc",
+			"branch": "master",
+			"notests": true
+		},
+		{
 			"importpath": "github.com/golang/protobuf/proto",
 			"repository": "https://github.com/golang/protobuf",
 			"vcs": "git",
@@ -26,6 +42,22 @@
 			"revision": "130e6b02ab059e7b717a096f397c5b60111cae74",
 			"branch": "master",
 			"path": "ptypes",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/gonuts/commander",
+			"repository": "https://github.com/gonuts/commander",
+			"vcs": "git",
+			"revision": "f8ba4e959ca914268227c3ebbd7f6bf0bb35541a",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/gonuts/flag",
+			"repository": "https://github.com/gonuts/flag",
+			"vcs": "git",
+			"revision": "741a6cbd37a30dedc93f817e7de6aaf0ca38a493",
+			"branch": "master",
 			"notests": true
 		},
 		{
