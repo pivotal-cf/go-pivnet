@@ -68,16 +68,16 @@ var _ = Describe("Downloader", func() {
 	Describe("Get", func() {
 		It("writes the product to the given location", func() {
 			ranger.BuildRangeReturns([]download.Range{
-				{
-					Lower:      0,
-					Upper:      9,
-					HTTPHeader: http.Header{"Range": []string{"bytes=0-9"}},
-				},
-				{
-					Lower:      10,
-					Upper:      19,
-					HTTPHeader: http.Header{"Range": []string{"bytes=10-19"}},
-				},
+				download.NewRange(
+					0,
+					9,
+					http.Header{"Range": []string{"bytes=0-9"}},
+			),
+				download.NewRange(
+					10,
+					19,
+					http.Header{"Range": []string{"bytes=10-19"}},
+			),
 			}, nil)
 
 			var receivedRequests []*http.Request
@@ -152,10 +152,15 @@ var _ = Describe("Downloader", func() {
 				receivedRequests[1].Header.Get("Range"),
 				receivedRequests[2].Header.Get("Range"),
 			}
+			refererHeaders := []string {
+				receivedRequests[1].Header.Get("Referer"),
+				receivedRequests[2].Header.Get("Referer"),
+			}
 
 			Expect(methods).To(ConsistOf([]string{"HEAD", "GET", "GET"}))
 			Expect(urls).To(ConsistOf([]string{"https://example.com/some-file", "https://example.com/some-file", "https://example.com/some-file"}))
 			Expect(headers).To(ConsistOf([]string{"bytes=0-9", "bytes=10-19"}))
+			Expect(refererHeaders).To(ConsistOf([]string{"https://go-pivnet.network.pivotal.io", "https://go-pivnet.network.pivotal.io"}))
 
 			Expect(bar.FinishCallCount()).To(Equal(1))
 		})
@@ -190,7 +195,7 @@ var _ = Describe("Downloader", func() {
 					return responses[count], errors[count]
 				}
 
-				ranger.BuildRangeReturns([]download.Range{{Lower: 0, Upper: 15}}, nil)
+				ranger.BuildRangeReturns([]download.Range{download.NewRange(0,15, http.Header{})}, nil)
 
 				downloader := download.Client{
 					HTTPClient: httpClient,
@@ -244,7 +249,7 @@ var _ = Describe("Downloader", func() {
 					return responses[count], errors[count]
 				}
 
-				ranger.BuildRangeReturns([]download.Range{{Lower: 0, Upper: 15}}, nil)
+				ranger.BuildRangeReturns([]download.Range{download.NewRange(0,15, http.Header{})}, nil)
 
 				downloader := download.Client{
 					HTTPClient: httpClient,
@@ -294,7 +299,7 @@ var _ = Describe("Downloader", func() {
 					return responses[count], errors[count]
 				}
 
-				ranger.BuildRangeReturns([]download.Range{{Lower: 0, Upper: 15}}, nil)
+				ranger.BuildRangeReturns([]download.Range{download.NewRange(0,15, http.Header{})}, nil)
 
 				downloader := download.Client{
 					HTTPClient: httpClient,
@@ -436,7 +441,7 @@ var _ = Describe("Downloader", func() {
 					return responses[count], errors[count]
 				}
 
-				ranger.BuildRangeReturns([]download.Range{{}}, nil)
+				ranger.BuildRangeReturns([]download.Range{download.NewRange(0, 0, http.Header{})}, nil)
 
 				downloader := download.Client{
 					HTTPClient: httpClient,
@@ -476,7 +481,7 @@ var _ = Describe("Downloader", func() {
 					return responses[count], errors[count]
 				}
 
-				ranger.BuildRangeReturns([]download.Range{{}}, nil)
+				ranger.BuildRangeReturns([]download.Range{download.NewRange(0, 0, http.Header{})}, nil)
 
 				downloader := download.Client{
 					HTTPClient: httpClient,
@@ -516,7 +521,7 @@ var _ = Describe("Downloader", func() {
 					return responses[count], errors[count]
 				}
 
-				ranger.BuildRangeReturns([]download.Range{{Lower: 0, Upper: 15}}, nil)
+				ranger.BuildRangeReturns([]download.Range{download.NewRange(0, 15, http.Header{})}, nil)
 
 				downloader := download.Client{
 					HTTPClient: httpClient,
