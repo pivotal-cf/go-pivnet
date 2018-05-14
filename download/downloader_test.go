@@ -153,6 +153,7 @@ var _ = Describe("Downloader", func() {
 				receivedRequests[2].Header.Get("Range"),
 			}
 			refererHeaders := []string {
+				receivedRequests[0].Header.Get("Referer"),
 				receivedRequests[1].Header.Get("Referer"),
 				receivedRequests[2].Header.Get("Referer"),
 			}
@@ -160,7 +161,11 @@ var _ = Describe("Downloader", func() {
 			Expect(methods).To(ConsistOf([]string{"HEAD", "GET", "GET"}))
 			Expect(urls).To(ConsistOf([]string{"https://example.com/some-file", "https://example.com/some-file", "https://example.com/some-file"}))
 			Expect(headers).To(ConsistOf([]string{"bytes=0-9", "bytes=10-19"}))
-			Expect(refererHeaders).To(ConsistOf([]string{"https://go-pivnet.network.pivotal.io", "https://go-pivnet.network.pivotal.io"}))
+			Expect(refererHeaders).To(ConsistOf([]string{
+				"https://go-pivnet.network.pivotal.io",
+				"https://go-pivnet.network.pivotal.io",
+				"https://go-pivnet.network.pivotal.io",
+				}))
 
 			Expect(bar.FinishCallCount()).To(Equal(1))
 		})
