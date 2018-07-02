@@ -150,7 +150,7 @@ var _ = Describe("PivnetClient - Auth", func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("POST", fmt.Sprintf(
-						"%s/authentication",
+						"%s/authentication/access_tokens",
 						apiPrefix,
 					)),
 					ghttp.VerifyJSON(expectedRequestBody),
@@ -175,7 +175,7 @@ var _ = Describe("PivnetClient - Auth", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("POST", fmt.Sprintf(
-							"%s/authentication",
+							"%s/authentication/access_tokens",
 							apiPrefix,
 						)),
 						ghttp.VerifyJSON(expectedRequestBody),
