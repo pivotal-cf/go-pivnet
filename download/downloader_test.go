@@ -18,6 +18,9 @@ import (
 	"net"
 	"syscall"
 	"math"
+	"time"
+	"github.com/pivotal-cf/go-pivnet/logger/loggerfakes"
+	"os"
 )
 
 type EOFReader struct{}
@@ -42,6 +45,14 @@ func (ne NetError) Temporary() bool {
 
 func (ne NetError) Timeout() bool {
 	return true
+}
+
+type ReaderThatDoesntRead struct {}
+func (r ReaderThatDoesntRead) Read(p []byte) (int, error) {
+	for {
+		fmt.Println("not reading")
+		time.Sleep(time.Second)
+	}
 }
 
 var _ = Describe("Downloader", func() {
@@ -117,6 +128,7 @@ var _ = Describe("Downloader", func() {
 				HTTPClient: httpClient,
 				Ranger:     ranger,
 				Bar:        bar,
+				Timeout:    5*time.Millisecond,
 			}
 
 			tmpFile, err := ioutil.TempFile("", "")
@@ -172,18 +184,56 @@ var _ = Describe("Downloader", func() {
 	})
 
 	Context("when a retryable error occurs", func() {
-		Context("when there is an unexpected EOF", func() {
-			It("successfully retries the download", func() {
-				responses := []*http.Response{
-					{
-						Request: &http.Request{
-							URL: &url.URL{
-								Scheme: "https",
-								Host:   "example.com",
-								Path:   "some-file",
-							},
+		var (
+			responses             []*http.Response
+			responseErrors        []error
+			tmpFile               *os.File
+		)
+
+		JustBeforeEach(func() {
+			defaultErrors := []error{nil}
+			defaultResponses := []*http.Response{
+				{
+					Request: &http.Request{
+						URL: &url.URL{
+							Scheme: "https",
+							Host:   "example.com",
+							Path:   "some-file",
 						},
 					},
+				},
+			}
+
+			responseErrors = append(defaultErrors, responseErrors...)
+			responses = append(defaultResponses, responses...)
+
+			httpClient.DoStub = func(req *http.Request) (*http.Response, error) {
+				count := httpClient.DoCallCount() - 1
+				return responses[count], responseErrors[count]
+			}
+
+			ranger.BuildRangeReturns([]download.Range{download.NewRange(0,15, http.Header{})}, nil)
+
+			downloader := download.Client{
+				Logger:     &loggerfakes.FakeLogger{},
+				HTTPClient: httpClient,
+				Ranger:     ranger,
+				Bar:        bar,
+				Timeout: 	5*time.Millisecond,
+			}
+
+			var err error
+			tmpFile, err = ioutil.TempFile("", "")
+			Expect(err).NotTo(HaveOccurred())
+
+			err = downloader.Get(tmpFile, downloadLinkFetcher, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Context("when there is an unexpected EOF", func() {
+			BeforeEach(func() {
+				responseErrors = []error{nil, nil}
+				responses = []*http.Response{
 					{
 						StatusCode: http.StatusPartialContent,
 						Body:       ioutil.NopCloser(io.MultiReader(strings.NewReader("some"), EOFReader{})),
@@ -193,27 +243,63 @@ var _ = Describe("Downloader", func() {
 						Body:       ioutil.NopCloser(strings.NewReader("something")),
 					},
 				}
-				errors := []error{nil, nil, nil}
+			})
 
-				httpClient.DoStub = func(req *http.Request) (*http.Response, error) {
-					count := httpClient.DoCallCount() - 1
-					return responses[count], errors[count]
-				}
-
-				ranger.BuildRangeReturns([]download.Range{download.NewRange(0,15, http.Header{})}, nil)
-
-				downloader := download.Client{
-					HTTPClient: httpClient,
-					Ranger:     ranger,
-					Bar:        bar,
-				}
-
-				tmpFile, err := ioutil.TempFile("", "")
+			It("successfully retries the download", func() {
+				stats, err := tmpFile.Stat()
 				Expect(err).NotTo(HaveOccurred())
 
-				err = downloader.Get(tmpFile, downloadLinkFetcher, GinkgoWriter)
+				Expect(stats.Size()).To(BeNumerically(">", 0))
+
+				Expect(bar.AddArgsForCall(0)).To(Equal(-4))
+
+				content, err := ioutil.ReadAll(tmpFile)
 				Expect(err).NotTo(HaveOccurred())
 
+				Expect(string(content)).To(Equal("something"))
+			})
+		})
+
+		Context("when there is a temporary network error", func() {
+			BeforeEach(func() {
+				responses = []*http.Response{
+					{
+						StatusCode: http.StatusPartialContent,
+					},
+					{
+						StatusCode: http.StatusPartialContent,
+						Body:       ioutil.NopCloser(strings.NewReader("something")),
+					},
+				}
+				responseErrors = []error{NetError{errors.New("whoops")}, nil}
+			})
+
+			It("successfully retries the download", func() {
+				stats, err := tmpFile.Stat()
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(stats.Size()).To(BeNumerically(">", 0))
+			})
+		})
+
+		Context("when the connection is reset", func() {
+			BeforeEach(func() {
+				responses = []*http.Response{
+					{
+						StatusCode: http.StatusPartialContent,
+						Body:       ioutil.NopCloser(io.MultiReader(strings.NewReader("some"), ConnectionResetReader{})),
+					},
+					{
+						StatusCode: http.StatusPartialContent,
+						Body:       ioutil.NopCloser(strings.NewReader("something")),
+					},
+				}
+
+				responseErrors = []error{nil, nil}
+
+			})
+
+			It("successfully retries the download", func() {
 				stats, err := tmpFile.Stat()
 				Expect(err).NotTo(HaveOccurred())
 
@@ -227,97 +313,24 @@ var _ = Describe("Downloader", func() {
 			})
 		})
 
-		Context("when there is a temporary network error", func() {
-			It("successfully retries the download", func() {
-				responses := []*http.Response{
-					{
-						Request: &http.Request{
-							URL: &url.URL{
-								Scheme: "https",
-								Host:   "example.com",
-								Path:   "some-file",
-							},
-						},
-					},
+		Context("when there is a timeout", func() {
+			BeforeEach(func() {
+				responses = []*http.Response{
 					{
 						StatusCode: http.StatusPartialContent,
+						Body:       ioutil.NopCloser(io.MultiReader(strings.NewReader("some"), ReaderThatDoesntRead{})),
 					},
 					{
 						StatusCode: http.StatusPartialContent,
 						Body:       ioutil.NopCloser(strings.NewReader("something")),
 					},
 				}
-				errors := []error{nil, NetError{errors.New("whoops")}, nil}
 
-				httpClient.DoStub = func(req *http.Request) (*http.Response, error) {
-					count := httpClient.DoCallCount() - 1
-					return responses[count], errors[count]
-				}
+				responseErrors = []error{nil, nil}
 
-				ranger.BuildRangeReturns([]download.Range{download.NewRange(0,15, http.Header{})}, nil)
-
-				downloader := download.Client{
-					HTTPClient: httpClient,
-					Ranger:     ranger,
-					Bar:        bar,
-				}
-
-				tmpFile, err := ioutil.TempFile("", "")
-				Expect(err).NotTo(HaveOccurred())
-
-				err = downloader.Get(tmpFile, downloadLinkFetcher, GinkgoWriter)
-				Expect(err).NotTo(HaveOccurred())
-
-				stats, err := tmpFile.Stat()
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(stats.Size()).To(BeNumerically(">", 0))
 			})
-		})
 
-		Context("when the connection is reset", func() {
-			It("successfully retries the download", func() {
-				responses := []*http.Response{
-					{
-						Request: &http.Request{
-							URL: &url.URL{
-								Scheme: "https",
-								Host:   "example.com",
-								Path:   "some-file",
-							},
-						},
-					},
-					{
-						StatusCode: http.StatusPartialContent,
-						Body:       ioutil.NopCloser(io.MultiReader(strings.NewReader("some"), ConnectionResetReader{})),
-					},
-					{
-						StatusCode: http.StatusPartialContent,
-						Body:       ioutil.NopCloser(strings.NewReader("something")),
-					},
-				}
-
-				errors := []error{nil, nil, nil}
-
-				httpClient.DoStub = func(req *http.Request) (*http.Response, error) {
-					count := httpClient.DoCallCount() - 1
-					return responses[count], errors[count]
-				}
-
-				ranger.BuildRangeReturns([]download.Range{download.NewRange(0,15, http.Header{})}, nil)
-
-				downloader := download.Client{
-					HTTPClient: httpClient,
-					Ranger:     ranger,
-					Bar:        bar,
-				}
-
-				tmpFile, err := ioutil.TempFile("", "")
-				Expect(err).NotTo(HaveOccurred())
-
-				err = downloader.Get(tmpFile, downloadLinkFetcher, GinkgoWriter)
-				Expect(err).NotTo(HaveOccurred())
-
+			It("retries", func() {
 				stats, err := tmpFile.Stat()
 				Expect(err).NotTo(HaveOccurred())
 
@@ -357,9 +370,11 @@ var _ = Describe("Downloader", func() {
 
 
 				downloader := download.Client{
+					Logger:     &loggerfakes.FakeLogger{},
 					HTTPClient: httpClient,
 					Ranger:     ranger,
 					Bar:        bar,
+					Timeout: 	5 * time.Millisecond,
 				}
 
 				file, err := ioutil.TempFile("", "")
@@ -373,9 +388,11 @@ var _ = Describe("Downloader", func() {
 		Context("when the HEAD request cannot be constucted", func() {
 			It("returns an error", func() {
 				downloader := download.Client{
+					Logger:     &loggerfakes.FakeLogger{},
 					HTTPClient: nil,
 					Ranger:     nil,
 					Bar:        nil,
+					Timeout: 	5 * time.Millisecond,
 				}
 				downloadLinkFetcher.NewDownloadLinkStub = func() (string, error) {
 					return "%%%", nil
@@ -391,9 +408,11 @@ var _ = Describe("Downloader", func() {
 				httpClient.DoReturns(&http.Response{}, errors.New("failed request"))
 
 				downloader := download.Client{
+					Logger:     &loggerfakes.FakeLogger{},
 					HTTPClient: httpClient,
 					Ranger:     nil,
 					Bar:        nil,
+					Timeout: 	5 * time.Millisecond,
 				}
 
 				err := downloader.Get(nil, downloadLinkFetcher, GinkgoWriter)
@@ -415,9 +434,11 @@ var _ = Describe("Downloader", func() {
 				ranger.BuildRangeReturns([]download.Range{}, errors.New("failed range build"))
 
 				downloader := download.Client{
+					Logger:     &loggerfakes.FakeLogger{},
 					HTTPClient: httpClient,
 					Ranger:     ranger,
 					Bar:        nil,
+					Timeout: 	5 * time.Millisecond,
 				}
 
 				err := downloader.Get(nil, downloadLinkFetcher, GinkgoWriter)
@@ -449,9 +470,11 @@ var _ = Describe("Downloader", func() {
 				ranger.BuildRangeReturns([]download.Range{download.NewRange(0, 0, http.Header{})}, nil)
 
 				downloader := download.Client{
+					Logger:     &loggerfakes.FakeLogger{},
 					HTTPClient: httpClient,
 					Ranger:     ranger,
 					Bar:        bar,
+					Timeout: 	5 * time.Millisecond,
 				}
 
 				file, err := ioutil.TempFile("", "")
@@ -489,9 +512,11 @@ var _ = Describe("Downloader", func() {
 				ranger.BuildRangeReturns([]download.Range{download.NewRange(0, 0, http.Header{})}, nil)
 
 				downloader := download.Client{
+					Logger:     &loggerfakes.FakeLogger{},
 					HTTPClient: httpClient,
 					Ranger:     ranger,
 					Bar:        bar,
+					Timeout: 	5 * time.Millisecond,
 				}
 
 				file, err := ioutil.TempFile("", "")
@@ -529,9 +554,11 @@ var _ = Describe("Downloader", func() {
 				ranger.BuildRangeReturns([]download.Range{download.NewRange(0, 15, http.Header{})}, nil)
 
 				downloader := download.Client{
+					Logger:     &loggerfakes.FakeLogger{},
 					HTTPClient: httpClient,
 					Ranger:     ranger,
 					Bar:        bar,
+					Timeout: 	5 * time.Millisecond,
 				}
 
 				closedFile, err := ioutil.TempFile("", "")
