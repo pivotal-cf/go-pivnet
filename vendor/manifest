@@ -93,6 +93,22 @@
 			"notests": true
 		},
 		{
+			"importpath": "github.com/shirou/gopsutil",
+			"repository": "https://github.com/shirou/gopsutil",
+			"vcs": "git",
+			"revision": "ef54649286408053c0620d366dc06ead7d7cae5a",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/shirou/w32",
+			"repository": "https://github.com/shirou/w32",
+			"vcs": "git",
+			"revision": "bb4de0191aa41b5507caa14b0650cdbddcd9280b",
+			"branch": "master",
+			"notests": true
+		},
+		{
 			"importpath": "golang.org/x/net/context",
 			"repository": "https://go.googlesource.com/net",
 			"vcs": "git",
@@ -126,6 +142,15 @@
 			"revision": "8dbc5d05d6edcc104950cc299a1ce6641235bc86",
 			"branch": "master",
 			"path": "/unix",
+			"notests": true
+		},
+		{
+			"importpath": "golang.org/x/sys/windows",
+			"repository": "https://go.googlesource.com/sys",
+			"vcs": "git",
+			"revision": "1a700e749ce29638d0bbcb531cce1094ea096bd3",
+			"branch": "master",
+			"path": "/windows",
 			"notests": true
 		},
 		{
