@@ -1125,7 +1125,6 @@ var _ = Describe("PivnetClient - product files", func() {
 			getResponse   interface{}
 
 			downloadLinkResponseStatusCode   int
-			cloudfrontLinkResponseStatusCode int
 			cloudfrontDownloadPath           string
 		)
 
@@ -1155,7 +1154,6 @@ var _ = Describe("PivnetClient - product files", func() {
 			}
 
 			downloadLinkResponseStatusCode = http.StatusFound
-			cloudfrontLinkResponseStatusCode = http.StatusOK
 			cloudfrontDownloadPath = "/download"
 		})
 
