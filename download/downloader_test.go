@@ -381,7 +381,9 @@ var _ = Describe("Downloader", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				err = downloader.Get(file, downloadLinkFetcher, GinkgoWriter)
-				Expect(err).To(MatchError("file is too big to fit on this drive"))
+				Expect(err).To(MatchError(ContainSubstring("file is too big to fit on this drive:")))
+				Expect(err).To(MatchError(ContainSubstring("bytes required")))
+				Expect(err).To(MatchError(ContainSubstring("bytes free")))
 			})
 		})
 
