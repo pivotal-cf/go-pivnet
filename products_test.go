@@ -46,7 +46,8 @@ var _ = Describe("PivnetClient - product", func() {
 
 	Describe("Get", func() {
 		var (
-			slug = "my-product"
+			slug        = "my-product"
+			s3Directory = "my-product/path"
 		)
 
 		Context("when the product can be found", func() {
@@ -66,6 +67,28 @@ var _ = Describe("PivnetClient - product", func() {
 				product, err := client.Products.Get(slug)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(product.Slug).To(Equal(slug))
+				Expect(product.S3Directory).To(BeNil())
+			})
+
+			Context("when the product includes the s3Directory", func() {
+				It("contains the s3 prefix path", func() {
+					response := fmt.Sprintf(`{"id": 3, "slug": "%s", "s3_directory": { "path": "%s" }}`, slug, s3Directory)
+
+					server.AppendHandlers(
+						ghttp.CombineHandlers(
+							ghttp.VerifyRequest("GET", fmt.Sprintf(
+								"%s/products/%s",
+								apiPrefix,
+								slug)),
+							ghttp.RespondWith(http.StatusOK, response),
+						),
+					)
+
+					product, err := client.Products.Get(slug)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(product.S3Directory).NotTo(BeNil())
+					Expect(product.S3Directory.Path).To(Equal(s3Directory))
+				})
 			})
 		})
 
