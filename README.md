@@ -2,7 +2,7 @@
 
 A golang library for [Pivotal Network](https://network.pivotal.io).
 
-See also the [pivnet-cli](https://github.com/pivotal-cf/pivnet-cli)
+See also: the [pivnet-cli](https://github.com/pivotal-cf/pivnet-cli)
 and the [pivnet-resource](https://github.com/pivotal-cf/pivnet-resource).
 
 ## Usage
