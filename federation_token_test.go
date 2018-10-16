@@ -25,13 +25,14 @@ var _ = Describe("PivnetClient - federation token", func() {
 		apiAddress string
 		userAgent  string
 
-		response           interface{}
-		responseStatusCode int
+		mockedResponse      interface{}
+		responseStatusCode  int
 		expectedRequestBody requestBody
-		newClientConfig pivnet.ClientConfig
-		fakeLogger      logger.Logger
+		newClientConfig     pivnet.ClientConfig
+		fakeLogger          logger.Logger
 
 		productSlug string
+		expectedFederationToken pivnet.FederationToken
 	)
 
 	BeforeEach(func() {
@@ -61,7 +62,7 @@ var _ = Describe("PivnetClient - federation token", func() {
 					fmt.Sprintf("%s/federation_token", apiPrefix),
 				),
 				ghttp.VerifyJSONRepresenting(&expectedRequestBody),
-				ghttp.RespondWithJSONEncoded(responseStatusCode, response),
+				ghttp.RespondWithJSONEncoded(responseStatusCode, mockedResponse),
 			),
 		)
 	})
@@ -74,13 +75,22 @@ var _ = Describe("PivnetClient - federation token", func() {
 		BeforeEach(func() {
 			productSlug = "banana"
 
-			response = pivnet.FederationToken{
-				AccessKeyID: "some-AccessKeyID",
+			mockedResponse = pivnet.FederationToken{
+				AccessKeyID:     "some-AccessKeyID",
 				SecretAccessKey: "some-SecretAccessKey",
-				SessionToken: "some-SessionToken",
+				SessionToken:    "some-SessionToken",
+				Bucket:          "some-bucket",
+				Region:          "some-region",
 			}
 
 			responseStatusCode = http.StatusOK
+			expectedFederationToken = pivnet.FederationToken{
+				AccessKeyID:     "some-AccessKeyID",
+				SecretAccessKey: "some-SecretAccessKey",
+				SessionToken:    "some-SessionToken",
+				Bucket:          "some-bucket",
+				Region:          "some-region",
+			}
 		})
 
 		It("returns the federated token without error", func() {
@@ -90,9 +100,7 @@ var _ = Describe("PivnetClient - federation token", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(federationToken).ToNot(Equal(nil))
-			Expect(federationToken.AccessKeyID).To(Equal("some-AccessKeyID"))
-			Expect(federationToken.SecretAccessKey).To(Equal("some-SecretAccessKey"))
-			Expect(federationToken.SessionToken).To(Equal("some-SessionToken"))
+			Expect(federationToken).To(Equal(expectedFederationToken))
 		})
 	})
 
@@ -100,7 +108,7 @@ var _ = Describe("PivnetClient - federation token", func() {
 		BeforeEach(func() {
 			productSlug = "something-i-dont-manage"
 
-			response = pivnetErr{Message: "only available for product admins and partner product admins"}
+			mockedResponse = pivnetErr{Message: "only available for product admins and partner product admins"}
 
 			responseStatusCode = http.StatusForbidden
 		})
