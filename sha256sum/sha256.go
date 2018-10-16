@@ -1,8 +1,8 @@
 package sha256sum
 
 import (
-	"crypto/sha256"
 	"fmt"
+	"github.com/minio/sha256-simd"
 	"io"
 	"os"
 )
