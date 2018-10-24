@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/pivotal-cf/go-pivnet/logger"
 	"encoding/json"
+	"github.com/pivotal-cf/go-pivnet/logger"
 )
 
 type ProductsService struct {
@@ -18,10 +18,11 @@ type S3Directory struct {
 }
 
 type Product struct {
-	ID   int    `json:"id,omitempty" yaml:"id,omitempty"`
-	Slug string `json:"slug,omitempty" yaml:"slug,omitempty"`
-	Name string `json:"name,omitempty" yaml:"name,omitempty"`
-	S3Directory *S3Directory `json:"s3_directory,omitempty" yaml:"s3_directory,omitempty"`
+	ID            int          `json:"id,omitempty" yaml:"id,omitempty"`
+	Slug          string       `json:"slug,omitempty" yaml:"slug,omitempty"`
+	Name          string       `json:"name,omitempty" yaml:"name,omitempty"`
+	S3Directory   *S3Directory `json:"s3_directory,omitempty" yaml:"s3_directory,omitempty"`
+	InstallsOnPks bool         `json:"installs_on_pks,omitempty" yaml:"installs_on_pks,omitempty"`
 }
 
 type ProductsResponse struct {

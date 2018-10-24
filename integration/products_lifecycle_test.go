@@ -19,6 +19,7 @@ var _ = Describe("Products Lifecycle", func() {
 				S3Directory: &pivnet.S3Directory{
 					Path: "/product_files/Pivotal-Test",
 				},
+				InstallsOnPks: false,
 			}))
 		})
 	})

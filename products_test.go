@@ -46,8 +46,9 @@ var _ = Describe("PivnetClient - product", func() {
 
 	Describe("Get", func() {
 		var (
-			slug        = "my-product"
-			s3Directory = "my-product/path"
+			slug         = "my-product"
+			s3Directory  = "my-product/path"
+			isPksProduct = true
 		)
 
 		Context("when the product can be found", func() {
@@ -88,6 +89,28 @@ var _ = Describe("PivnetClient - product", func() {
 					Expect(err).NotTo(HaveOccurred())
 					Expect(product.S3Directory).NotTo(BeNil())
 					Expect(product.S3Directory.Path).To(Equal(s3Directory))
+				})
+			})
+
+			Context("when the product is installable on PKS", func() {
+				It("contains installs_on_pks field", func() {
+					response := fmt.Sprintf(`{"id": 3, "slug": "%s", "s3_directory": { "path": "%s" }, "installs_on_pks": %t}`, slug, s3Directory, isPksProduct)
+
+					server.AppendHandlers(
+						ghttp.CombineHandlers(
+							ghttp.VerifyRequest("GET", fmt.Sprintf(
+								"%s/products/%s",
+								apiPrefix,
+								slug)),
+							ghttp.RespondWith(http.StatusOK, response),
+						),
+					)
+
+					product, err := client.Products.Get(slug)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(product.S3Directory).NotTo(BeNil())
+					Expect(product.S3Directory.Path).To(Equal(s3Directory))
+					Expect(product.InstallsOnPks).To(Equal(isPksProduct))
 				})
 			})
 		})
