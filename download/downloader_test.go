@@ -125,6 +125,7 @@ var _ = Describe("Downloader", func() {
 			}
 
 			downloader := download.Client{
+				Logger:     &loggerfakes.FakeLogger{},
 				HTTPClient: httpClient,
 				Ranger:     ranger,
 				Bar:        bar,
