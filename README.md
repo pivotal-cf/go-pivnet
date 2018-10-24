@@ -59,6 +59,9 @@ HOST='https://pivnet-integration.cfapps.io' \
 ./bin/test_all
 ```
 
+**NOTE**
+ - If dependencies are not correct, the tests may not run correctly. You will have to run `GO111MODULE=on go mod vendor` first in this case.
+
 ### Contributing
 
 Please make all pull requests to the `develop` branch, and
