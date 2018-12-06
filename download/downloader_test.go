@@ -388,6 +388,46 @@ var _ = Describe("Downloader", func() {
 			})
 		})
 
+		Context("when content length is -1", func() {
+			It("returns an error", func() {
+				invalidLength := int64(-1)
+
+				responses := []*http.Response{
+					{
+						Request: &http.Request{
+							URL: &url.URL{
+								Scheme: "https",
+								Host:   "example.com",
+								Path:   "some-file",
+							},
+						},
+						ContentLength: invalidLength,
+					},
+				}
+				errors := []error{nil, nil}
+
+				httpClient.DoStub = func(req *http.Request) (*http.Response, error) {
+					count := httpClient.DoCallCount() - 1
+					return responses[count], errors[count]
+				}
+
+
+				downloader := download.Client{
+					Logger:     &loggerfakes.FakeLogger{},
+					HTTPClient: httpClient,
+					Ranger:     ranger,
+					Bar:        bar,
+					Timeout: 	5 * time.Millisecond,
+				}
+
+				file, err := ioutil.TempFile("", "")
+				Expect(err).NotTo(HaveOccurred())
+
+				err = downloader.Get(file, downloadLinkFetcher, GinkgoWriter)
+				Expect(err).To(MatchError(ContainSubstring("failed to find file")))
+			})
+		})
+
 		Context("when the HEAD request cannot be constucted", func() {
 			It("returns an error", func() {
 				downloader := download.Client{

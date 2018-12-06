@@ -84,6 +84,10 @@ func (c Client) Get(
 		return fmt.Errorf("failed to get disk free space: %s", err)
 	}
 
+	if resp.ContentLength == -1 {
+		return fmt.Errorf("failed to find file on remote filestore")
+	}
+
 	if diskStats.Free < uint64(resp.ContentLength) {
 		return fmt.Errorf("file is too big to fit on this drive: %d bytes required, %d bytes free", uint64(resp.ContentLength), diskStats.Free)
 	}
