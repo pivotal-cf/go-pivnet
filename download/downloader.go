@@ -74,6 +74,10 @@ func (c Client) Get(
 
 	contentURL = resp.Request.URL.String()
 
+	if resp.ContentLength == -1 {
+		return fmt.Errorf("failed to find file on remote filestore")
+	}
+
 	ranges, err := c.Ranger.BuildRange(resp.ContentLength)
 	if err != nil {
 		return fmt.Errorf("failed to construct range: %s", err)
@@ -82,10 +86,6 @@ func (c Client) Get(
 	diskStats, err := disk.Usage(path.Dir(location.Name()))
 	if err != nil {
 		return fmt.Errorf("failed to get disk free space: %s", err)
-	}
-
-	if resp.ContentLength == -1 {
-		return fmt.Errorf("failed to find file on remote filestore")
 	}
 
 	if diskStats.Free < uint64(resp.ContentLength) {
