@@ -2,6 +2,7 @@ package pivnet
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -24,10 +25,10 @@ const (
 )
 
 type Client struct {
-	baseURL   string
-	token     string
-	userAgent string
-	logger    logger.Logger
+	baseURL       string
+	token         string
+	userAgent     string
+	logger        logger.Logger
 	usingUAAToken bool
 
 	HTTP *http.Client
@@ -37,7 +38,7 @@ type Client struct {
 	Auth                  *AuthService
 	EULA                  *EULAsService
 	ProductFiles          *ProductFilesService
-	FederationToken		  *FederationTokenService
+	FederationToken       *FederationTokenService
 	FileGroups            *FileGroupsService
 	Releases              *ReleasesService
 	Products              *ProductsService
@@ -54,6 +55,7 @@ type ClientConfig struct {
 	Token             string
 	UserAgent         string
 	SkipSSLValidation bool
+	RootCAPath        string
 }
 
 func NewClient(
@@ -62,23 +64,44 @@ func NewClient(
 ) Client {
 	baseURL := fmt.Sprintf("%s%s", config.Host, apiVersion)
 
+	var tlsConf tls.Config
+	if config.RootCAPath != "" {
+		tlsConf.InsecureSkipVerify = config.SkipSSLValidation
+
+		// build the new pool.
+		rootCa := x509.NewCertPool()
+		if rootCa == nil {
+			logger.Debug("cannot instantiate new x509 pool")
+			return Client{}
+		}
+
+		cert, err := ioutil.ReadFile(config.RootCAPath)
+		if err != nil {
+			logger.Debug(fmt.Sprintf("error reading x509 root cert: %s", err))
+		}
+
+		// add the root ca to the pool.
+		if ok := rootCa.AppendCertsFromPEM(cert); !ok {
+			logger.Debug("cannot add root ca cert to the x509 pool.")
+		}
+		tlsConf.RootCAs = rootCa
+	} else {
+		tlsConf.InsecureSkipVerify = config.SkipSSLValidation
+	}
+
 	httpClient := &http.Client{
 		Timeout: 60 * time.Second,
 		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: config.SkipSSLValidation,
-			},
-			Proxy: http.ProxyFromEnvironment,
+			TLSClientConfig: &tlsConf,
+			Proxy:           http.ProxyFromEnvironment,
 		},
 	}
 
 	downloadClient := &http.Client{
 		Timeout: 0,
 		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: config.SkipSSLValidation,
-			},
-			Proxy: http.ProxyFromEnvironment,
+			TLSClientConfig: &tlsConf,
+			Proxy:           http.ProxyFromEnvironment,
 		},
 	}
 
@@ -87,7 +110,7 @@ func NewClient(
 		HTTPClient: downloadClient,
 		Ranger:     ranger,
 		Logger:     logger,
-		Timeout: 5*time.Second,
+		Timeout:    5 * time.Second,
 	}
 
 	client := Client{
