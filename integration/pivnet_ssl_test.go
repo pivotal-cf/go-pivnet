@@ -29,7 +29,7 @@ const (
 	apiPrefix = "/api/v2"
 )
 
-var _ = Describe("Test Custom Root CA For MITM Reencryption", func() {
+var _ = FDescribe("Test Custom Root CA For MITM Reencryption", func() {
 	It("", func() {
 		// generate our "corporate" certificates.
 		publicKey, privateKey := generateRootCA()
@@ -52,10 +52,16 @@ var _ = Describe("Test Custom Root CA For MITM Reencryption", func() {
 
 		defer os.Remove(privKeyFile.Name())
 
+		fmt.Printf("publicKey location: %s\n", pubKeyFile.Name())
+		fmt.Println(string(publicKey.Bytes()))
+		fmt.Printf("privateKey location: %s\n", privKeyFile.Name())
+		fmt.Println(string(privateKey.Bytes()))
+
 		// our middle man server.
 		testProxyServer := &http.Server{
 			Addr: ":8888",
 			Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				fmt.Println("Connected to proxy server")
 				if r.Method == http.MethodConnect {
 					handleTunneling(w, r)
 				} else {
@@ -71,7 +77,7 @@ var _ = Describe("Test Custom Root CA For MITM Reencryption", func() {
 		err = os.Setenv("HTTPS_PROXY", fmt.Sprintf("%s:%s", "https://localhost", testProxyServer.Addr))
 		Expect(err).NotTo(HaveOccurred())
 
-		// test release payload.
+		// test release payload can be converted to json.
 		releases := pivnet.ReleasesResponse{Releases: []pivnet.Release{
 			{
 				ID:      1,
@@ -95,6 +101,7 @@ var _ = Describe("Test Custom Root CA For MITM Reencryption", func() {
 			Token:      token,
 			UserAgent:  userAgent,
 			RootCAPath: pubKeyFile.Name(),
+			//SkipSSLValidation: true,
 		}
 
 		client := pivnet.NewClient(newClientConfig, fakeLogger)
