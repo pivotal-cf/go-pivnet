@@ -524,7 +524,7 @@ var _ = Describe("Downloader", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				err = downloader.Get(file, downloadLinkFetcher, GinkgoWriter)
-				Expect(err).To(MatchError("failed during retryable request: download request failed: failed GET"))
+				Expect(err).To(MatchError("problem while waiting for chunks to download: failed during retryable request: download request failed: failed GET"))
 			})
 		})
 
@@ -566,7 +566,7 @@ var _ = Describe("Downloader", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				err = downloader.Get(file, downloadLinkFetcher, GinkgoWriter)
-				Expect(err).To(MatchError("failed during retryable request: during GET unexpected status code was returned: 500"))
+				Expect(err).To(MatchError("problem while waiting for chunks to download: failed during retryable request: during GET unexpected status code was returned: 500"))
 			})
 		})
 
