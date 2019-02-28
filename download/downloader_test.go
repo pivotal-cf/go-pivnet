@@ -135,7 +135,10 @@ var _ = Describe("Downloader", func() {
 			tmpFile, err := ioutil.TempFile("", "")
 			Expect(err).NotTo(HaveOccurred())
 
-			err = downloader.Get(tmpFile, downloadLinkFetcher, GinkgoWriter)
+			tmpLocation, err := download.NewFileInfo(tmpFile)
+			Expect(err).NotTo(HaveOccurred())
+
+			err = downloader.Get(tmpLocation, downloadLinkFetcher, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 
 			content, err := ioutil.ReadAll(tmpFile)
@@ -227,7 +230,10 @@ var _ = Describe("Downloader", func() {
 			tmpFile, err = ioutil.TempFile("", "")
 			Expect(err).NotTo(HaveOccurred())
 
-			err = downloader.Get(tmpFile, downloadLinkFetcher, GinkgoWriter)
+			tmpLocation, err := download.NewFileInfo(tmpFile)
+			Expect(err).NotTo(HaveOccurred())
+
+			err = downloader.Get(tmpLocation, downloadLinkFetcher, GinkgoWriter)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
@@ -381,7 +387,10 @@ var _ = Describe("Downloader", func() {
 				file, err := ioutil.TempFile("", "")
 				Expect(err).NotTo(HaveOccurred())
 
-				err = downloader.Get(file, downloadLinkFetcher, GinkgoWriter)
+				location, err := download.NewFileInfo(file)
+				Expect(err).NotTo(HaveOccurred())
+
+				err = downloader.Get(location, downloadLinkFetcher, GinkgoWriter)
 				Expect(err).To(MatchError(ContainSubstring("file is too big to fit on this drive:")))
 				Expect(err).To(MatchError(ContainSubstring("bytes required")))
 				Expect(err).To(MatchError(ContainSubstring("bytes free")))
@@ -423,7 +432,10 @@ var _ = Describe("Downloader", func() {
 				file, err := ioutil.TempFile("", "")
 				Expect(err).NotTo(HaveOccurred())
 
-				err = downloader.Get(file, downloadLinkFetcher, GinkgoWriter)
+				location, err := download.NewFileInfo(file)
+				Expect(err).NotTo(HaveOccurred())
+
+				err = downloader.Get(location, downloadLinkFetcher, GinkgoWriter)
 				Expect(err).To(MatchError(ContainSubstring("failed to find file")))
 			})
 		})
@@ -523,7 +535,10 @@ var _ = Describe("Downloader", func() {
 				file, err := ioutil.TempFile("", "")
 				Expect(err).NotTo(HaveOccurred())
 
-				err = downloader.Get(file, downloadLinkFetcher, GinkgoWriter)
+				location, err := download.NewFileInfo(file)
+				Expect(err).NotTo(HaveOccurred())
+
+				err = downloader.Get(location, downloadLinkFetcher, GinkgoWriter)
 				Expect(err).To(MatchError("problem while waiting for chunks to download: failed during retryable request: download request failed: failed GET"))
 			})
 		})
@@ -565,53 +580,11 @@ var _ = Describe("Downloader", func() {
 				file, err := ioutil.TempFile("", "")
 				Expect(err).NotTo(HaveOccurred())
 
-				err = downloader.Get(file, downloadLinkFetcher, GinkgoWriter)
+				location, err := download.NewFileInfo(file)
+				Expect(err).NotTo(HaveOccurred())
+
+				err = downloader.Get(location, downloadLinkFetcher, GinkgoWriter)
 				Expect(err).To(MatchError("problem while waiting for chunks to download: failed during retryable request: during GET unexpected status code was returned: 500"))
-			})
-		})
-
-		Context("when the file cannot be written to", func() {
-			It("returns an error", func() {
-				responses := []*http.Response{
-					{
-						Request: &http.Request{
-							URL: &url.URL{
-								Scheme: "https",
-								Host:   "example.com",
-								Path:   "some-file",
-							},
-						},
-					},
-					{
-						StatusCode: http.StatusPartialContent,
-						Body:       ioutil.NopCloser(strings.NewReader("something")),
-					},
-				}
-				errors := []error{nil, nil}
-
-				httpClient.DoStub = func(req *http.Request) (*http.Response, error) {
-					count := httpClient.DoCallCount() - 1
-					return responses[count], errors[count]
-				}
-
-				ranger.BuildRangeReturns([]download.Range{download.NewRange(0, 15, http.Header{})}, nil)
-
-				downloader := download.Client{
-					Logger:     &loggerfakes.FakeLogger{},
-					HTTPClient: httpClient,
-					Ranger:     ranger,
-					Bar:        bar,
-					Timeout: 	5 * time.Millisecond,
-				}
-
-				closedFile, err := ioutil.TempFile("", "")
-				Expect(err).NotTo(HaveOccurred())
-
-				err = closedFile.Close()
-				Expect(err).NotTo(HaveOccurred())
-
-				err = downloader.Get(closedFile, downloadLinkFetcher, GinkgoWriter)
-				Expect(err).To(MatchError(ContainSubstring("failed to read information from output file")))
 			})
 		})
 	})

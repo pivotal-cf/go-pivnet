@@ -14,6 +14,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/pivotal-cf/go-pivnet/download"
 )
 
 var _ = Describe("PivnetClient - product files", func() {
@@ -1124,8 +1125,8 @@ var _ = Describe("PivnetClient - product files", func() {
 			getStatusCode int
 			getResponse   interface{}
 
-			downloadLinkResponseStatusCode   int
-			cloudfrontDownloadPath           string
+			downloadLinkResponseStatusCode int
+			cloudfrontDownloadPath         string
 		)
 
 		BeforeEach(func() {
@@ -1231,8 +1232,11 @@ var _ = Describe("PivnetClient - product files", func() {
 			tmpFile, err := ioutil.TempFile("", "")
 			Expect(err).NotTo(HaveOccurred())
 
+			tmpLocation, err := download.NewFileInfo(tmpFile)
+			Expect(err).NotTo(HaveOccurred())
+
 			err = client.ProductFiles.DownloadForRelease(
-				tmpFile,
+				tmpLocation,
 				productSlug,
 				releaseID,
 				productFileID,
@@ -1259,8 +1263,11 @@ var _ = Describe("PivnetClient - product files", func() {
 				tmpFile, err := ioutil.TempFile("", "")
 				Expect(err).NotTo(HaveOccurred())
 
+				tmpLocation, err := download.NewFileInfo(tmpFile)
+				Expect(err).NotTo(HaveOccurred())
+
 				err = client.ProductFiles.DownloadForRelease(
-					tmpFile,
+					tmpLocation,
 					productSlug,
 					releaseID,
 					productFileID,
@@ -1279,8 +1286,11 @@ var _ = Describe("PivnetClient - product files", func() {
 				tmpFile, err := ioutil.TempFile("", "")
 				Expect(err).NotTo(HaveOccurred())
 
+				tmpLocation, err := download.NewFileInfo(tmpFile)
+				Expect(err).NotTo(HaveOccurred())
+
 				err = client.ProductFiles.DownloadForRelease(
-					tmpFile,
+					tmpLocation,
 					productSlug,
 					releaseID,
 					productFileID,
@@ -1341,8 +1351,11 @@ var _ = Describe("PivnetClient - product files", func() {
 				tmpFile, err := ioutil.TempFile("", "")
 				Expect(err).NotTo(HaveOccurred())
 
+				tmpLocation, err := download.NewFileInfo(tmpFile)
+				Expect(err).NotTo(HaveOccurred())
+
 				err = client.ProductFiles.DownloadForRelease(
-					tmpFile,
+					tmpLocation,
 					productSlug,
 					releaseID,
 					productFileID,
@@ -1366,8 +1379,11 @@ var _ = Describe("PivnetClient - product files", func() {
 				tmpFile, err := ioutil.TempFile("", "")
 				Expect(err).NotTo(HaveOccurred())
 
+				tmpLocation, err := download.NewFileInfo(tmpFile)
+				Expect(err).NotTo(HaveOccurred())
+
 				err = client.ProductFiles.DownloadForRelease(
-					tmpFile,
+					tmpLocation,
 					productSlug,
 					releaseID,
 					productFileID,
