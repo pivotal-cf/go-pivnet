@@ -201,11 +201,7 @@ var _ = Describe("PivnetClient", func() {
 			body []byte
 		)
 
-		BeforeEach(func() {
-			body = []byte(`{"message":"foo message"}`)
-		})
-
-		It("returns an ErrUnauthorized error with message from Pivnet", func() {
+		JustBeforeEach(func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest(
@@ -215,22 +211,49 @@ var _ = Describe("PivnetClient", func() {
 					ghttp.RespondWith(http.StatusUnauthorized, body),
 				),
 			)
+		})
 
-			_, err := client.MakeRequest(
-				"GET",
-				"/foo",
-				http.StatusOK,
-				nil,
-			)
-			Expect(err).To(HaveOccurred())
-			Expect(err).To(MatchError(
-				pivnet.ErrUnauthorized{
-					ResponseCode: http.StatusUnauthorized,
-					Message:      "foo message",
-				},
-			))
+		Context("when Pivnet returns JSON", func() {
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
+			It("returns an ErrUnauthorized error with message from Pivnet", func() {
+				_, err := client.MakeRequest(
+					"GET",
+					"/foo",
+					http.StatusOK,
+					nil,
+				)
+				Expect(err).To(HaveOccurred())
+				Expect(err).To(MatchError(
+					pivnet.ErrUnauthorized{
+						ResponseCode: http.StatusUnauthorized,
+						Message:      "foo message",
+					},
+				))
+			})
+		})
+
+		Context("when Pivnet returns a non JSON", func() {
+			BeforeEach(func() {
+				body = []byte("Forbidden")
+			})
+
+			It("returns a well formatted error", func() {
+				_, err := client.MakeRequest(
+					"GET",
+					"/foo",
+					http.StatusOK,
+					nil,
+				)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("could not parse json [Forbidden]"))
+			})
 		})
 	})
+
+
 
 	Context("when Pivnet returns a 429", func() {
 		var (
