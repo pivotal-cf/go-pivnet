@@ -248,7 +248,7 @@ var _ = Describe("PivnetClient", func() {
 					nil,
 				)
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("could not parse json [Forbidden]"))
+				Expect(err.Error()).To(ContainSubstring("could not parse json [\"Forbidden\"]"))
 			})
 		})
 	})
