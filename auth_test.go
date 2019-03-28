@@ -36,10 +36,10 @@ var _ = Describe("PivnetClient - Auth", func() {
 		fakeLogger = &loggerfakes.FakeLogger{}
 		newClientConfig = pivnet.ClientConfig{
 			Host:      apiAddress,
-			Token:     token,
 			UserAgent: userAgent,
 		}
-		client = pivnet.NewClient(newClientConfig, fakeLogger)
+		accessTokenService := pivnet.NewAccessTokenOrLegacyToken(token, apiAddress)
+		client = pivnet.NewClient(accessTokenService, newClientConfig, fakeLogger)
 	})
 
 	AfterEach(func() {

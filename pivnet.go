@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -14,7 +15,6 @@ import (
 
 	"github.com/pivotal-cf/go-pivnet/download"
 	"github.com/pivotal-cf/go-pivnet/logger"
-	"log"
 )
 
 const (
@@ -25,7 +25,7 @@ const (
 
 type Client struct {
 	baseURL   string
-	token     string
+	token     AccessTokenService
 	userAgent string
 	logger    logger.Logger
 	usingUAAToken bool
@@ -49,14 +49,57 @@ type Client struct {
 	UpgradePathSpecifiers *UpgradePathSpecifiersService
 }
 
+type AccessTokenOrLegacyToken struct {
+	host string
+	refreshToken string
+}
+
+func (o AccessTokenOrLegacyToken) AccessToken() (string, error) {
+	const legacyAPITokenLength = 20
+	if len(o.refreshToken) > legacyAPITokenLength {
+		baseURL := fmt.Sprintf("%s%s", o.host, apiVersion)
+		tokenFetcher := NewTokenFetcher(baseURL, o.refreshToken)
+
+		accessToken, err := tokenFetcher.GetToken()
+		if err != nil {
+			log.Fatalf("Exiting with error: %s", err)
+			return "", err
+		}
+		return accessToken, nil
+	} else {
+		return o.refreshToken, nil
+	}
+}
+
+func AuthorizationHeader(accessToken string) (string, error) {
+	const legacyAPITokenLength = 20
+	if len(accessToken) > legacyAPITokenLength {
+		return fmt.Sprintf("Bearer %s", accessToken), nil
+	} else {
+		return fmt.Sprintf("Token %s", accessToken), nil
+	}
+}
+
 type ClientConfig struct {
 	Host              string
-	Token             string
 	UserAgent         string
 	SkipSSLValidation bool
 }
 
+//go:generate counterfeiter . AccessTokenService
+type AccessTokenService interface {
+	AccessToken() (string, error)
+}
+
+func NewAccessTokenOrLegacyToken(token string, host string) AccessTokenOrLegacyToken {
+	return AccessTokenOrLegacyToken {
+		refreshToken: token,
+		host: host,
+	}
+}
+
 func NewClient(
+	token AccessTokenService,
 	config ClientConfig,
 	logger logger.Logger,
 ) Client {
@@ -92,7 +135,7 @@ func NewClient(
 
 	client := Client{
 		baseURL:    baseURL,
-		token:      config.Token,
+		token:      token,
 		userAgent:  config.UserAgent,
 		logger:     logger,
 		downloader: downloader,
@@ -135,20 +178,17 @@ func (c Client) CreateRequest(
 		return nil, err
 	}
 
-	const legacyAPITokenLength = 20
-	if len(c.token) > legacyAPITokenLength {
-		tokenFetcher := NewTokenFetcher(c.baseURL, c.token)
-		var err error
-		accessToken, err := tokenFetcher.GetToken()
-
-		if err != nil {
-			log.Fatalf("Exiting with error: %s", err)
-		}
-		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", accessToken))
-	} else {
-		req.Header.Add("Authorization", fmt.Sprintf("Token %s", c.token))
+	accessToken, err := c.token.AccessToken()
+	if err != nil {
+		return nil, err
 	}
 
+	authorizationHeader, err := AuthorizationHeader(accessToken)
+	if err != nil {
+		return nil, fmt.Errorf("could not create authorization header: %s", err)
+	}
+
+	req.Header.Add("Authorization", authorizationHeader)
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("User-Agent", c.userAgent)
 
