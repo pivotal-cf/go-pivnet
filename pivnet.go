@@ -47,6 +47,7 @@ type Client struct {
 	DependencySpecifiers  *DependencySpecifiersService
 	ReleaseUpgradePaths   *ReleaseUpgradePathsService
 	UpgradePathSpecifiers *UpgradePathSpecifiersService
+	PivnetVersions        *PivnetVersionsService
 }
 
 type ClientConfig struct {
@@ -112,6 +113,7 @@ func NewClient(
 	client.DependencySpecifiers = &DependencySpecifiersService{client: client}
 	client.ReleaseUpgradePaths = &ReleaseUpgradePathsService{client: client}
 	client.UpgradePathSpecifiers = &UpgradePathSpecifiersService{client: client}
+	client.PivnetVersions = &PivnetVersionsService{client: client}
 
 	return client
 }
