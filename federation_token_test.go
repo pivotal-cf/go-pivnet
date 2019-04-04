@@ -2,6 +2,7 @@ package pivnet_test
 
 import (
 	"fmt"
+	"github.com/pivotal-cf/go-pivnet/go-pivnetfakes"
 	"net/http"
 
 	"github.com/onsi/gomega/ghttp"
@@ -21,33 +22,32 @@ var _ = Describe("PivnetClient - federation token", func() {
 	var (
 		server     *ghttp.Server
 		client     pivnet.Client
-		token      string
 		apiAddress string
 		userAgent  string
 
-		mockedResponse      interface{}
-		responseStatusCode  int
-		expectedRequestBody requestBody
-		newClientConfig     pivnet.ClientConfig
-		fakeLogger          logger.Logger
+		mockedResponse         interface{}
+		responseStatusCode     int
+		expectedRequestBody    requestBody
+		newClientConfig        pivnet.ClientConfig
+		fakeLogger             logger.Logger
+		fakeAccessTokenService *gopivnetfakes.FakeAccessTokenService
 
-		productSlug string
+		productSlug             string
 		expectedFederationToken pivnet.FederationToken
 	)
 
 	BeforeEach(func() {
 		server = ghttp.NewServer()
 		apiAddress = server.URL()
-		token = "my-auth-token"
 		userAgent = "pivnet-resource/0.1.0 (some-url)"
 
 		fakeLogger = &loggerfakes.FakeLogger{}
+		fakeAccessTokenService = &gopivnetfakes.FakeAccessTokenService{}
 		newClientConfig = pivnet.ClientConfig{
 			Host:      apiAddress,
-			Token:     token,
 			UserAgent: userAgent,
 		}
-		client = pivnet.NewClient(newClientConfig, fakeLogger)
+		client = pivnet.NewClient(fakeAccessTokenService, newClientConfig, fakeLogger)
 	})
 
 	JustBeforeEach(func() {

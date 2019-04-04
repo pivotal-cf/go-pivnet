@@ -2,6 +2,7 @@ package pivnet_test
 
 import (
 	"fmt"
+	"github.com/pivotal-cf/go-pivnet/go-pivnetfakes"
 	"net/http"
 
 	"github.com/onsi/gomega/ghttp"
@@ -22,14 +23,14 @@ var _ = Describe("PivnetClient", func() {
 	var (
 		server       *ghttp.Server
 		client       pivnet.Client
-		refreshToken string
 		userAgent    string
-		token		 string
+		token        string
 
 		releases pivnet.ReleasesResponse
 
-		newClientConfig pivnet.ClientConfig
-		fakeLogger      logger.Logger
+		newClientConfig        pivnet.ClientConfig
+		fakeLogger             logger.Logger
+		fakeAccessTokenService *gopivnetfakes.FakeAccessTokenService
 	)
 
 	BeforeEach(func() {
@@ -49,27 +50,29 @@ var _ = Describe("PivnetClient", func() {
 		userAgent = "pivnet-resource/0.1.0 (some-url)"
 
 		fakeLogger = &loggerfakes.FakeLogger{}
+		fakeAccessTokenService = &gopivnetfakes.FakeAccessTokenService{}
 		newClientConfig = pivnet.ClientConfig{
 			Host:      server.URL(),
-			Token:     token,
 			UserAgent: userAgent,
 		}
-		client = pivnet.NewClient(newClientConfig, fakeLogger)
+		client = pivnet.NewClient(fakeAccessTokenService, newClientConfig, fakeLogger)
+	})
+
+	JustBeforeEach(func() {
+		fakeAccessTokenService.AccessTokenReturns(token, nil)
 	})
 
 	AfterEach(func() {
 		server.Close()
 	})
 
-	Context("when using a pivnet API token", func(){
+	Context("when using a pivnet API token", func() {
 		BeforeEach(func() {
-			token = "my-auth-refreshToken"
 			newClientConfig = pivnet.ClientConfig{
 				Host:      server.URL(),
-				Token:     token,
 				UserAgent: userAgent,
 			}
-			client = pivnet.NewClient(newClientConfig, fakeLogger)
+			client = pivnet.NewClient(fakeAccessTokenService, newClientConfig, fakeLogger)
 		})
 		It("uses token authentication header if configured with a pivnet api token", func() {
 			server.AppendHandlers(
@@ -93,36 +96,24 @@ var _ = Describe("PivnetClient", func() {
 		})
 	})
 
-	Context("when using a UAA refreshToken", func(){
+	Context("when using a UAA refreshToken", func() {
 		BeforeEach(func() {
-			refreshToken = "my-uaa-refreshToken-using-bearer"
+			token = "my-auth-token-that-is-longer-than-a-legacy-token"
 			newClientConfig = pivnet.ClientConfig{
 				Host:      server.URL(),
-				Token:     refreshToken,
 				UserAgent: userAgent,
 			}
-			client = pivnet.NewClient(newClientConfig, fakeLogger)
+			client = pivnet.NewClient(fakeAccessTokenService, newClientConfig, fakeLogger)
 		})
 
 		It("uses bearer authentication header", func() {
-			uaaToken := "my-uaa-token"
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(
-						"POST",
-						fmt.Sprintf("%s/authentication/access_tokens", apiPrefix),
-					),
-					ghttp.VerifyJSON(fmt.Sprintf("{\"refresh_token\": \"%s\"}", refreshToken)),
-					ghttp.RespondWithJSONEncoded(http.StatusOK, &pivnet.AuthResp {Token: uaaToken}),
-				),
-			)
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest(
 						"GET",
 						fmt.Sprintf("%s/foo", apiPrefix),
 					),
-					ghttp.VerifyHeaderKV("Authorization", fmt.Sprintf("Bearer %s", uaaToken)),
+					ghttp.VerifyHeaderKV("Authorization", fmt.Sprintf("Bearer %s", token)),
 					ghttp.RespondWithJSONEncoded(http.StatusOK, releases),
 				),
 			)
@@ -183,7 +174,7 @@ var _ = Describe("PivnetClient", func() {
 	Context("when parsing the url fails with error", func() {
 		It("forwards the error", func() {
 			newClientConfig.Host = "%%%"
-			client = pivnet.NewClient(newClientConfig, fakeLogger)
+			client = pivnet.NewClient(fakeAccessTokenService, newClientConfig, fakeLogger)
 
 			_, err := client.MakeRequest(
 				"GET",
@@ -252,8 +243,6 @@ var _ = Describe("PivnetClient", func() {
 			})
 		})
 	})
-
-
 
 	Context("when Pivnet returns a 429", func() {
 		var (

@@ -2,6 +2,7 @@ package pivnet_test
 
 import (
 	"fmt"
+	"github.com/pivotal-cf/go-pivnet/go-pivnetfakes"
 	"net/http"
 
 	"github.com/onsi/gomega/ghttp"
@@ -17,12 +18,12 @@ var _ = Describe("PivnetClient - upgrade path specifiers", func() {
 	var (
 		server     *ghttp.Server
 		client     pivnet.Client
-		token      string
 		apiAddress string
 		userAgent  string
 
-		newClientConfig pivnet.ClientConfig
-		fakeLogger      logger.Logger
+		newClientConfig        pivnet.ClientConfig
+		fakeLogger             logger.Logger
+		fakeAccessTokenService *gopivnetfakes.FakeAccessTokenService
 
 		productSlug string
 		releaseID   int
@@ -31,19 +32,18 @@ var _ = Describe("PivnetClient - upgrade path specifiers", func() {
 	BeforeEach(func() {
 		server = ghttp.NewServer()
 		apiAddress = server.URL()
-		token = "my-auth-token"
 		userAgent = "pivnet-resource/0.1.0 (some-url)"
 
 		productSlug = "some-product"
 		releaseID = 2345
 
 		fakeLogger = &loggerfakes.FakeLogger{}
+		fakeAccessTokenService = &gopivnetfakes.FakeAccessTokenService{}
 		newClientConfig = pivnet.ClientConfig{
 			Host:      apiAddress,
-			Token:     token,
 			UserAgent: userAgent,
 		}
-		client = pivnet.NewClient(newClientConfig, fakeLogger)
+		client = pivnet.NewClient(fakeAccessTokenService, newClientConfig, fakeLogger)
 	})
 
 	AfterEach(func() {

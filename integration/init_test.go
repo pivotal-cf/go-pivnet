@@ -42,15 +42,16 @@ var _ = BeforeSuite(func() {
 	sanitizedWriter := sanitizer.NewSanitizer(sanitized, GinkgoWriter)
 	GinkgoWriter = sanitizedWriter
 
+	accessTokenService := pivnet.NewAccessTokenOrLegacyToken(APIToken, Host)
+
 	config := pivnet.ClientConfig{
 		Host:      Host,
-		Token:     APIToken,
 		UserAgent: "go-pivnet/integration-test",
 	}
 
 	logger := GinkgoLogShim{}
 
-	client = pivnet.NewClient(config, logger)
+	client = pivnet.NewClient(accessTokenService, config, logger)
 
 	ok, err := client.Auth.Check()
 	Expect(err).NotTo(HaveOccurred())

@@ -2,6 +2,7 @@ package pivnet_test
 
 import (
 	"fmt"
+	"github.com/pivotal-cf/go-pivnet/go-pivnetfakes"
 	"net/http"
 
 	"github.com/onsi/gomega/ghttp"
@@ -21,8 +22,9 @@ var _ = Describe("PivnetClient - EULA", func() {
 		apiAddress string
 		userAgent  string
 
-		newClientConfig pivnet.ClientConfig
-		fakeLogger      logger.Logger
+		newClientConfig        pivnet.ClientConfig
+		fakeLogger             logger.Logger
+		fakeAccessTokenService *gopivnetfakes.FakeAccessTokenService
 	)
 
 	BeforeEach(func() {
@@ -32,12 +34,12 @@ var _ = Describe("PivnetClient - EULA", func() {
 		userAgent = "pivnet-resource/0.1.0 (some-url)"
 
 		fakeLogger = &loggerfakes.FakeLogger{}
+		fakeAccessTokenService = &gopivnetfakes.FakeAccessTokenService{}
 		newClientConfig = pivnet.ClientConfig{
 			Host:      apiAddress,
-			Token:     token,
 			UserAgent: userAgent,
 		}
-		client = pivnet.NewClient(newClientConfig, fakeLogger)
+		client = pivnet.NewClient(fakeAccessTokenService, newClientConfig, fakeLogger)
 	})
 
 	AfterEach(func() {
@@ -182,6 +184,7 @@ var _ = Describe("PivnetClient - EULA", func() {
 			productSlug = "banana-slug"
 			releaseID = 42
 			EULAAcceptanceURL = fmt.Sprintf(apiPrefix+"/products/%s/releases/%d/pivnet_resource_eula_acceptance", productSlug, releaseID)
+			fakeAccessTokenService.AccessTokenReturns(token, nil)
 		})
 
 		It("accepts the EULA for a given release and product ID", func() {

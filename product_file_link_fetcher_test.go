@@ -1,39 +1,39 @@
 package pivnet_test
 
 import (
-	"github.com/pivotal-cf/go-pivnet"
-	"net/http"
-	"github.com/pivotal-cf/go-pivnet/logger/loggerfakes"
 	"github.com/onsi/gomega/ghttp"
+	"github.com/pivotal-cf/go-pivnet"
+	"github.com/pivotal-cf/go-pivnet/go-pivnetfakes"
 	"github.com/pivotal-cf/go-pivnet/logger"
+	"github.com/pivotal-cf/go-pivnet/logger/loggerfakes"
+	"net/http"
 
+	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"fmt"
 )
 
 var _ = Describe("PivnetClient - ProductFileLinkFetcher", func() {
 	var (
-		server     *ghttp.Server
-		client pivnet.Client
-		token string
+		server           *ghttp.Server
+		client           pivnet.Client
 		pivnetApiAddress string
 
-		newClientConfig pivnet.ClientConfig
-		fakeLogger logger.Logger
+		newClientConfig        pivnet.ClientConfig
+		fakeLogger             logger.Logger
+		fakeAccessTokenService *gopivnetfakes.FakeAccessTokenService
 	)
 
 	BeforeEach(func() {
 		server = ghttp.NewServer()
 		pivnetApiAddress = server.URL()
-		token = "my-auth-token"
 
 		fakeLogger = &loggerfakes.FakeLogger{}
+		fakeAccessTokenService = &gopivnetfakes.FakeAccessTokenService{}
 		newClientConfig = pivnet.ClientConfig{
-			Host:      pivnetApiAddress,
-			Token:     token,
+			Host: pivnetApiAddress,
 		}
-		client = pivnet.NewClient(newClientConfig, fakeLogger)
+		client = pivnet.NewClient(fakeAccessTokenService, newClientConfig, fakeLogger)
 	})
 
 	AfterEach(func() {
