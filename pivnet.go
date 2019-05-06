@@ -180,17 +180,20 @@ func (c Client) CreateRequest(
 		return nil, err
 	}
 
-	accessToken, err := c.token.AccessToken()
-	if err != nil {
-		return nil, err
+	if !isVersionsEndpoint(endpoint) {
+		accessToken, err := c.token.AccessToken()
+		if err != nil {
+			return nil, err
+		}
+
+		authorizationHeader, err := AuthorizationHeader(accessToken)
+		if err != nil {
+			return nil, fmt.Errorf("could not create authorization header: %s", err)
+		}
+
+		req.Header.Add("Authorization", authorizationHeader)
 	}
 
-	authorizationHeader, err := AuthorizationHeader(accessToken)
-	if err != nil {
-		return nil, fmt.Errorf("could not create authorization header: %s", err)
-	}
-
-	req.Header.Add("Authorization", authorizationHeader)
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("User-Agent", c.userAgent)
 
@@ -282,4 +285,8 @@ func (c Client) handleUnexpectedResponse(resp *http.Response) error {
 			Errors:       pErr.Errors,
 		}
 	}
+}
+
+func isVersionsEndpoint(endpoint string) bool {
+	return endpoint == "/versions"
 }

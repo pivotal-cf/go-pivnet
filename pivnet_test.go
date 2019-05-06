@@ -503,5 +503,17 @@ var _ = Describe("PivnetClient", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(req.URL.Path).To(Equal("/api/v2/foo/bar"))
 		})
+
+		It("does not add auth header if versions endpoint", func() {
+			req, err := client.CreateRequest(
+				"GET",
+				"/versions",
+				nil,
+			)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(req.Header.Get("Authorization")).To(Equal(""))
+			Expect(req.Header.Get("Content-Type")).To(Equal("application/json"))
+		})
 	})
 })
