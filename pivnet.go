@@ -53,13 +53,14 @@ type Client struct {
 type AccessTokenOrLegacyToken struct {
 	host string
 	refreshToken string
+	userAgent string
 }
 
 func (o AccessTokenOrLegacyToken) AccessToken() (string, error) {
 	const legacyAPITokenLength = 20
 	if len(o.refreshToken) > legacyAPITokenLength {
 		baseURL := fmt.Sprintf("%s%s", o.host, apiVersion)
-		tokenFetcher := NewTokenFetcher(baseURL, o.refreshToken)
+		tokenFetcher := NewTokenFetcher(baseURL, o.refreshToken, o.userAgent)
 
 		accessToken, err := tokenFetcher.GetToken()
 		if err != nil {
@@ -92,10 +93,15 @@ type AccessTokenService interface {
 	AccessToken() (string, error)
 }
 
-func NewAccessTokenOrLegacyToken(token string, host string) AccessTokenOrLegacyToken {
+func NewAccessTokenOrLegacyToken(token string, host string, userAgentOptional ...string) AccessTokenOrLegacyToken {
+	var userAgent = ""
+	if len(userAgentOptional) > 0 {
+		userAgent = userAgentOptional[0]
+	}
 	return AccessTokenOrLegacyToken {
 		refreshToken: token,
-		host: host,
+		host:         host,
+		userAgent:    userAgent,
 	}
 }
 
