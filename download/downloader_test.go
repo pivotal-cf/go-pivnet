@@ -50,7 +50,6 @@ func (ne NetError) Timeout() bool {
 type ReaderThatDoesntRead struct {}
 func (r ReaderThatDoesntRead) Read(p []byte) (int, error) {
 	for {
-		fmt.Println("not reading")
 		time.Sleep(time.Second)
 	}
 }
