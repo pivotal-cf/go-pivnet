@@ -17,7 +17,7 @@ See [example](https://github.com/pivotal-cf/go-pivnet/blob/master/example/main.g
 for an executable example.
 
 ```go
-import github.com/pivotal-cf/pivnet/v3
+import pivnet github.com/pivotal-cf/go-pivnet/v5
 
 [...]
 
