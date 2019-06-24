@@ -64,7 +64,7 @@ func (o AccessTokenOrLegacyToken) AccessToken() (string, error) {
 
 		accessToken, err := tokenFetcher.GetToken()
 		if err != nil {
-			log.Fatalf("Exiting with error: %s", err)
+			log.Panicf("Exiting with error: %s", err)
 			return "", err
 		}
 		return accessToken, nil
