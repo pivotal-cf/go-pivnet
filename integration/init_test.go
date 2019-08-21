@@ -42,7 +42,7 @@ var _ = BeforeSuite(func() {
 	sanitizedWriter := sanitizer.NewSanitizer(sanitized, GinkgoWriter)
 	GinkgoWriter = sanitizedWriter
 
-	accessTokenService := pivnet.NewAccessTokenOrLegacyToken(APIToken, Host)
+	accessTokenService := pivnet.NewAccessTokenOrLegacyToken(APIToken, Host, false)
 
 	config := pivnet.ClientConfig{
 		Host:      Host,

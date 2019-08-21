@@ -38,7 +38,7 @@ var _ = Describe("PivnetClient - Auth", func() {
 			Host:      apiAddress,
 			UserAgent: userAgent,
 		}
-		accessTokenService := pivnet.NewAccessTokenOrLegacyToken(token, apiAddress)
+		accessTokenService := pivnet.NewAccessTokenOrLegacyToken(token, apiAddress, false)
 		client = pivnet.NewClient(accessTokenService, newClientConfig, fakeLogger)
 	})
 

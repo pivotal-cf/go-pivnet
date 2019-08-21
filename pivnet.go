@@ -24,10 +24,10 @@ const (
 )
 
 type Client struct {
-	baseURL   string
-	token     AccessTokenService
-	userAgent string
-	logger    logger.Logger
+	baseURL       string
+	token         AccessTokenService
+	userAgent     string
+	logger        logger.Logger
 	usingUAAToken bool
 
 	HTTP *http.Client
@@ -37,7 +37,7 @@ type Client struct {
 	Auth                  *AuthService
 	EULA                  *EULAsService
 	ProductFiles          *ProductFilesService
-	FederationToken		  *FederationTokenService
+	FederationToken       *FederationTokenService
 	FileGroups            *FileGroupsService
 	Releases              *ReleasesService
 	Products              *ProductsService
@@ -51,16 +51,17 @@ type Client struct {
 }
 
 type AccessTokenOrLegacyToken struct {
-	host string
-	refreshToken string
-	userAgent string
+	host              string
+	refreshToken      string
+	skipSSLValidation bool
+	userAgent         string
 }
 
 func (o AccessTokenOrLegacyToken) AccessToken() (string, error) {
 	const legacyAPITokenLength = 20
 	if len(o.refreshToken) > legacyAPITokenLength {
 		baseURL := fmt.Sprintf("%s%s", o.host, apiVersion)
-		tokenFetcher := NewTokenFetcher(baseURL, o.refreshToken, o.userAgent)
+		tokenFetcher := NewTokenFetcher(baseURL, o.refreshToken, o.skipSSLValidation, o.userAgent)
 
 		accessToken, err := tokenFetcher.GetToken()
 		if err != nil {
@@ -93,15 +94,16 @@ type AccessTokenService interface {
 	AccessToken() (string, error)
 }
 
-func NewAccessTokenOrLegacyToken(token string, host string, userAgentOptional ...string) AccessTokenOrLegacyToken {
+func NewAccessTokenOrLegacyToken(token string, host string, skipSSLValidation bool, userAgentOptional ...string) AccessTokenOrLegacyToken {
 	var userAgent = ""
 	if len(userAgentOptional) > 0 {
 		userAgent = userAgentOptional[0]
 	}
-	return AccessTokenOrLegacyToken {
-		refreshToken: token,
-		host:         host,
-		userAgent:    userAgent,
+	return AccessTokenOrLegacyToken{
+		refreshToken:      token,
+		host:              host,
+		skipSSLValidation: skipSSLValidation,
+		userAgent:         userAgent,
 	}
 }
 
@@ -137,7 +139,7 @@ func NewClient(
 		HTTPClient: downloadClient,
 		Ranger:     ranger,
 		Logger:     logger,
-		Timeout: 5*time.Second,
+		Timeout:    5 * time.Second,
 	}
 
 	client := Client{
