@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	pivnet "github.com/pivotal-cf/go-pivnet"
-	"github.com/pivotal-cf/go-pivnet/logshim"
+	pivnet "github.com/pivotal-cf/go-pivnet/v2"
+	"github.com/pivotal-cf/go-pivnet/v2/logshim"
 )
 
 func main() {

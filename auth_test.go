@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/onsi/gomega/ghttp"
-	"github.com/pivotal-cf/go-pivnet"
-	"github.com/pivotal-cf/go-pivnet/logger"
-	"github.com/pivotal-cf/go-pivnet/logger/loggerfakes"
+	"github.com/pivotal-cf/go-pivnet/v2"
+	"github.com/pivotal-cf/go-pivnet/v2/logger"
+	"github.com/pivotal-cf/go-pivnet/v2/logger/loggerfakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
