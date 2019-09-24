@@ -37,6 +37,7 @@ type Client struct {
 	Auth                  *AuthService
 	EULA                  *EULAsService
 	ProductFiles          *ProductFilesService
+	ImageReferences       *ImageReferencesService
 	FederationToken       *FederationTokenService
 	FileGroups            *FileGroupsService
 	Releases              *ReleasesService
@@ -154,6 +155,7 @@ func NewClient(
 	client.Auth = &AuthService{client: client}
 	client.EULA = &EULAsService{client: client}
 	client.ProductFiles = &ProductFilesService{client: client}
+	client.ImageReferences = &ImageReferencesService{client: client}
 	client.FederationToken = &FederationTokenService{client: client}
 	client.FileGroups = &FileGroupsService{client: client}
 	client.Releases = &ReleasesService{client: client, l: logger}
