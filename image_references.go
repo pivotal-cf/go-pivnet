@@ -25,6 +25,10 @@ type ImageReferenceResponse struct {
 	ImageReference ImageReference `json:"image_reference,omitempty"`
 }
 
+type ImageReferencesResponse struct {
+	ImageReferences []ImageReference `json:"image_references,omitempty"`
+}
+
 type ImageReference struct {
 	ID                 int      `json:"id,omitempty" yaml:"id,omitempty"`
 	ImagePath          string   `json:"image_path,omitempty" yaml:"image_path,omitempty"`
@@ -79,6 +83,56 @@ func (p ImageReferencesService) Create(config CreateImageReferenceConfig) (Image
 	}
 
 	return response.ImageReference, nil
+}
+
+func (p ImageReferencesService) List(productSlug string) ([]ImageReference, error) {
+	url := fmt.Sprintf("/products/%s/image_references", productSlug)
+
+	var response ImageReferencesResponse
+	resp, err := p.client.MakeRequest(
+		"GET",
+		url,
+		http.StatusOK,
+		nil,
+	)
+	if err != nil {
+		return []ImageReference{}, err
+	}
+	defer resp.Body.Close()
+
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	if err != nil {
+		return []ImageReference{}, err
+	}
+
+	return response.ImageReferences, nil
+}
+
+func (p ImageReferencesService) ListForRelease(productSlug string, releaseID int) ([]ImageReference, error) {
+	url := fmt.Sprintf(
+		"/products/%s/releases/%d/image_references",
+		productSlug,
+		releaseID,
+	)
+
+	var response ImageReferencesResponse
+	resp, err := p.client.MakeRequest(
+		"GET",
+		url,
+		http.StatusOK,
+		nil,
+	)
+	if err != nil {
+		return []ImageReference{}, err
+	}
+	defer resp.Body.Close()
+
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	if err != nil {
+		return []ImageReference{}, err
+	}
+
+	return response.ImageReferences, nil
 }
 
 type createUpdateImageReferenceBody struct {
