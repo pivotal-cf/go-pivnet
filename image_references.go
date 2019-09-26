@@ -81,6 +81,44 @@ func (p ImageReferencesService) Create(config CreateImageReferenceConfig) (Image
 	return response.ImageReference, nil
 }
 
+func (p ImageReferencesService) AddToRelease(
+	productSlug string,
+	releaseID int,
+	imageReferenceID int,
+) error {
+	url := fmt.Sprintf(
+		"/products/%s/releases/%d/add_image_reference",
+		productSlug,
+		releaseID,
+	)
+
+	body := createUpdateImageReferenceBody{
+		ImageReference: ImageReference{
+			ID: imageReferenceID,
+		},
+	}
+
+	b, err := json.Marshal(body)
+	if err != nil {
+		// Untested as we cannot force an error because we are marshalling
+		// a known-good body
+		return err
+	}
+
+	resp, err := p.client.MakeRequest(
+		"PATCH",
+		url,
+		http.StatusNoContent,
+		bytes.NewReader(b),
+	)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	return nil
+}
+
 type createUpdateImageReferenceBody struct {
 	ImageReference ImageReference `json:"image_reference"`
 }

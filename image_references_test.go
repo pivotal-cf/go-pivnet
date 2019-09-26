@@ -174,4 +174,81 @@ var _ = Describe("PivnetClient - image references", func() {
 		})
 	})
 
+	Describe("Add Image Reference to release", func() {
+		var (
+			productSlug      = "some-product"
+			releaseID        = 2345
+			imageReferenceID = 3456
+
+			expectedRequestBody = `{"image_reference":{"id":3456}}`
+		)
+
+		Context("when the server responds with a 204 status code", func() {
+			It("returns without error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/releases/%d/add_image_reference",
+							apiPrefix,
+							productSlug,
+							releaseID,
+						)),
+						ghttp.VerifyJSON(expectedRequestBody),
+						ghttp.RespondWith(http.StatusNoContent, nil),
+					),
+				)
+
+				err := client.ImageReferences.AddToRelease(productSlug, releaseID, imageReferenceID)
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+
+		Context("when the server responds with a non-204 status code", func() {
+			var (
+				response interface{}
+			)
+
+			BeforeEach(func() {
+				response = pivnetErr{Message: "foo message"}
+			})
+
+			It("returns an error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/releases/%d/add_image_reference",
+							apiPrefix,
+							productSlug,
+							releaseID,
+						)),
+						ghttp.RespondWithJSONEncoded(http.StatusTeapot, response),
+					),
+				)
+
+				err := client.ImageReferences.AddToRelease(productSlug, releaseID, imageReferenceID)
+				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			It("forwards the error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
+							"%s/products/%s/releases/%d/add_image_reference",
+							apiPrefix,
+							productSlug,
+							releaseID,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, "%%%"),
+					),
+				)
+
+				err := client.ImageReferences.AddToRelease(productSlug, releaseID, imageReferenceID)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("invalid character"))
+			})
+		})
+	})
 })
