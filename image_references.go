@@ -21,6 +21,10 @@ type CreateImageReferenceConfig struct {
 	SystemRequirements []string
 }
 
+type ImageReferencesResponse struct {
+	ImageReferences []ImageReference `json:"image_references,omitempty"`
+}
+
 type ImageReferenceResponse struct {
 	ImageReference ImageReference `json:"image_reference,omitempty"`
 }
@@ -33,6 +37,115 @@ type ImageReference struct {
 	DocsURL            string   `json:"docs_url,omitempty" yaml:"docs_url,omitempty"`
 	Name               string   `json:"name,omitempty" yaml:"name,omitempty"`
 	SystemRequirements []string `json:"system_requirements,omitempty" yaml:"system_requirements,omitempty"`
+}
+
+type createUpdateImageReferenceBody struct {
+	ImageReference ImageReference `json:"image_reference"`
+}
+
+func (p ImageReferencesService) List(productSlug string) ([]ImageReference, error) {
+	url := fmt.Sprintf("/products/%s/image_references", productSlug)
+
+	var response ImageReferencesResponse
+	resp, err := p.client.MakeRequest(
+		"GET",
+		url,
+		http.StatusOK,
+		nil,
+	)
+	if err != nil {
+		return []ImageReference{}, err
+	}
+	defer resp.Body.Close()
+
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	if err != nil {
+		return []ImageReference{}, err
+	}
+
+	return response.ImageReferences, nil
+}
+
+func (p ImageReferencesService) ListForRelease(productSlug string, releaseID int) ([]ImageReference, error) {
+	url := fmt.Sprintf(
+		"/products/%s/releases/%d/image_references",
+		productSlug,
+		releaseID,
+	)
+
+	var response ImageReferencesResponse
+	resp, err := p.client.MakeRequest(
+		"GET",
+		url,
+		http.StatusOK,
+		nil,
+	)
+	if err != nil {
+		return []ImageReference{}, err
+	}
+	defer resp.Body.Close()
+
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	if err != nil {
+		return []ImageReference{}, err
+	}
+
+	return response.ImageReferences, nil
+}
+
+func (p ImageReferencesService) Get(productSlug string, imageReferenceID int) (ImageReference, error) {
+	url := fmt.Sprintf(
+		"/products/%s/image_references/%d",
+		productSlug,
+		imageReferenceID,
+	)
+
+	var response ImageReferenceResponse
+	resp, err := p.client.MakeRequest(
+		"GET",
+		url,
+		http.StatusOK,
+		nil,
+	)
+	if err != nil {
+		return ImageReference{}, err
+	}
+	defer resp.Body.Close()
+
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	if err != nil {
+		return ImageReference{}, err
+	}
+
+	return response.ImageReference, nil
+}
+
+func (p ImageReferencesService) GetForRelease(productSlug string, releaseID int, imageReferenceID int) (ImageReference, error) {
+	url := fmt.Sprintf(
+		"/products/%s/releases/%d/image_references/%d",
+		productSlug,
+		releaseID,
+		imageReferenceID,
+	)
+
+	var response ImageReferenceResponse
+	resp, err := p.client.MakeRequest(
+		"GET",
+		url,
+		http.StatusOK,
+		nil,
+	)
+	if err != nil {
+		return ImageReference{}, err
+	}
+	defer resp.Body.Close()
+
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	if err != nil {
+		return ImageReference{}, err
+	}
+
+	return response.ImageReference, nil
 }
 
 func (p ImageReferencesService) Create(config CreateImageReferenceConfig) (ImageReference, error) {
@@ -70,6 +183,33 @@ func (p ImageReferencesService) Create(config CreateImageReferenceConfig) (Image
 		} else {
 			return ImageReference{}, err
 		}
+	}
+	defer resp.Body.Close()
+
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	if err != nil {
+		return ImageReference{}, err
+	}
+
+	return response.ImageReference, nil
+}
+
+func (p ImageReferencesService) Delete(productSlug string, id int) (ImageReference, error) {
+	url := fmt.Sprintf(
+		"/products/%s/image_references/%d",
+		productSlug,
+		id,
+	)
+
+	var response ImageReferenceResponse
+	resp, err := p.client.MakeRequest(
+		"DELETE",
+		url,
+		http.StatusOK,
+		nil,
+	)
+	if err != nil {
+		return ImageReference{}, err
 	}
 	defer resp.Body.Close()
 
@@ -119,6 +259,40 @@ func (p ImageReferencesService) AddToRelease(
 	return nil
 }
 
-type createUpdateImageReferenceBody struct {
-	ImageReference ImageReference `json:"image_reference"`
+func (p ImageReferencesService) RemoveFromRelease(
+	productSlug string,
+	releaseID int,
+	imageReferenceID int,
+) error {
+	url := fmt.Sprintf(
+		"/products/%s/releases/%d/remove_image_reference",
+		productSlug,
+		releaseID,
+	)
+
+	body := createUpdateImageReferenceBody{
+		ImageReference: ImageReference{
+			ID: imageReferenceID,
+		},
+	}
+
+	b, err := json.Marshal(body)
+	if err != nil {
+		// Untested as we cannot force an error because we are marshalling
+		// a known-good body
+		return err
+	}
+
+	resp, err := p.client.MakeRequest(
+		"PATCH",
+		url,
+		http.StatusNoContent,
+		bytes.NewReader(b),
+	)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	return nil
 }
