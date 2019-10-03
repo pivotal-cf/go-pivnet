@@ -43,6 +43,7 @@ type Client struct {
 	Releases              *ReleasesService
 	Products              *ProductsService
 	UserGroups            *UserGroupsService
+	CompanyGroups         *CompanyGroupsService
 	ReleaseTypes          *ReleaseTypesService
 	ReleaseDependencies   *ReleaseDependenciesService
 	DependencySpecifiers  *DependencySpecifiersService
@@ -161,6 +162,7 @@ func NewClient(
 	client.Releases = &ReleasesService{client: client, l: logger}
 	client.Products = &ProductsService{client: client, l: logger}
 	client.UserGroups = &UserGroupsService{client: client}
+	client.CompanyGroups = &CompanyGroupsService{client: client}
 	client.ReleaseTypes = &ReleaseTypesService{client: client}
 	client.ReleaseDependencies = &ReleaseDependenciesService{client: client}
 	client.DependencySpecifiers = &DependencySpecifiersService{client: client}
