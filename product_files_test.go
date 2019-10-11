@@ -661,6 +661,8 @@ var _ = Describe("PivnetClient - product files", func() {
 				)
 
 				_, err := client.ProductFiles.Update(productSlug, productFile)
+				
+				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})

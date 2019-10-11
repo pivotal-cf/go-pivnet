@@ -520,6 +520,88 @@ var _ = Describe("PivnetClient - image references", func() {
 		})
 	})
 
+	Describe("Update image reference", func() {
+		type requestBody struct {
+			ImageReference pivnet.ImageReference `json:"image_reference"`
+		}
+
+		var (
+			expectedRequestBody     requestBody
+			imageReference          pivnet.ImageReference
+			updateImageReferenceUrl string
+			validResponse           = `{"image_reference":{"id":1234}}`
+		)
+
+		BeforeEach(func() {
+			imageReference = pivnet.ImageReference{
+				ID:                 1234,
+				ImagePath:          "some/path",
+				Description:        "Avast! Pieces o' passion are forever fine.",
+				Digest:             "some-sha265",
+				DocsURL:            "example.io",
+				Name:               "turpis-hercle",
+				SystemRequirements: nil,
+			}
+
+			expectedRequestBody = requestBody{
+				ImageReference: pivnet.ImageReference{
+					Description: imageReference.Description,
+					Name:        imageReference.Name,
+				},
+			}
+
+			updateImageReferenceUrl = fmt.Sprintf(
+				"%s/products/%s/image_references/%d",
+				apiPrefix,
+				productSlug,
+				imageReference.ID,
+			)
+
+		})
+
+		It("updates the image reference with the provided fields", func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("PATCH", updateImageReferenceUrl),
+					ghttp.VerifyJSONRepresenting(&expectedRequestBody),
+					ghttp.RespondWith(http.StatusOK, validResponse),
+				),
+			)
+
+			updatedImageReference, err := client.ImageReferences.Update(productSlug, imageReference)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(updatedImageReference.ID).To(Equal(imageReference.ID))
+		})
+
+		It("forwards the server-side error", func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("PATCH", updateImageReferenceUrl),
+					ghttp.RespondWithJSONEncoded(http.StatusTeapot,
+						pivnetErr{Message: "Meet, scotty, powerdrain!"}),
+				),
+			)
+
+			_, err := client.ImageReferences.Update(productSlug, imageReference)
+
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("scotty"))
+		})
+
+		It("forwards the unmarshalling error", func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("PATCH", updateImageReferenceUrl),
+					ghttp.RespondWith(http.StatusTeapot, "<NOT></JSON>"),
+				),
+			)
+			_, err := client.ImageReferences.Update(productSlug, imageReference)
+
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("invalid character"))
+		})
+	})
+
 	Describe("Delete Image Reference", func() {
 		var (
 			id = 1234
@@ -666,8 +748,8 @@ var _ = Describe("PivnetClient - image references", func() {
 
 	Describe("Remove Image Reference from release", func() {
 		var (
-			productSlug   = "some-product"
-			releaseID     = 2345
+			productSlug      = "some-product"
+			releaseID        = 2345
 			imageReferenceID = 3456
 
 			expectedRequestBody = `{"image_reference":{"id":3456}}`

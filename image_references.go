@@ -120,6 +120,42 @@ func (p ImageReferencesService) Get(productSlug string, imageReferenceID int) (I
 	return response.ImageReference, nil
 }
 
+func (p ImageReferencesService) Update(productSlug string, imageReference ImageReference) (ImageReference, error) {
+	url:= fmt.Sprintf("/products/%s/image_references/%d", productSlug, imageReference.ID)
+
+	body := createUpdateImageReferenceBody{
+		ImageReference: ImageReference{
+			Description: imageReference.Description,
+			Name:        imageReference.Name,
+		},
+	}
+
+	b, err := json.Marshal(body)
+	if err != nil {
+		return ImageReference{}, err
+	}
+
+	var response ImageReferenceResponse
+	resp, err := p.client.MakeRequest(
+		"PATCH",
+		url,
+		http.StatusOK,
+		bytes.NewReader(b),
+	)
+	if err != nil {
+		return ImageReference{}, err
+	}
+	defer resp.Body.Close()
+
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	if err != nil {
+		return ImageReference{}, err
+	}
+
+
+	return response.ImageReference, nil
+}
+
 func (p ImageReferencesService) GetForRelease(productSlug string, releaseID int, imageReferenceID int) (ImageReference, error) {
 	url := fmt.Sprintf(
 		"/products/%s/releases/%d/image_references/%d",
