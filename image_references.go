@@ -121,12 +121,14 @@ func (p ImageReferencesService) Get(productSlug string, imageReferenceID int) (I
 }
 
 func (p ImageReferencesService) Update(productSlug string, imageReference ImageReference) (ImageReference, error) {
-	url:= fmt.Sprintf("/products/%s/image_references/%d", productSlug, imageReference.ID)
+	url := fmt.Sprintf("/products/%s/image_references/%d", productSlug, imageReference.ID)
 
 	body := createUpdateImageReferenceBody{
 		ImageReference: ImageReference{
-			Description: imageReference.Description,
-			Name:        imageReference.Name,
+			Description:        imageReference.Description,
+			Name:               imageReference.Name,
+			DocsURL:            imageReference.DocsURL,
+			SystemRequirements: imageReference.SystemRequirements,
 		},
 	}
 

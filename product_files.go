@@ -240,11 +240,13 @@ func (p ProductFilesService) Update(productSlug string, productFile ProductFile)
 
 	body := createUpdateProductFileBody{
 		ProductFile: ProductFile{
-			Description: productFile.Description,
-			FileVersion: productFile.FileVersion,
-			SHA256:      productFile.SHA256,
-			MD5:         productFile.MD5,
-			Name:        productFile.Name,
+			Description:        productFile.Description,
+			FileVersion:        productFile.FileVersion,
+			SHA256:             productFile.SHA256,
+			MD5:                productFile.MD5,
+			Name:               productFile.Name,
+			DocsURL:            productFile.DocsURL,
+			SystemRequirements: productFile.SystemRequirements,
 		},
 	}
 

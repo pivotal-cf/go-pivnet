@@ -529,7 +529,7 @@ var _ = Describe("PivnetClient - image references", func() {
 			expectedRequestBody     requestBody
 			imageReference          pivnet.ImageReference
 			updateImageReferenceUrl string
-			validResponse           = `{"image_reference":{"id":1234}}`
+			validResponse           = `{"image_reference":{"id":1234, "docs_url":"example.io", "system_requirements": ["1", "2"]}}`
 		)
 
 		BeforeEach(func() {
@@ -540,13 +540,15 @@ var _ = Describe("PivnetClient - image references", func() {
 				Digest:             "some-sha265",
 				DocsURL:            "example.io",
 				Name:               "turpis-hercle",
-				SystemRequirements: nil,
+				SystemRequirements: []string{"1", "2"},
 			}
 
 			expectedRequestBody = requestBody{
 				ImageReference: pivnet.ImageReference{
-					Description: imageReference.Description,
-					Name:        imageReference.Name,
+					Description:        imageReference.Description,
+					Name:               imageReference.Name,
+					DocsURL:            imageReference.DocsURL,
+					SystemRequirements: imageReference.SystemRequirements,
 				},
 			}
 
@@ -571,6 +573,8 @@ var _ = Describe("PivnetClient - image references", func() {
 			updatedImageReference, err := client.ImageReferences.Update(productSlug, imageReference)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(updatedImageReference.ID).To(Equal(imageReference.ID))
+			Expect(updatedImageReference.DocsURL).To(Equal(imageReference.DocsURL))
+			Expect(updatedImageReference.SystemRequirements).To(ConsistOf("2", "1"))
 		})
 
 		It("forwards the server-side error", func() {
