@@ -40,6 +40,7 @@ type UserGroup struct {
 	Name        string   `json:"name,omitempty" yaml:"name,omitempty"`
 	Description string   `json:"description,omitempty" yaml:"description,omitempty"`
 	Members     []string `json:"members,omitempty" yaml:"members,omitempty"`
+	Admins      []string `json:"admins,omitempty" yaml:"admins,omitempty"`
 }
 
 type createUserGroup struct {
