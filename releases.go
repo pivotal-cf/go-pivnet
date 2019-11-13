@@ -66,11 +66,11 @@ type CreateReleaseConfig struct {
 	CopyMetadata          bool
 }
 
-func (r ReleasesService) List(productSlug string, params ...QueryParameter) ([]Release, error) {
+func (r ReleasesService) List(productSlug string) ([]Release, error) {
 	url := fmt.Sprintf("/products/%s/releases", productSlug)
 
 	var response ReleasesResponse
-	resp, err := r.client.MakeRequestWithParams("GET", url, http.StatusOK, params, nil)
+	resp, err := r.client.MakeRequest("GET", url, http.StatusOK, nil)
 	if err != nil {
 		return nil, err
 	}

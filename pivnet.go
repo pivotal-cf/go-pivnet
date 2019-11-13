@@ -59,11 +59,6 @@ type AccessTokenOrLegacyToken struct {
 	userAgent         string
 }
 
-type QueryParameter struct {
-	Key string
-	Value string
-}
-
 func (o AccessTokenOrLegacyToken) AccessToken() (string, error) {
 	const legacyAPITokenLength = 20
 	if len(o.refreshToken) > legacyAPITokenLength {
@@ -227,46 +222,6 @@ func (c Client) MakeRequest(
 	if err != nil {
 		return nil, err
 	}
-
-	reqBytes, err := httputil.DumpRequestOut(req, true)
-	if err != nil {
-		return nil, err
-	}
-
-	c.logger.Debug("Making request", logger.Data{"request": string(reqBytes)})
-
-	resp, err := c.HTTP.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	c.logger.Debug("Response status code", logger.Data{"status code": resp.StatusCode})
-	c.logger.Debug("Response headers", logger.Data{"headers": resp.Header})
-
-	if expectedStatusCode > 0 && resp.StatusCode != expectedStatusCode {
-		return nil, c.handleUnexpectedResponse(resp)
-	}
-
-	return resp, nil
-}
-
-func (c Client) MakeRequestWithParams(
-	requestType string,
-	endpoint string,
-	expectedStatusCode int,
-	params []QueryParameter,
-	body io.Reader,
-) (*http.Response, error) {
-	req, err := c.CreateRequest(requestType, endpoint, body)
-	if err != nil {
-		return nil, err
-	}
-
-	q := req.URL.Query()
-	for _, param := range params {
-		q.Add(param.Key, param.Value)
-	}
-	req.URL.RawQuery = q.Encode()
 
 	reqBytes, err := httputil.DumpRequestOut(req, true)
 	if err != nil {
