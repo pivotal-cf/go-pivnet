@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"encoding/json"
-	"github.com/pivotal-cf/go-pivnet/v2/logger"
+	"github.com/pivotal-cf/go-pivnet/v3/logger"
 )
 
 type ProductsService struct {

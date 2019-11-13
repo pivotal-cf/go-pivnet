@@ -2,20 +2,20 @@ package pivnet_test
 
 import (
 	"fmt"
-	"github.com/pivotal-cf/go-pivnet/v2/go-pivnetfakes"
+	"github.com/pivotal-cf/go-pivnet/v3/go-pivnetfakes"
 	"io/ioutil"
 	"net/http"
 	"regexp"
 	"strconv"
 
 	"github.com/onsi/gomega/ghttp"
-	"github.com/pivotal-cf/go-pivnet/v2"
-	"github.com/pivotal-cf/go-pivnet/v2/logger"
-	"github.com/pivotal-cf/go-pivnet/v2/logger/loggerfakes"
+	"github.com/pivotal-cf/go-pivnet/v3"
+	"github.com/pivotal-cf/go-pivnet/v3/logger"
+	"github.com/pivotal-cf/go-pivnet/v3/logger/loggerfakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/pivotal-cf/go-pivnet/v2/download"
+	"github.com/pivotal-cf/go-pivnet/v3/download"
 )
 
 var _ = Describe("PivnetClient - product files", func() {

@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pivotal-cf/go-pivnet/v2/download"
-	"github.com/pivotal-cf/go-pivnet/v2/logger"
+	"github.com/pivotal-cf/go-pivnet/v3/download"
+	"github.com/pivotal-cf/go-pivnet/v3/logger"
 )
 
 const (
