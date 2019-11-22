@@ -37,6 +37,7 @@ type ImageReference struct {
 	DocsURL            string   `json:"docs_url,omitempty" yaml:"docs_url,omitempty"`
 	Name               string   `json:"name,omitempty" yaml:"name,omitempty"`
 	SystemRequirements []string `json:"system_requirements,omitempty" yaml:"system_requirements,omitempty"`
+	ReleaseVersions    []string `json:"release_versions,omitempty" yaml:"release_versions,omitempty"`
 }
 
 type createUpdateImageReferenceBody struct {
@@ -51,6 +52,33 @@ func (p ImageReferencesService) List(productSlug string) ([]ImageReference, erro
 		"GET",
 		url,
 		http.StatusOK,
+		nil,
+	)
+	if err != nil {
+		return []ImageReference{}, err
+	}
+	defer resp.Body.Close()
+
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	if err != nil {
+		return []ImageReference{}, err
+	}
+
+	return response.ImageReferences, nil
+}
+
+func (p ImageReferencesService) ListForDigest(productSlug string, digest string) ([]ImageReference, error) {
+	url := fmt.Sprintf("/products/%s/image_references", productSlug)
+	params := []QueryParameter{
+		{"digest", digest},
+	}
+
+	var response ImageReferencesResponse
+	resp, err := p.client.MakeRequestWithParams(
+		"GET",
+		url,
+		http.StatusOK,
+		params,
 		nil,
 	)
 	if err != nil {
@@ -153,7 +181,6 @@ func (p ImageReferencesService) Update(productSlug string, imageReference ImageR
 	if err != nil {
 		return ImageReference{}, err
 	}
-
 
 	return response.ImageReference, nil
 }
