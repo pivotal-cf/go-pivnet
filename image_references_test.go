@@ -126,6 +126,99 @@ var _ = Describe("PivnetClient - image references", func() {
 		})
 	})
 
+	Describe("List image references for specific digest", func() {
+		var (
+			productSlug string
+			digest      string
+
+			response           interface{}
+			responseStatusCode int
+		)
+
+		BeforeEach(func() {
+			productSlug = "banana"
+			digest = "sha256:digest"
+
+			response = pivnet.ImageReferencesResponse{[]pivnet.ImageReference{
+				{
+					ID:   1234,
+					Name: "something",
+				},
+				{
+					ID:   2345,
+					Name: "something-else",
+					ReleaseVersions: []string{"1.0.0","1.2.3"},
+				},
+			}}
+
+			responseStatusCode = http.StatusOK
+		})
+
+		JustBeforeEach(func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						fmt.Sprintf(
+							"%s/products/%s/image_references",
+							apiPrefix,
+							productSlug,
+						),
+						"digest=sha256:digest",
+					),
+					ghttp.RespondWithJSONEncoded(responseStatusCode, response),
+				),
+			)
+		})
+
+		It("returns the image references without error", func() {
+			imageReferences, err := client.ImageReferences.ListForDigest(
+				productSlug,
+				digest,
+			)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(imageReferences).To(HaveLen(2))
+			Expect(imageReferences[0].ID).To(Equal(1234))
+			Expect(imageReferences[1].ReleaseVersions).To(HaveLen(2))
+			Expect(imageReferences[1].ReleaseVersions[0]).To(Equal("1.0.0"))
+			Expect(imageReferences[1].ReleaseVersions[1]).To(Equal("1.2.3"))
+		})
+
+		Context("when the server responds with a non-2XX status code", func() {
+			BeforeEach(func() {
+				responseStatusCode = http.StatusTeapot
+				response = pivnetErr{Message: "foo message"}
+			})
+
+			It("returns an error", func() {
+				_, err := client.ImageReferences.ListForDigest(
+					productSlug,
+					digest,
+				)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("foo message"))
+			})
+		})
+
+		Context("when the json unmarshalling fails with error", func() {
+			BeforeEach(func() {
+				response = "%%%"
+			})
+
+			It("forwards the error", func() {
+				_, err := client.ImageReferences.ListForDigest(
+					productSlug,
+					digest,
+				)
+				Expect(err).To(HaveOccurred())
+
+				Expect(err.Error()).To(ContainSubstring("json"))
+			})
+		})
+	})
+
 	Describe("List image references for release", func() {
 		var (
 			productSlug string
