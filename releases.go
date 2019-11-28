@@ -47,6 +47,7 @@ type Release struct {
 	EndOfAvailabilityDate  string      `json:"end_of_availability_date,omitempty" yaml:"end_of_availability_date,omitempty"`
 	UpdatedAt              string      `json:"updated_at,omitempty" yaml:"updated_at,omitempty"`
 	SoftwareFilesUpdatedAt string      `json:"software_files_updated_at,omitempty" yaml:"software_files_updated_at,omitempty"`
+	UserGroupsUpdatedAt    string      `json:"user_groups_updated_at,omitempty" yaml:"user_groups_updated_at,omitempty"`
 }
 
 type CreateReleaseConfig struct {
