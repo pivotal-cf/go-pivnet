@@ -542,7 +542,6 @@ var _ = Describe("PivnetClient - helm chart references", func() {
 			expectedRequestBody = requestBody{
 				HelmChartReference: pivnet.HelmChartReference{
 					Description:        helmChartReference.Description,
-					Name:               helmChartReference.Name,
 					DocsURL:            helmChartReference.DocsURL,
 					SystemRequirements: helmChartReference.SystemRequirements,
 				},

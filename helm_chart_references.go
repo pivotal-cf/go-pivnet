@@ -124,7 +124,6 @@ func (p HelmChartReferencesService) Update(productSlug string, helmChartReferenc
 	body := createUpdateHelmChartReferenceBody{
 		HelmChartReference: HelmChartReference{
 			Description:        helmChartReference.Description,
-			Name:               helmChartReference.Name,
 			DocsURL:            helmChartReference.DocsURL,
 			SystemRequirements: helmChartReference.SystemRequirements,
 		},
