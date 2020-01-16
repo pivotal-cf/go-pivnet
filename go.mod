@@ -14,6 +14,7 @@ require (
 	github.com/shirou/gopsutil v0.0.0-20180927124308-a11c78ba2c13
 	golang.org/x/net v0.0.0-20190813141303-74dc4d7220e7 // indirect
 	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f
+	golang.org/x/text v0.3.2 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/cheggaaa/pb.v1 v1.0.26
 )

@@ -14,7 +14,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("PivnetClient - company groups", func() {
+var _ = Describe("PivnetClient - subscription groups", func() {
 	var (
 		server     *ghttp.Server
 		client     pivnet.Client
@@ -49,22 +49,22 @@ var _ = Describe("PivnetClient - company groups", func() {
 	})
 
 	Describe("List", func() {
-		It("returns all company groups", func() {
-			response := `{"company_groups": [{"id":2,"name":"company group 1"},{"id": 3, "name": "company group 2"}]}`
+		It("returns all subscription groups", func() {
+			response := `{"subscription_groups": [{"id":2,"name":"subscription group 1"},{"id": 3, "name": "subscription group 2"}]}`
 
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/company_groups", apiPrefix)),
+					ghttp.VerifyRequest("GET", fmt.Sprintf("%s/subscription_groups", apiPrefix)),
 					ghttp.RespondWith(http.StatusOK, response),
 				),
 			)
 
-			companyGroups, err := client.CompanyGroups.List()
+			subscriptionGroups, err := client.SubscriptionGroups.List()
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(companyGroups).To(HaveLen(2))
-			Expect(companyGroups[0].ID).To(Equal(2))
-			Expect(companyGroups[1].ID).To(Equal(3))
+			Expect(subscriptionGroups).To(HaveLen(2))
+			Expect(subscriptionGroups[0].ID).To(Equal(2))
+			Expect(subscriptionGroups[1].ID).To(Equal(3))
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
@@ -79,12 +79,12 @@ var _ = Describe("PivnetClient - company groups", func() {
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
-						ghttp.VerifyRequest("GET", fmt.Sprintf("%s/company_groups", apiPrefix)),
+						ghttp.VerifyRequest("GET", fmt.Sprintf("%s/subscription_groups", apiPrefix)),
 						ghttp.RespondWith(http.StatusTeapot, body),
 					),
 				)
 
-				_, err := client.CompanyGroups.List()
+				_, err := client.SubscriptionGroups.List()
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
@@ -93,12 +93,12 @@ var _ = Describe("PivnetClient - company groups", func() {
 			It("forwards the error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
-						ghttp.VerifyRequest("GET", fmt.Sprintf("%s/company_groups", apiPrefix)),
+						ghttp.VerifyRequest("GET", fmt.Sprintf("%s/subscription_groups", apiPrefix)),
 						ghttp.RespondWith(http.StatusTeapot, "%%%"),
 					),
 				)
 
-				_, err := client.CompanyGroups.List()
+				_, err := client.SubscriptionGroups.List()
 				Expect(err).To(HaveOccurred())
 
 				Expect(err.Error()).To(ContainSubstring("invalid character"))
@@ -106,33 +106,33 @@ var _ = Describe("PivnetClient - company groups", func() {
 		})
 	})
 
-	Describe("Get Company Group", func() {
+	Describe("Get Subscription Group", func() {
 		var (
-			companyGroupID int
+			subscriptionGroupID int
 		)
 
 		BeforeEach(func() {
-			companyGroupID = 1234
+			subscriptionGroupID = 1234
 
-			response = pivnet.CompanyGroup{
-				ID:   companyGroupID,
-				Name: "some company group",
-				Members: []pivnet.CompanyGroupMember{
+			response = pivnet.SubscriptionGroup{
+				ID:   subscriptionGroupID,
+				Name: "some subscription group",
+				Members: []pivnet.SubscriptionGroupMember{
 					{
 						ID:      4321,
-						Name:    "company group member 1",
+						Name:    "subscription group member 1",
 						Email:   "dude@dude.dude",
 						IsAdmin: false,
 					},
 					{
 						ID:      9876,
-						Name:    "company group member 2",
+						Name:    "subscription group member 2",
 						Email:   "buddy@buddy.buddy",
 						IsAdmin: true,
 					},
 				},
 				PendingInvitations: []string{},
-				Entitlements:       []pivnet.CompanyGroupEntitlement{},
+				Entitlements:       []pivnet.SubscriptionGroupEntitlement{},
 			}
 		})
 
@@ -142,9 +142,9 @@ var _ = Describe("PivnetClient - company groups", func() {
 					ghttp.VerifyRequest(
 						"GET",
 						fmt.Sprintf(
-							"%s/company_groups/%d",
+							"%s/subscription_groups/%d",
 							apiPrefix,
-							companyGroupID,
+							subscriptionGroupID,
 						),
 					),
 					ghttp.RespondWithJSONEncoded(responseStatusCode, response),
@@ -152,8 +152,8 @@ var _ = Describe("PivnetClient - company groups", func() {
 			)
 		})
 
-		It("returns company group without errors", func() {
-			_, err := client.CompanyGroups.Get(companyGroupID)
+		It("returns subscription group without errors", func() {
+			_, err := client.SubscriptionGroups.Get(subscriptionGroupID)
 
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -174,17 +174,17 @@ var _ = Describe("PivnetClient - company groups", func() {
 						ghttp.VerifyRequest(
 							"GET",
 							fmt.Sprintf(
-								"%s/company_groups/%d",
+								"%s/subscription_groups/%d",
 								apiPrefix,
-								companyGroupID,
+								subscriptionGroupID,
 							),
 						),
 						ghttp.RespondWith(responseStatusCode, body),
 					),
 				)
 
-				_, err := client.CompanyGroups.Get(
-					companyGroupID,
+				_, err := client.SubscriptionGroups.Get(
+					subscriptionGroupID,
 				)
 				Expect(err).To(HaveOccurred())
 
@@ -195,34 +195,34 @@ var _ = Describe("PivnetClient - company groups", func() {
 
 	Describe("AddMember", func() {
 		var (
-			companyGroupID      int
+			subscriptionGroupID      int
 			memberEmailAddress  string
 			expectedRequestBody string
 		)
 
 		BeforeEach(func() {
-			companyGroupID = 1234
+			subscriptionGroupID = 1234
 			memberEmailAddress = "dude@dude.dude"
 
-			response = pivnet.CompanyGroup{
-				ID:   companyGroupID,
-				Name: "some company group",
-				Members: []pivnet.CompanyGroupMember{
+			response = pivnet.SubscriptionGroup{
+				ID:   subscriptionGroupID,
+				Name: "some subscription group",
+				Members: []pivnet.SubscriptionGroupMember{
 					{
 						ID:      4321,
-						Name:    "company group member 1",
+						Name:    "subscription group member 1",
 						Email:   "dude@dude.dude",
 						IsAdmin: false,
 					},
 					{
 						ID:      9876,
-						Name:    "company group member 2",
+						Name:    "subscription group member 2",
 						Email:   "buddy@buddy.buddy",
 						IsAdmin: true,
 					},
 				},
 				PendingInvitations: []string{},
-				Entitlements:       []pivnet.CompanyGroupEntitlement{},
+				Entitlements:       []pivnet.SubscriptionGroupEntitlement{},
 			}
 
 			expectedRequestBody = fmt.Sprintf(
@@ -231,15 +231,15 @@ var _ = Describe("PivnetClient - company groups", func() {
 			)
 		})
 
-		It("should return the changed company group when successful", func() {
+		It("should return the changed subscription group when successful", func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest(
 						"PATCH",
 						fmt.Sprintf(
-							"%s/company_groups/%d/add_member",
+							"%s/subscription_groups/%d/add_member",
 							apiPrefix,
-							companyGroupID,
+							subscriptionGroupID,
 						),
 					),
 					ghttp.VerifyJSON(expectedRequestBody),
@@ -247,7 +247,7 @@ var _ = Describe("PivnetClient - company groups", func() {
 				),
 			)
 
-			_, err := client.CompanyGroups.AddMember(companyGroupID, memberEmailAddress, "false")
+			_, err := client.SubscriptionGroups.AddMember(subscriptionGroupID, memberEmailAddress, "false")
 
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -264,12 +264,12 @@ var _ = Describe("PivnetClient - company groups", func() {
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
-						ghttp.VerifyRequest("PATCH", fmt.Sprintf("%s/company_groups/%d/add_member", apiPrefix, 1234)),
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf("%s/subscription_groups/%d/add_member", apiPrefix, 1234)),
 						ghttp.RespondWith(http.StatusTeapot, body),
 					),
 				)
 
-				_, err := client.CompanyGroups.AddMember(1234, "dude@dude.dude", "false")
+				_, err := client.SubscriptionGroups.AddMember(1234, "dude@dude.dude", "false")
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
@@ -279,7 +279,7 @@ var _ = Describe("PivnetClient - company groups", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
-							"%s/company_groups/%d/add_member",
+							"%s/subscription_groups/%d/add_member",
 							apiPrefix,
 							4321,
 						)),
@@ -287,7 +287,7 @@ var _ = Describe("PivnetClient - company groups", func() {
 					),
 				)
 
-				_, err := client.CompanyGroups.AddMember(4321, memberEmailAddress, "false")
+				_, err := client.SubscriptionGroups.AddMember(4321, memberEmailAddress, "false")
 				Expect(err).To(HaveOccurred())
 
 				Expect(err.Error()).To(ContainSubstring("invalid character"))
@@ -297,34 +297,34 @@ var _ = Describe("PivnetClient - company groups", func() {
 
 	Describe("RemoveMember", func() {
 		var (
-			companyGroupID      int
+			subscriptionGroupID      int
 			memberEmailAddress  string
 			expectedRequestBody string
 		)
 
 		BeforeEach(func() {
-			companyGroupID = 1234
+			subscriptionGroupID = 1234
 			memberEmailAddress = "dude@dude.dude"
 
-			response = pivnet.CompanyGroup{
-				ID:   companyGroupID,
-				Name: "some company group",
-				Members: []pivnet.CompanyGroupMember{
+			response = pivnet.SubscriptionGroup{
+				ID:   subscriptionGroupID,
+				Name: "some subscription group",
+				Members: []pivnet.SubscriptionGroupMember{
 					{
 						ID:      4321,
-						Name:    "company group member 1",
+						Name:    "subscription group member 1",
 						Email:   "dude@dude.dude",
 						IsAdmin: false,
 					},
 					{
 						ID:      9876,
-						Name:    "company group member 2",
+						Name:    "subscription group member 2",
 						Email:   "buddy@buddy.buddy",
 						IsAdmin: true,
 					},
 				},
 				PendingInvitations: []string{},
-				Entitlements:       []pivnet.CompanyGroupEntitlement{},
+				Entitlements:       []pivnet.SubscriptionGroupEntitlement{},
 			}
 
 			expectedRequestBody = fmt.Sprintf(
@@ -333,15 +333,15 @@ var _ = Describe("PivnetClient - company groups", func() {
 			)
 		})
 
-		It("should return the changed company group when successful", func() {
+		It("should return the changed subscription group when successful", func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest(
 						"PATCH",
 						fmt.Sprintf(
-							"%s/company_groups/%d/remove_member",
+							"%s/subscription_groups/%d/remove_member",
 							apiPrefix,
-							companyGroupID,
+							subscriptionGroupID,
 						),
 					),
 					ghttp.VerifyJSON(expectedRequestBody),
@@ -349,7 +349,7 @@ var _ = Describe("PivnetClient - company groups", func() {
 				),
 			)
 
-			_, err := client.CompanyGroups.RemoveMember(companyGroupID, memberEmailAddress)
+			_, err := client.SubscriptionGroups.RemoveMember(subscriptionGroupID, memberEmailAddress)
 
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -366,12 +366,12 @@ var _ = Describe("PivnetClient - company groups", func() {
 			It("returns an error", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
-						ghttp.VerifyRequest("PATCH", fmt.Sprintf("%s/company_groups/%d/remove_member", apiPrefix, 1234)),
+						ghttp.VerifyRequest("PATCH", fmt.Sprintf("%s/subscription_groups/%d/remove_member", apiPrefix, 1234)),
 						ghttp.RespondWith(http.StatusTeapot, body),
 					),
 				)
 
-				_, err := client.CompanyGroups.RemoveMember(1234, "dude@dude.dude")
+				_, err := client.SubscriptionGroups.RemoveMember(1234, "dude@dude.dude")
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
@@ -381,7 +381,7 @@ var _ = Describe("PivnetClient - company groups", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
-							"%s/company_groups/%d/remove_member",
+							"%s/subscription_groups/%d/remove_member",
 							apiPrefix,
 							4321,
 						)),
@@ -389,7 +389,7 @@ var _ = Describe("PivnetClient - company groups", func() {
 					),
 				)
 
-				_, err := client.CompanyGroups.RemoveMember(4321, memberEmailAddress)
+				_, err := client.SubscriptionGroups.RemoveMember(4321, memberEmailAddress)
 				Expect(err).To(HaveOccurred())
 
 				Expect(err.Error()).To(ContainSubstring("invalid character"))
