@@ -2,7 +2,7 @@ package download
 
 import (
 	"fmt"
-	"github.com/pivotal-cf/go-pivnet/v3/logger"
+	"github.com/pivotal-cf/go-pivnet/v4/logger"
 	"golang.org/x/sync/errgroup"
 	"io"
 	"net"

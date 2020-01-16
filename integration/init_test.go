@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/pivotal-cf/go-pivnet/v3"
-	"github.com/pivotal-cf/go-pivnet/v3/logger"
+	"github.com/pivotal-cf/go-pivnet/v4"
+	"github.com/pivotal-cf/go-pivnet/v4/logger"
 	"github.com/robdimsdale/sanitizer"
 
 	. "github.com/onsi/ginkgo"

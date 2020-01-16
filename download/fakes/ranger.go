@@ -4,7 +4,7 @@ package fakes
 import (
 	"sync"
 
-	"github.com/pivotal-cf/go-pivnet/v3/download"
+	"github.com/pivotal-cf/go-pivnet/v4/download"
 )
 
 type Ranger struct {

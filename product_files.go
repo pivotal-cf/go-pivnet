@@ -7,8 +7,8 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/pivotal-cf/go-pivnet/v3/download"
-	"github.com/pivotal-cf/go-pivnet/v3/logger"
+	"github.com/pivotal-cf/go-pivnet/v4/download"
+	"github.com/pivotal-cf/go-pivnet/v4/logger"
 )
 
 type ProductFilesService struct {

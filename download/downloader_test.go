@@ -9,8 +9,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/pivotal-cf/go-pivnet/v3/download"
-	"github.com/pivotal-cf/go-pivnet/v3/download/fakes"
+	"github.com/pivotal-cf/go-pivnet/v4/download"
+	"github.com/pivotal-cf/go-pivnet/v4/download/fakes"
 
 	"fmt"
 	. "github.com/onsi/ginkgo"
@@ -19,7 +19,7 @@ import (
 	"syscall"
 	"math"
 	"time"
-	"github.com/pivotal-cf/go-pivnet/v3/logger/loggerfakes"
+	"github.com/pivotal-cf/go-pivnet/v4/logger/loggerfakes"
 	"os"
 )
 
