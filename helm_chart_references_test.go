@@ -430,6 +430,7 @@ var _ = Describe("PivnetClient - helm chart references", func() {
 					Name:               createHelmChartReferenceConfig.Name,
 					Version:            createHelmChartReferenceConfig.Version,
 					SystemRequirements: createHelmChartReferenceConfig.SystemRequirements,
+					ReplicationStatus:  pivnet.InProgress,
 				}}
 		})
 
@@ -526,7 +527,7 @@ var _ = Describe("PivnetClient - helm chart references", func() {
 			expectedRequestBody     requestBody
 			helmChartReference          pivnet.HelmChartReference
 			updateHelmChartReferenceUrl string
-			validResponse           = `{"helm_chart_reference":{"id":1234, "docs_url":"example.io", "system_requirements": ["1", "2"]}}`
+			validResponse           = `{"helm_chart_reference":{"id":1234, "docs_url":"example.io", "system_requirements": ["1", "2"], "replication_status": "in_progress"}}`
 		)
 
 		BeforeEach(func() {
@@ -570,6 +571,7 @@ var _ = Describe("PivnetClient - helm chart references", func() {
 			Expect(updatedHelmChartReference.ID).To(Equal(helmChartReference.ID))
 			Expect(updatedHelmChartReference.DocsURL).To(Equal(helmChartReference.DocsURL))
 			Expect(updatedHelmChartReference.SystemRequirements).To(ConsistOf("2", "1"))
+			Expect(updatedHelmChartReference.ReplicationStatus).To(Equal(pivnet.InProgress))
 		})
 
 		It("forwards the server-side error", func() {

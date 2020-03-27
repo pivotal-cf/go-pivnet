@@ -29,15 +29,24 @@ type ImageReferenceResponse struct {
 	ImageReference ImageReference `json:"image_reference,omitempty"`
 }
 
+type ReplicationStatus string
+
+const (
+	InProgress        ReplicationStatus = "in_progress"
+	Complete          ReplicationStatus = "complete"
+	FailedToReplicate ReplicationStatus = "failed_to_replicate"
+)
+
 type ImageReference struct {
-	ID                 int      `json:"id,omitempty" yaml:"id,omitempty"`
-	ImagePath          string   `json:"image_path,omitempty" yaml:"image_path,omitempty"`
-	Description        string   `json:"description,omitempty" yaml:"description,omitempty"`
-	Digest             string   `json:"digest,omitempty" yaml:"digest,omitempty"`
-	DocsURL            string   `json:"docs_url,omitempty" yaml:"docs_url,omitempty"`
-	Name               string   `json:"name,omitempty" yaml:"name,omitempty"`
-	SystemRequirements []string `json:"system_requirements,omitempty" yaml:"system_requirements,omitempty"`
-	ReleaseVersions    []string `json:"release_versions,omitempty" yaml:"release_versions,omitempty"`
+	ID                 int               `json:"id,omitempty" yaml:"id,omitempty"`
+	ImagePath          string            `json:"image_path,omitempty" yaml:"image_path,omitempty"`
+	Description        string            `json:"description,omitempty" yaml:"description,omitempty"`
+	Digest             string            `json:"digest,omitempty" yaml:"digest,omitempty"`
+	DocsURL            string            `json:"docs_url,omitempty" yaml:"docs_url,omitempty"`
+	Name               string            `json:"name,omitempty" yaml:"name,omitempty"`
+	SystemRequirements []string          `json:"system_requirements,omitempty" yaml:"system_requirements,omitempty"`
+	ReleaseVersions    []string          `json:"release_versions,omitempty" yaml:"release_versions,omitempty"`
+	ReplicationStatus  ReplicationStatus `json:"replication_status,omitempty" yaml:"replication_status,omitempty"`
 }
 
 type createUpdateImageReferenceBody struct {

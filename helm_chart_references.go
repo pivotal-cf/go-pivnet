@@ -29,12 +29,13 @@ type HelmChartReferenceResponse struct {
 }
 
 type HelmChartReference struct {
-	ID                 int      `json:"id,omitempty" yaml:"id,omitempty"`
-	Description        string   `json:"description,omitempty" yaml:"description,omitempty"`
-	DocsURL            string   `json:"docs_url,omitempty" yaml:"docs_url,omitempty"`
-	Name               string   `json:"name,omitempty" yaml:"name,omitempty"`
-	Version            string   `json:"version,omitempty" yaml:"version,omitempty"`
-	SystemRequirements []string `json:"system_requirements,omitempty" yaml:"system_requirements,omitempty"`
+	ID                 int               `json:"id,omitempty" yaml:"id,omitempty"`
+	Description        string            `json:"description,omitempty" yaml:"description,omitempty"`
+	DocsURL            string            `json:"docs_url,omitempty" yaml:"docs_url,omitempty"`
+	Name               string            `json:"name,omitempty" yaml:"name,omitempty"`
+	Version            string            `json:"version,omitempty" yaml:"version,omitempty"`
+	SystemRequirements []string          `json:"system_requirements,omitempty" yaml:"system_requirements,omitempty"`
+	ReplicationStatus  ReplicationStatus `json:"replication_status,omitempty" yaml:"replication_status,omitempty"`
 }
 
 type createUpdateHelmChartReferenceBody struct {

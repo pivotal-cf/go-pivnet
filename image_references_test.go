@@ -526,6 +526,7 @@ var _ = Describe("PivnetClient - image references", func() {
 					ImagePath:          createImageReferenceConfig.ImagePath,
 					Name:               createImageReferenceConfig.Name,
 					SystemRequirements: createImageReferenceConfig.SystemRequirements,
+					ReplicationStatus:  pivnet.InProgress,
 				}}
 		})
 
@@ -622,7 +623,7 @@ var _ = Describe("PivnetClient - image references", func() {
 			expectedRequestBody     requestBody
 			imageReference          pivnet.ImageReference
 			updateImageReferenceUrl string
-			validResponse           = `{"image_reference":{"id":1234, "docs_url":"example.io", "system_requirements": ["1", "2"]}}`
+			validResponse           = `{"image_reference":{"id":1234, "docs_url":"example.io", "system_requirements": ["1", "2"], "replication_status": "in_progress"}}`
 		)
 
 		BeforeEach(func() {
@@ -668,6 +669,7 @@ var _ = Describe("PivnetClient - image references", func() {
 			Expect(updatedImageReference.ID).To(Equal(imageReference.ID))
 			Expect(updatedImageReference.DocsURL).To(Equal(imageReference.DocsURL))
 			Expect(updatedImageReference.SystemRequirements).To(ConsistOf("2", "1"))
+			Expect(updatedImageReference.ReplicationStatus).To(Equal(pivnet.InProgress))
 		})
 
 		It("forwards the server-side error", func() {
