@@ -48,14 +48,14 @@ type subscriptionGroupMemberToRemove struct {
 }
 
 type SubscriptionGroup struct {
-	ID                 int                            `json:"id,omitempty" yaml:"id,omitempty"`
-	Name               string                         `json:"name,omitempty" yaml:"name,omitempty"`
-	Members            []SubscriptionGroupMember      `json:"members" yaml:"members"`
-	PendingInvitations []string                       `json:"pending_invitations" yaml:"pending_invitations"`
-	Entitlements       []SubscriptionGroupEntitlement `json:"entitlements" yaml:"entitlements"`
+	ID                 int                             `json:"id,omitempty" yaml:"id,omitempty"`
+	Name               string                          `json:"name,omitempty" yaml:"name,omitempty"`
+	Members            []SubscriptionGroupMember       `json:"members" yaml:"members"`
+	PendingInvitations []string                        `json:"pending_invitations" yaml:"pending_invitations"`
+	Subscriptions      []SubscriptionGroupSubscription `json:"subscriptions" yaml:"subscriptions"`
 }
 
-type SubscriptionGroupEntitlement struct {
+type SubscriptionGroupSubscription struct {
 	ID   int    `json:"id,omitempty" yaml:"id,omitempty"`
 	Name string `json:"name,omitempty" yaml:"name,omitempty"`
 }

@@ -132,7 +132,7 @@ var _ = Describe("PivnetClient - subscription groups", func() {
 					},
 				},
 				PendingInvitations: []string{},
-				Entitlements:       []pivnet.SubscriptionGroupEntitlement{},
+				Subscriptions:      []pivnet.SubscriptionGroupSubscription{},
 			}
 		})
 
@@ -195,7 +195,7 @@ var _ = Describe("PivnetClient - subscription groups", func() {
 
 	Describe("AddMember", func() {
 		var (
-			subscriptionGroupID      int
+			subscriptionGroupID int
 			memberEmailAddress  string
 			expectedRequestBody string
 		)
@@ -222,7 +222,7 @@ var _ = Describe("PivnetClient - subscription groups", func() {
 					},
 				},
 				PendingInvitations: []string{},
-				Entitlements:       []pivnet.SubscriptionGroupEntitlement{},
+				Subscriptions:      []pivnet.SubscriptionGroupSubscription{},
 			}
 
 			expectedRequestBody = fmt.Sprintf(
@@ -297,7 +297,7 @@ var _ = Describe("PivnetClient - subscription groups", func() {
 
 	Describe("RemoveMember", func() {
 		var (
-			subscriptionGroupID      int
+			subscriptionGroupID int
 			memberEmailAddress  string
 			expectedRequestBody string
 		)
@@ -324,7 +324,7 @@ var _ = Describe("PivnetClient - subscription groups", func() {
 					},
 				},
 				PendingInvitations: []string{},
-				Entitlements:       []pivnet.SubscriptionGroupEntitlement{},
+				Subscriptions:      []pivnet.SubscriptionGroupSubscription{},
 			}
 
 			expectedRequestBody = fmt.Sprintf(
