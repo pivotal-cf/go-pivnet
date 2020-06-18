@@ -7,7 +7,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/pivotal-cf/go-pivnet/v4/md5sum"
+	"github.com/pivotal-cf/go-pivnet/v5/md5sum"
 )
 
 var _ = Describe("MD5", func() {

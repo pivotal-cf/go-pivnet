@@ -7,7 +7,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/pivotal-cf/go-pivnet/v4/sha256sum"
+	"github.com/pivotal-cf/go-pivnet/v5/sha256sum"
 )
 
 var _ = Describe("SHA256", func() {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/pivotal-cf/go-pivnet/v4/logger"
+	"github.com/pivotal-cf/go-pivnet/v5/logger"
 )
 
 type LogShim struct {
