@@ -19,7 +19,7 @@ var _ = Describe("UAA", func() {
 
 		BeforeEach(func() {
 			server = ghttp.NewServer()
-			tokenFetcher = NewTokenFetcher(server.URL(), "some-refresh-token", "")
+			tokenFetcher = NewTokenFetcher(server.URL(), "some-refresh-token", false, "")
 		})
 
 		AfterEach(func() {
@@ -43,7 +43,7 @@ var _ = Describe("UAA", func() {
 
 		It("passes on the user agent in the request header", func() {
 			userAgent := "my_user_agent"
-			tokenFetcher = NewTokenFetcher(server.URL(), "some-refresh-token", userAgent)
+			tokenFetcher = NewTokenFetcher(server.URL(), "some-refresh-token", false, userAgent)
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyHeaderKV("User-Agent", userAgent),
@@ -69,7 +69,7 @@ var _ = Describe("UAA", func() {
 			})
 
 			It("returns an error without endpoint", func() {
-				tokenFetcher = NewTokenFetcher("", "some-refresh-token", "")
+				tokenFetcher = NewTokenFetcher("", "some-refresh-token", false, "")
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("POST", "/authentication/access_tokens"),

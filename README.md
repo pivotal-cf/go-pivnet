@@ -1,3 +1,6 @@
+[![GoDoc](https://godoc.org/github.com/pivotal-cf/go-pivnet?status.svg)](https://godoc.org/github.com/pivotal-cf/go-pivnet)
+
+
 # go-pivnet API library
 
 A golang library for [Pivotal Network](https://network.pivotal.io).
@@ -14,7 +17,8 @@ See [example](https://github.com/pivotal-cf/go-pivnet/blob/master/example/main.g
 for an executable example.
 
 ```go
-import pivnet github.com/pivotal-cf/go-pivnet
+
+import pivnet github.com/pivotal-cf/go-pivnet/v5
 
 [...]
 

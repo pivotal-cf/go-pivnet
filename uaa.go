@@ -2,9 +2,11 @@ package pivnet
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 )
 
 type AuthResp struct {
@@ -12,17 +14,26 @@ type AuthResp struct {
 }
 
 type TokenFetcher struct {
-	Endpoint     string
-	RefreshToken string
-	UserAgent    string
+	Endpoint          string
+	RefreshToken      string
+	SkipSSLValidation bool
+	UserAgent         string
 }
 
-func NewTokenFetcher(endpoint, refreshToken string, userAgent string) *TokenFetcher {
-	return &TokenFetcher{endpoint, refreshToken, userAgent}
+func NewTokenFetcher(endpoint, refreshToken string, skipSSLValidation bool, userAgent string) *TokenFetcher {
+	return &TokenFetcher{endpoint, refreshToken, skipSSLValidation, userAgent }
 }
 
 func (t TokenFetcher) GetToken() (string, error) {
-	httpClient := &http.Client{}
+	httpClient := &http.Client{
+		Timeout: 60 * time.Second,
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: t.SkipSSLValidation,
+			},
+			Proxy: http.ProxyFromEnvironment,
+		},
+	}
 	body := AuthBody{RefreshToken: t.RefreshToken}
 	b, err := json.Marshal(body)
 	if err != nil {

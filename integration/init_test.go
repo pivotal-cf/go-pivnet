@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/pivotal-cf/go-pivnet"
-	"github.com/pivotal-cf/go-pivnet/logger"
+	"github.com/pivotal-cf/go-pivnet/v5"
+	"github.com/pivotal-cf/go-pivnet/v5/logger"
 	"github.com/robdimsdale/sanitizer"
 
 	. "github.com/onsi/ginkgo"
@@ -42,7 +42,7 @@ var _ = BeforeSuite(func() {
 	sanitizedWriter := sanitizer.NewSanitizer(sanitized, GinkgoWriter)
 	GinkgoWriter = sanitizedWriter
 
-	accessTokenService := pivnet.NewAccessTokenOrLegacyToken(APIToken, Host)
+	accessTokenService := pivnet.NewAccessTokenOrLegacyToken(APIToken, Host, false)
 
 	config := pivnet.ClientConfig{
 		Host:      Host,

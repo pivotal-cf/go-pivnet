@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pivotal-cf/go-pivnet/download"
-	"github.com/pivotal-cf/go-pivnet/logger"
+	"github.com/pivotal-cf/go-pivnet/v5/download"
+	"github.com/pivotal-cf/go-pivnet/v5/logger"
 )
 
 const (
@@ -24,10 +24,10 @@ const (
 )
 
 type Client struct {
-	baseURL   string
-	token     AccessTokenService
-	userAgent string
-	logger    logger.Logger
+	baseURL       string
+	token         AccessTokenService
+	userAgent     string
+	logger        logger.Logger
 	usingUAAToken bool
 
 	HTTP *http.Client
@@ -37,11 +37,13 @@ type Client struct {
 	Auth                  *AuthService
 	EULA                  *EULAsService
 	ProductFiles          *ProductFilesService
-	FederationToken		  *FederationTokenService
+	ImageReferences       *ImageReferencesService
+	FederationToken       *FederationTokenService
 	FileGroups            *FileGroupsService
 	Releases              *ReleasesService
 	Products              *ProductsService
 	UserGroups            *UserGroupsService
+	SubscriptionGroups    *SubscriptionGroupsService
 	ReleaseTypes          *ReleaseTypesService
 	ReleaseDependencies   *ReleaseDependenciesService
 	DependencySpecifiers  *DependencySpecifiersService
@@ -51,20 +53,26 @@ type Client struct {
 }
 
 type AccessTokenOrLegacyToken struct {
-	host string
-	refreshToken string
-	userAgent string
+	host              string
+	refreshToken      string
+	skipSSLValidation bool
+	userAgent         string
+}
+
+type QueryParameter struct {
+	Key string
+	Value string
 }
 
 func (o AccessTokenOrLegacyToken) AccessToken() (string, error) {
 	const legacyAPITokenLength = 20
 	if len(o.refreshToken) > legacyAPITokenLength {
 		baseURL := fmt.Sprintf("%s%s", o.host, apiVersion)
-		tokenFetcher := NewTokenFetcher(baseURL, o.refreshToken, o.userAgent)
+		tokenFetcher := NewTokenFetcher(baseURL, o.refreshToken, o.skipSSLValidation, o.userAgent)
 
 		accessToken, err := tokenFetcher.GetToken()
 		if err != nil {
-			log.Fatalf("Exiting with error: %s", err)
+			log.Panicf("Exiting with error: %s", err)
 			return "", err
 		}
 		return accessToken, nil
@@ -93,15 +101,16 @@ type AccessTokenService interface {
 	AccessToken() (string, error)
 }
 
-func NewAccessTokenOrLegacyToken(token string, host string, userAgentOptional ...string) AccessTokenOrLegacyToken {
+func NewAccessTokenOrLegacyToken(token string, host string, skipSSLValidation bool, userAgentOptional ...string) AccessTokenOrLegacyToken {
 	var userAgent = ""
 	if len(userAgentOptional) > 0 {
 		userAgent = userAgentOptional[0]
 	}
-	return AccessTokenOrLegacyToken {
-		refreshToken: token,
-		host:         host,
-		userAgent:    userAgent,
+	return AccessTokenOrLegacyToken{
+		refreshToken:      token,
+		host:              host,
+		skipSSLValidation: skipSSLValidation,
+		userAgent:         userAgent,
 	}
 }
 
@@ -137,7 +146,7 @@ func NewClient(
 		HTTPClient: downloadClient,
 		Ranger:     ranger,
 		Logger:     logger,
-		Timeout: 5*time.Second,
+		Timeout:    5 * time.Second,
 	}
 
 	client := Client{
@@ -152,11 +161,13 @@ func NewClient(
 	client.Auth = &AuthService{client: client}
 	client.EULA = &EULAsService{client: client}
 	client.ProductFiles = &ProductFilesService{client: client}
+	client.ImageReferences = &ImageReferencesService{client: client}
 	client.FederationToken = &FederationTokenService{client: client}
 	client.FileGroups = &FileGroupsService{client: client}
 	client.Releases = &ReleasesService{client: client, l: logger}
 	client.Products = &ProductsService{client: client, l: logger}
 	client.UserGroups = &UserGroupsService{client: client}
+	client.SubscriptionGroups = &SubscriptionGroupsService{client: client}
 	client.ReleaseTypes = &ReleaseTypesService{client: client}
 	client.ReleaseDependencies = &ReleaseDependenciesService{client: client}
 	client.DependencySpecifiers = &DependencySpecifiersService{client: client}
@@ -216,6 +227,46 @@ func (c Client) MakeRequest(
 	if err != nil {
 		return nil, err
 	}
+
+	reqBytes, err := httputil.DumpRequestOut(req, true)
+	if err != nil {
+		return nil, err
+	}
+
+	c.logger.Debug("Making request", logger.Data{"request": string(reqBytes)})
+
+	resp, err := c.HTTP.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	c.logger.Debug("Response status code", logger.Data{"status code": resp.StatusCode})
+	c.logger.Debug("Response headers", logger.Data{"headers": resp.Header})
+
+	if expectedStatusCode > 0 && resp.StatusCode != expectedStatusCode {
+		return nil, c.handleUnexpectedResponse(resp)
+	}
+
+	return resp, nil
+}
+
+func (c Client) MakeRequestWithParams(
+	requestType string,
+	endpoint string,
+	expectedStatusCode int,
+	params []QueryParameter,
+	body io.Reader,
+) (*http.Response, error) {
+	req, err := c.CreateRequest(requestType, endpoint, body)
+	if err != nil {
+		return nil, err
+	}
+
+	q := req.URL.Query()
+	for _, param := range params {
+		q.Add(param.Key, param.Value)
+	}
+	req.URL.RawQuery = q.Encode()
 
 	reqBytes, err := httputil.DumpRequestOut(req, true)
 	if err != nil {

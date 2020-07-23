@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/onsi/gomega/ghttp"
-	"github.com/pivotal-cf/go-pivnet"
-	"github.com/pivotal-cf/go-pivnet/logger"
-	"github.com/pivotal-cf/go-pivnet/logger/loggerfakes"
+	"github.com/pivotal-cf/go-pivnet/v5"
+	"github.com/pivotal-cf/go-pivnet/v5/logger"
+	"github.com/pivotal-cf/go-pivnet/v5/logger/loggerfakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -38,7 +38,7 @@ var _ = Describe("PivnetClient - Auth", func() {
 			Host:      apiAddress,
 			UserAgent: userAgent,
 		}
-		accessTokenService := pivnet.NewAccessTokenOrLegacyToken(token, apiAddress)
+		accessTokenService := pivnet.NewAccessTokenOrLegacyToken(token, apiAddress, false)
 		client = pivnet.NewClient(accessTokenService, newClientConfig, fakeLogger)
 	})
 

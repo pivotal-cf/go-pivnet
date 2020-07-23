@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/pivotal-cf/go-pivnet/logger"
+	"github.com/pivotal-cf/go-pivnet/v5/logger"
 )
 
 type ReleasesService struct {
@@ -47,6 +47,7 @@ type Release struct {
 	EndOfAvailabilityDate  string      `json:"end_of_availability_date,omitempty" yaml:"end_of_availability_date,omitempty"`
 	UpdatedAt              string      `json:"updated_at,omitempty" yaml:"updated_at,omitempty"`
 	SoftwareFilesUpdatedAt string      `json:"software_files_updated_at,omitempty" yaml:"software_files_updated_at,omitempty"`
+	UserGroupsUpdatedAt    string      `json:"user_groups_updated_at,omitempty" yaml:"user_groups_updated_at,omitempty"`
 }
 
 type CreateReleaseConfig struct {
@@ -66,11 +67,11 @@ type CreateReleaseConfig struct {
 	CopyMetadata          bool
 }
 
-func (r ReleasesService) List(productSlug string) ([]Release, error) {
+func (r ReleasesService) List(productSlug string, params ...QueryParameter) ([]Release, error) {
 	url := fmt.Sprintf("/products/%s/releases", productSlug)
 
 	var response ReleasesResponse
-	resp, err := r.client.MakeRequest("GET", url, http.StatusOK, nil)
+	resp, err := r.client.MakeRequestWithParams("GET", url, http.StatusOK, params, nil)
 	if err != nil {
 		return nil, err
 	}

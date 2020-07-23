@@ -2,14 +2,14 @@ package pivnet_test
 
 import (
 	"fmt"
-	"github.com/pivotal-cf/go-pivnet/go-pivnetfakes"
+	"github.com/pivotal-cf/go-pivnet/v5/go-pivnetfakes"
 	"net/http"
 	"time"
 
 	"github.com/onsi/gomega/ghttp"
-	"github.com/pivotal-cf/go-pivnet"
-	"github.com/pivotal-cf/go-pivnet/logger"
-	"github.com/pivotal-cf/go-pivnet/logger/loggerfakes"
+	"github.com/pivotal-cf/go-pivnet/v5"
+	"github.com/pivotal-cf/go-pivnet/v5/logger"
+	"github.com/pivotal-cf/go-pivnet/v5/logger/loggerfakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -61,6 +61,23 @@ var _ = Describe("PivnetClient - product files", func() {
 			Expect(releases).To(HaveLen(2))
 			Expect(releases[0].ID).To(Equal(2))
 			Expect(releases[1].ID).To(Equal(3))
+		})
+
+		Context("when specifying a limit", func() {
+			It("passes the limit to the API endpoint in the form of query params", func() {
+				response := `{"releases": [{"id": 3, "version": "3.2.1", "_links": {"product_files": {"href":"https://banana.org/cookies/download"}}}]}`
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", apiPrefix+"/products/banana/releases", "limit=1"),
+						ghttp.RespondWith(http.StatusOK, response),
+					),
+				)
+
+				releases, err := client.Releases.List("banana", pivnet.QueryParameter{"limit", "1"})
+				Expect(err).NotTo(HaveOccurred())
+				Expect(releases).To(HaveLen(1))
+				Expect(releases[0].ID).To(Equal(3))
+			})
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {

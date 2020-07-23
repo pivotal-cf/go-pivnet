@@ -2,13 +2,13 @@ package pivnet_test
 
 import (
 	"fmt"
-	"github.com/pivotal-cf/go-pivnet/go-pivnetfakes"
+	"github.com/pivotal-cf/go-pivnet/v5/go-pivnetfakes"
 	"net/http"
 
 	"github.com/onsi/gomega/ghttp"
-	"github.com/pivotal-cf/go-pivnet"
-	"github.com/pivotal-cf/go-pivnet/logger"
-	"github.com/pivotal-cf/go-pivnet/logger/loggerfakes"
+	"github.com/pivotal-cf/go-pivnet/v5"
+	"github.com/pivotal-cf/go-pivnet/v5/logger"
+	"github.com/pivotal-cf/go-pivnet/v5/logger/loggerfakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -229,6 +229,61 @@ var _ = Describe("PivnetClient - product", func() {
 				Expect(err).To(HaveOccurred())
 
 				Expect(err.Error()).To(ContainSubstring("invalid character"))
+			})
+		})
+	})
+
+	Describe("SlugAlias", func() {
+		Context("when product can be found", func() {
+			var (
+				productSlug = "product-slug"
+				productSlugAlias = "product-slug-alias"
+			)
+
+			It("returns list of all the slugs associated to the product", func() {
+				response := fmt.Sprintf(`{"slugs": ["%[1]v", "%[2]v"], "current_slug": "%[1]v"}`, productSlug, productSlugAlias)
+
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", fmt.Sprintf(
+							"%s/products/%s/slug_alias",
+							apiPrefix,
+							productSlug)),
+						ghttp.RespondWith(http.StatusOK, response),
+					),
+				)
+
+				slugAliasResponse, err := client.Products.SlugAlias(productSlug)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(slugAliasResponse.Slugs).To(HaveLen(2))
+				Expect(slugAliasResponse.Slugs).To(ConsistOf(productSlugAlias, productSlug))
+				Expect(slugAliasResponse.CurrentSlug).To(Equal(productSlug))
+			})
+		})
+
+		Context("when the server responds with a non-2XX status code", func() {
+			var (
+				body []byte
+			)
+
+			BeforeEach(func() {
+				body = []byte(`{"message":"foo message"}`)
+			})
+
+			It("returns an error", func() {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", fmt.Sprintf(
+							"%s/products/%s/slug_alias",
+							apiPrefix,
+							productSlug,
+						)),
+						ghttp.RespondWith(http.StatusTeapot, body),
+					),
+				)
+
+				_, err := client.Products.SlugAlias(productSlug)
+				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
 	})

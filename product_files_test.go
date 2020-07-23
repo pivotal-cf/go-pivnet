@@ -2,20 +2,20 @@ package pivnet_test
 
 import (
 	"fmt"
-	"github.com/pivotal-cf/go-pivnet/go-pivnetfakes"
+	"github.com/pivotal-cf/go-pivnet/v5/go-pivnetfakes"
 	"io/ioutil"
 	"net/http"
 	"regexp"
 	"strconv"
 
 	"github.com/onsi/gomega/ghttp"
-	"github.com/pivotal-cf/go-pivnet"
-	"github.com/pivotal-cf/go-pivnet/logger"
-	"github.com/pivotal-cf/go-pivnet/logger/loggerfakes"
+	"github.com/pivotal-cf/go-pivnet/v5"
+	"github.com/pivotal-cf/go-pivnet/v5/logger"
+	"github.com/pivotal-cf/go-pivnet/v5/logger/loggerfakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/pivotal-cf/go-pivnet/download"
+	"github.com/pivotal-cf/go-pivnet/v5/download"
 )
 
 var _ = Describe("PivnetClient - product files", func() {
@@ -595,26 +595,30 @@ var _ = Describe("PivnetClient - product files", func() {
 
 			productFile pivnet.ProductFile
 
-			validResponse = `{"product_file":{"id":1234}}`
+			validResponse = `{"product_file":{"id":1234,"docs_url":"http://self-docs.com/","system_requirements": ["1", "2"]}}`
 		)
 
 		BeforeEach(func() {
 			productFile = pivnet.ProductFile{
-				ID:          1234,
-				Description: "some-description",
-				FileVersion: "some-file-version",
-				SHA256:      "some-sha256",
-				MD5:         "some-md5",
-				Name:        "some-file-name",
+				ID:                 1234,
+				Description:        "some-description",
+				FileVersion:        "some-file-version",
+				SHA256:             "some-sha256",
+				MD5:                "some-md5",
+				Name:               "some-file-name",
+				DocsURL:            "http://self-docs.com/",
+				SystemRequirements: []string{"1", "2"},
 			}
 
 			expectedRequestBody = requestBody{
 				ProductFile: pivnet.ProductFile{
-					Description: productFile.Description,
-					FileVersion: productFile.FileVersion,
-					SHA256:      productFile.SHA256,
-					MD5:         productFile.MD5,
-					Name:        productFile.Name,
+					Description:        productFile.Description,
+					FileVersion:        productFile.FileVersion,
+					SHA256:             productFile.SHA256,
+					MD5:                productFile.MD5,
+					Name:               productFile.Name,
+					DocsURL:            productFile.DocsURL,
+					SystemRequirements: productFile.SystemRequirements,
 				},
 			}
 		})
@@ -636,6 +640,8 @@ var _ = Describe("PivnetClient - product files", func() {
 			updatedProductFile, err := client.ProductFiles.Update(productSlug, productFile)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(updatedProductFile.ID).To(Equal(productFile.ID))
+			Expect(updatedProductFile.DocsURL).To(Equal(productFile.DocsURL))
+			Expect(updatedProductFile.SystemRequirements).To(ConsistOf("2", "1"))
 		})
 
 		Context("when the server responds with a non-200 status code", func() {
@@ -661,6 +667,8 @@ var _ = Describe("PivnetClient - product files", func() {
 				)
 
 				_, err := client.ProductFiles.Update(productSlug, productFile)
+				
+				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})

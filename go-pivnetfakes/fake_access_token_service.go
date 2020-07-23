@@ -4,7 +4,7 @@ package gopivnetfakes
 import (
 	"sync"
 
-	pivnet "github.com/pivotal-cf/go-pivnet"
+	pivnet "github.com/pivotal-cf/go-pivnet/v5"
 )
 
 type FakeAccessTokenService struct {
