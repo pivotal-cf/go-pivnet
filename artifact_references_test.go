@@ -13,7 +13,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("PivnetClient - image references", func() {
+var _ = Describe("PivnetClient - artifact references", func() {
 	var (
 		server     *ghttp.Server
 		client     pivnet.Client
@@ -43,7 +43,7 @@ var _ = Describe("PivnetClient - image references", func() {
 		server.Close()
 	})
 
-	Describe("List image references", func() {
+	Describe("List artifact references", func() {
 		var (
 			productSlug string
 
@@ -54,7 +54,7 @@ var _ = Describe("PivnetClient - image references", func() {
 		BeforeEach(func() {
 			productSlug = "banana"
 
-			response = pivnet.ImageReferencesResponse{[]pivnet.ImageReference{
+			response = pivnet.ArtifactReferencesResponse{[]pivnet.ArtifactReference{
 				{
 					ID:   1234,
 					Name: "something",
@@ -74,7 +74,7 @@ var _ = Describe("PivnetClient - image references", func() {
 					ghttp.VerifyRequest(
 						"GET",
 						fmt.Sprintf(
-							"%s/products/%s/image_references",
+							"%s/products/%s/artifact_references",
 							apiPrefix,
 							productSlug,
 						),
@@ -84,14 +84,14 @@ var _ = Describe("PivnetClient - image references", func() {
 			)
 		})
 
-		It("returns the image references without error", func() {
-			imageReferences, err := client.ImageReferences.List(
+		It("returns the artifact references without error", func() {
+			artifactReferences, err := client.ArtifactReferences.List(
 				productSlug,
 			)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(imageReferences).To(HaveLen(2))
-			Expect(imageReferences[0].ID).To(Equal(1234))
+			Expect(artifactReferences).To(HaveLen(2))
+			Expect(artifactReferences[0].ID).To(Equal(1234))
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
@@ -101,7 +101,7 @@ var _ = Describe("PivnetClient - image references", func() {
 			})
 
 			It("returns an error", func() {
-				_, err := client.ImageReferences.List(
+				_, err := client.ArtifactReferences.List(
 					productSlug,
 				)
 				Expect(err).To(HaveOccurred())
@@ -116,7 +116,7 @@ var _ = Describe("PivnetClient - image references", func() {
 			})
 
 			It("forwards the error", func() {
-				_, err := client.ImageReferences.List(
+				_, err := client.ArtifactReferences.List(
 					productSlug,
 				)
 				Expect(err).To(HaveOccurred())
@@ -126,7 +126,7 @@ var _ = Describe("PivnetClient - image references", func() {
 		})
 	})
 
-	Describe("List image references for specific digest", func() {
+	Describe("List artifact references for specific digest", func() {
 		var (
 			productSlug string
 			digest      string
@@ -139,7 +139,7 @@ var _ = Describe("PivnetClient - image references", func() {
 			productSlug = "banana"
 			digest = "sha256:digest"
 
-			response = pivnet.ImageReferencesResponse{[]pivnet.ImageReference{
+			response = pivnet.ArtifactReferencesResponse{[]pivnet.ArtifactReference{
 				{
 					ID:   1234,
 					Name: "something",
@@ -160,7 +160,7 @@ var _ = Describe("PivnetClient - image references", func() {
 					ghttp.VerifyRequest(
 						"GET",
 						fmt.Sprintf(
-							"%s/products/%s/image_references",
+							"%s/products/%s/artifact_references",
 							apiPrefix,
 							productSlug,
 						),
@@ -171,18 +171,18 @@ var _ = Describe("PivnetClient - image references", func() {
 			)
 		})
 
-		It("returns the image references without error", func() {
-			imageReferences, err := client.ImageReferences.ListForDigest(
+		It("returns the artifact references without error", func() {
+			artifactReferences, err := client.ArtifactReferences.ListForDigest(
 				productSlug,
 				digest,
 			)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(imageReferences).To(HaveLen(2))
-			Expect(imageReferences[0].ID).To(Equal(1234))
-			Expect(imageReferences[1].ReleaseVersions).To(HaveLen(2))
-			Expect(imageReferences[1].ReleaseVersions[0]).To(Equal("1.0.0"))
-			Expect(imageReferences[1].ReleaseVersions[1]).To(Equal("1.2.3"))
+			Expect(artifactReferences).To(HaveLen(2))
+			Expect(artifactReferences[0].ID).To(Equal(1234))
+			Expect(artifactReferences[1].ReleaseVersions).To(HaveLen(2))
+			Expect(artifactReferences[1].ReleaseVersions[0]).To(Equal("1.0.0"))
+			Expect(artifactReferences[1].ReleaseVersions[1]).To(Equal("1.2.3"))
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
@@ -192,7 +192,7 @@ var _ = Describe("PivnetClient - image references", func() {
 			})
 
 			It("returns an error", func() {
-				_, err := client.ImageReferences.ListForDigest(
+				_, err := client.ArtifactReferences.ListForDigest(
 					productSlug,
 					digest,
 				)
@@ -208,7 +208,7 @@ var _ = Describe("PivnetClient - image references", func() {
 			})
 
 			It("forwards the error", func() {
-				_, err := client.ImageReferences.ListForDigest(
+				_, err := client.ArtifactReferences.ListForDigest(
 					productSlug,
 					digest,
 				)
@@ -219,7 +219,7 @@ var _ = Describe("PivnetClient - image references", func() {
 		})
 	})
 
-	Describe("List image references for release", func() {
+	Describe("List artifact references for release", func() {
 		var (
 			productSlug string
 			releaseID   int
@@ -232,7 +232,7 @@ var _ = Describe("PivnetClient - image references", func() {
 			productSlug = "banana"
 			releaseID = 12
 
-			response = pivnet.ImageReferencesResponse{[]pivnet.ImageReference{
+			response = pivnet.ArtifactReferencesResponse{[]pivnet.ArtifactReference{
 				{
 					ID:   1234,
 					Name: "something",
@@ -252,7 +252,7 @@ var _ = Describe("PivnetClient - image references", func() {
 					ghttp.VerifyRequest(
 						"GET",
 						fmt.Sprintf(
-							"%s/products/%s/releases/%d/image_references",
+							"%s/products/%s/releases/%d/artifact_references",
 							apiPrefix,
 							productSlug,
 							releaseID,
@@ -263,15 +263,15 @@ var _ = Describe("PivnetClient - image references", func() {
 			)
 		})
 
-		It("returns the image references without error", func() {
-			imageReferences, err := client.ImageReferences.ListForRelease(
+		It("returns the artifact references without error", func() {
+			artifactReferences, err := client.ArtifactReferences.ListForRelease(
 				productSlug,
 				releaseID,
 			)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(imageReferences).To(HaveLen(2))
-			Expect(imageReferences[0].ID).To(Equal(1234))
+			Expect(artifactReferences).To(HaveLen(2))
+			Expect(artifactReferences[0].ID).To(Equal(1234))
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
@@ -281,7 +281,7 @@ var _ = Describe("PivnetClient - image references", func() {
 			})
 
 			It("returns an error", func() {
-				_, err := client.ImageReferences.ListForRelease(
+				_, err := client.ArtifactReferences.ListForRelease(
 					productSlug,
 					releaseID,
 				)
@@ -297,7 +297,7 @@ var _ = Describe("PivnetClient - image references", func() {
 			})
 
 			It("forwards the error", func() {
-				_, err := client.ImageReferences.ListForRelease(
+				_, err := client.ArtifactReferences.ListForRelease(
 					productSlug,
 					releaseID,
 				)
@@ -308,10 +308,10 @@ var _ = Describe("PivnetClient - image references", func() {
 		})
 	})
 
-	Describe("Get Image Reference", func() {
+	Describe("Get artifact Reference", func() {
 		var (
-			productSlug      string
-			imageReferenceID int
+			productSlug         string
+			artifactReferenceID int
 
 			response           interface{}
 			responseStatusCode int
@@ -319,11 +319,11 @@ var _ = Describe("PivnetClient - image references", func() {
 
 		BeforeEach(func() {
 			productSlug = "banana"
-			imageReferenceID = 1234
+			artifactReferenceID = 1234
 
-			response = pivnet.ImageReferenceResponse{
-				ImageReference: pivnet.ImageReference{
-					ID:   imageReferenceID,
+			response = pivnet.ArtifactReferenceResponse{
+				ArtifactReference: pivnet.ArtifactReference{
+					ID:   artifactReferenceID,
 					Name: "something",
 				}}
 
@@ -336,10 +336,10 @@ var _ = Describe("PivnetClient - image references", func() {
 					ghttp.VerifyRequest(
 						"GET",
 						fmt.Sprintf(
-							"%s/products/%s/image_references/%d",
+							"%s/products/%s/artifact_references/%d",
 							apiPrefix,
 							productSlug,
-							imageReferenceID,
+							artifactReferenceID,
 						),
 					),
 					ghttp.RespondWithJSONEncoded(responseStatusCode, response),
@@ -347,15 +347,15 @@ var _ = Describe("PivnetClient - image references", func() {
 			)
 		})
 
-		It("returns the image reference without error", func() {
-			imageReference, err := client.ImageReferences.Get(
+		It("returns the artifact reference without error", func() {
+			artifactReference, err := client.ArtifactReferences.Get(
 				productSlug,
-				imageReferenceID,
+				artifactReferenceID,
 			)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(imageReference.ID).To(Equal(imageReferenceID))
-			Expect(imageReference.Name).To(Equal("something"))
+			Expect(artifactReference.ID).To(Equal(artifactReferenceID))
+			Expect(artifactReference.Name).To(Equal("something"))
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
@@ -365,9 +365,9 @@ var _ = Describe("PivnetClient - image references", func() {
 			})
 
 			It("returns an error", func() {
-				_, err := client.ImageReferences.Get(
+				_, err := client.ArtifactReferences.Get(
 					productSlug,
-					imageReferenceID,
+					artifactReferenceID,
 				)
 				Expect(err).To(HaveOccurred())
 
@@ -381,9 +381,9 @@ var _ = Describe("PivnetClient - image references", func() {
 			})
 
 			It("forwards the error", func() {
-				_, err := client.ImageReferences.Get(
+				_, err := client.ArtifactReferences.Get(
 					productSlug,
-					imageReferenceID,
+					artifactReferenceID,
 				)
 				Expect(err).To(HaveOccurred())
 
@@ -392,11 +392,11 @@ var _ = Describe("PivnetClient - image references", func() {
 		})
 	})
 
-	Describe("Get image reference for release", func() {
+	Describe("Get artifact reference for release", func() {
 		var (
-			productSlug      string
-			releaseID        int
-			imageReferenceID int
+			productSlug         string
+			releaseID           int
+			artifactReferenceID int
 
 			response           interface{}
 			responseStatusCode int
@@ -405,11 +405,11 @@ var _ = Describe("PivnetClient - image references", func() {
 		BeforeEach(func() {
 			productSlug = "banana"
 			releaseID = 12
-			imageReferenceID = 1234
+			artifactReferenceID = 1234
 
-			response = pivnet.ImageReferenceResponse{
-				ImageReference: pivnet.ImageReference{
-					ID:   imageReferenceID,
+			response = pivnet.ArtifactReferenceResponse{
+				ArtifactReference: pivnet.ArtifactReference{
+					ID:   artifactReferenceID,
 					Name: "something",
 				}}
 
@@ -422,11 +422,11 @@ var _ = Describe("PivnetClient - image references", func() {
 					ghttp.VerifyRequest(
 						"GET",
 						fmt.Sprintf(
-							"%s/products/%s/releases/%d/image_references/%d",
+							"%s/products/%s/releases/%d/artifact_references/%d",
 							apiPrefix,
 							productSlug,
 							releaseID,
-							imageReferenceID,
+							artifactReferenceID,
 						),
 					),
 					ghttp.RespondWithJSONEncoded(responseStatusCode, response),
@@ -434,16 +434,16 @@ var _ = Describe("PivnetClient - image references", func() {
 			)
 		})
 
-		It("returns the image reference without error", func() {
-			imageReference, err := client.ImageReferences.GetForRelease(
+		It("returns the artifact reference without error", func() {
+			artifactReference, err := client.ArtifactReferences.GetForRelease(
 				productSlug,
 				releaseID,
-				imageReferenceID,
+				artifactReferenceID,
 			)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(imageReference.ID).To(Equal(imageReferenceID))
-			Expect(imageReference.Name).To(Equal("something"))
+			Expect(artifactReference.ID).To(Equal(artifactReferenceID))
+			Expect(artifactReference.Name).To(Equal("something"))
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
@@ -453,10 +453,10 @@ var _ = Describe("PivnetClient - image references", func() {
 			})
 
 			It("returns an error", func() {
-				_, err := client.ImageReferences.GetForRelease(
+				_, err := client.ArtifactReferences.GetForRelease(
 					productSlug,
 					releaseID,
-					imageReferenceID,
+					artifactReferenceID,
 				)
 				Expect(err).To(HaveOccurred())
 
@@ -470,10 +470,10 @@ var _ = Describe("PivnetClient - image references", func() {
 			})
 
 			It("forwards the error", func() {
-				_, err := client.ImageReferences.GetForRelease(
+				_, err := client.ArtifactReferences.GetForRelease(
 					productSlug,
 					releaseID,
-					imageReferenceID,
+					artifactReferenceID,
 				)
 				Expect(err).To(HaveOccurred())
 
@@ -482,71 +482,71 @@ var _ = Describe("PivnetClient - image references", func() {
 		})
 	})
 
-	Describe("Create Image Reference", func() {
+	Describe("Create Artifact Reference", func() {
 		type requestBody struct {
-			ImageReference pivnet.ImageReference `json:"image_reference"`
+			ArtifactReference pivnet.ArtifactReference `json:"artifact_reference"`
 		}
 
 		var (
-			createImageReferenceConfig pivnet.CreateImageReferenceConfig
+			createArtifactReferenceConfig pivnet.CreateArtifactReferenceConfig
 
 			expectedRequestBody requestBody
 
-			imageReferenceResponse pivnet.ImageReferenceResponse
+			artifactReferenceResponse pivnet.ArtifactReferenceResponse
 		)
 
 		BeforeEach(func() {
-			createImageReferenceConfig = pivnet.CreateImageReferenceConfig{
+			createArtifactReferenceConfig = pivnet.CreateArtifactReferenceConfig{
 				ProductSlug:        productSlug,
 				Description:        "some\nmulti-line\ndescription",
 				Digest:             "sha256:mydigest",
 				DocsURL:            "some-docs-url",
-				ImagePath:          "my/path:123",
-				Name:               "some-image-name",
+				ArtifactPath:       "my/path:123",
+				Name:               "some-artifact-name",
 				SystemRequirements: []string{"system-1", "system-2"},
 			}
 
 			expectedRequestBody = requestBody{
-				ImageReference: pivnet.ImageReference{
-					Description:        createImageReferenceConfig.Description,
-					Digest:             createImageReferenceConfig.Digest,
-					DocsURL:            createImageReferenceConfig.DocsURL,
-					ImagePath:          createImageReferenceConfig.ImagePath,
-					Name:               createImageReferenceConfig.Name,
-					SystemRequirements: createImageReferenceConfig.SystemRequirements,
+				ArtifactReference: pivnet.ArtifactReference{
+					Description:        createArtifactReferenceConfig.Description,
+					Digest:             createArtifactReferenceConfig.Digest,
+					DocsURL:            createArtifactReferenceConfig.DocsURL,
+					ArtifactPath:       createArtifactReferenceConfig.ArtifactPath,
+					Name:               createArtifactReferenceConfig.Name,
+					SystemRequirements: createArtifactReferenceConfig.SystemRequirements,
 				},
 			}
 
-			imageReferenceResponse = pivnet.ImageReferenceResponse{
-				ImageReference: pivnet.ImageReference{
+			artifactReferenceResponse = pivnet.ArtifactReferenceResponse{
+				ArtifactReference: pivnet.ArtifactReference{
 					ID:                 1234,
-					Description:        createImageReferenceConfig.Description,
-					Digest:             createImageReferenceConfig.Digest,
-					DocsURL:            createImageReferenceConfig.DocsURL,
-					ImagePath:          createImageReferenceConfig.ImagePath,
-					Name:               createImageReferenceConfig.Name,
-					SystemRequirements: createImageReferenceConfig.SystemRequirements,
+					Description:        createArtifactReferenceConfig.Description,
+					Digest:             createArtifactReferenceConfig.Digest,
+					DocsURL:            createArtifactReferenceConfig.DocsURL,
+					ArtifactPath:       createArtifactReferenceConfig.ArtifactPath,
+					Name:               createArtifactReferenceConfig.Name,
+					SystemRequirements: createArtifactReferenceConfig.SystemRequirements,
 					ReplicationStatus:  pivnet.InProgress,
 				}}
 		})
 
-		It("creates the image reference", func() {
+		It("creates the artifact reference", func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("POST", fmt.Sprintf(
-						"%s/products/%s/image_references",
+						"%s/products/%s/artifact_references",
 						apiPrefix,
 						productSlug,
 					)),
 					ghttp.VerifyJSONRepresenting(&expectedRequestBody),
-					ghttp.RespondWithJSONEncoded(http.StatusCreated, imageReferenceResponse),
+					ghttp.RespondWithJSONEncoded(http.StatusCreated, artifactReferenceResponse),
 				),
 			)
 
-			imageReference, err := client.ImageReferences.Create(createImageReferenceConfig)
+			artifactReference, err := client.ArtifactReferences.Create(createArtifactReferenceConfig)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(imageReference.ID).To(Equal(1234))
-			Expect(imageReference).To(Equal(imageReferenceResponse.ImageReference))
+			Expect(artifactReference.ID).To(Equal(1234))
+			Expect(artifactReference).To(Equal(artifactReferenceResponse.ArtifactReference))
 		})
 
 		Context("when the server responds with a non-201 status code", func() {
@@ -562,7 +562,7 @@ var _ = Describe("PivnetClient - image references", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("POST", fmt.Sprintf(
-							"%s/products/%s/image_references",
+							"%s/products/%s/artifact_references",
 							apiPrefix,
 							productSlug,
 						)),
@@ -570,7 +570,7 @@ var _ = Describe("PivnetClient - image references", func() {
 					),
 				)
 
-				_, err := client.ImageReferences.Create(createImageReferenceConfig)
+				_, err := client.ArtifactReferences.Create(createArtifactReferenceConfig)
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
@@ -580,7 +580,7 @@ var _ = Describe("PivnetClient - image references", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("POST", fmt.Sprintf(
-							"%s/products/%s/image_references",
+							"%s/products/%s/artifact_references",
 							apiPrefix,
 							productSlug,
 						)),
@@ -588,8 +588,8 @@ var _ = Describe("PivnetClient - image references", func() {
 					),
 				)
 
-				_, err := client.ImageReferences.Create(createImageReferenceConfig)
-				Expect(err.Error()).To(ContainSubstring("You have hit the image reference creation limit. Please wait before creating more image references. Contact pivnet-eng@pivotal.io with additional questions."))
+				_, err := client.ArtifactReferences.Create(createArtifactReferenceConfig)
+				Expect(err.Error()).To(ContainSubstring("You have hit the artifact reference creation limit. Please wait before creating more artifact references. Contact pivnet-eng@pivotal.io with additional questions."))
 			})
 		})
 
@@ -598,7 +598,7 @@ var _ = Describe("PivnetClient - image references", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("POST", fmt.Sprintf(
-							"%s/products/%s/image_references",
+							"%s/products/%s/artifact_references",
 							apiPrefix,
 							productSlug,
 						)),
@@ -606,7 +606,7 @@ var _ = Describe("PivnetClient - image references", func() {
 					),
 				)
 
-				_, err := client.ImageReferences.Create(createImageReferenceConfig)
+				_, err := client.ArtifactReferences.Create(createArtifactReferenceConfig)
 				Expect(err).To(HaveOccurred())
 
 				Expect(err.Error()).To(ContainSubstring("invalid character"))
@@ -614,22 +614,22 @@ var _ = Describe("PivnetClient - image references", func() {
 		})
 	})
 
-	Describe("Update image reference", func() {
+	Describe("Update artifact reference", func() {
 		type requestBody struct {
-			ImageReference pivnet.ImageReference `json:"image_reference"`
+			ArtifactReference pivnet.ArtifactReference `json:"artifact_reference"`
 		}
 
 		var (
-			expectedRequestBody     requestBody
-			imageReference          pivnet.ImageReference
-			updateImageReferenceUrl string
-			validResponse           = `{"image_reference":{"id":1234, "docs_url":"example.io", "system_requirements": ["1", "2"], "replication_status": "in_progress"}}`
+			expectedRequestBody        requestBody
+			artifactReference          pivnet.ArtifactReference
+			updateArtifactReferenceUrl string
+			validResponse              = `{"artifact_reference":{"id":1234, "docs_url":"example.io", "system_requirements": ["1", "2"], "replication_status": "in_progress"}}`
 		)
 
 		BeforeEach(func() {
-			imageReference = pivnet.ImageReference{
+			artifactReference = pivnet.ArtifactReference{
 				ID:                 1234,
-				ImagePath:          "some/path",
+				ArtifactPath:       "some/path",
 				Description:        "Avast! Pieces o' passion are forever fine.",
 				Digest:             "some-sha265",
 				DocsURL:            "example.io",
@@ -638,50 +638,50 @@ var _ = Describe("PivnetClient - image references", func() {
 			}
 
 			expectedRequestBody = requestBody{
-				ImageReference: pivnet.ImageReference{
-					Description:        imageReference.Description,
-					Name:               imageReference.Name,
-					DocsURL:            imageReference.DocsURL,
-					SystemRequirements: imageReference.SystemRequirements,
+				ArtifactReference: pivnet.ArtifactReference{
+					Description:        artifactReference.Description,
+					Name:               artifactReference.Name,
+					DocsURL:            artifactReference.DocsURL,
+					SystemRequirements: artifactReference.SystemRequirements,
 				},
 			}
 
-			updateImageReferenceUrl = fmt.Sprintf(
-				"%s/products/%s/image_references/%d",
+			updateArtifactReferenceUrl = fmt.Sprintf(
+				"%s/products/%s/artifact_references/%d",
 				apiPrefix,
 				productSlug,
-				imageReference.ID,
+				artifactReference.ID,
 			)
 
 		})
 
-		It("updates the image reference with the provided fields", func() {
+		It("updates the artifact reference with the provided fields", func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("PATCH", updateImageReferenceUrl),
+					ghttp.VerifyRequest("PATCH", updateArtifactReferenceUrl),
 					ghttp.VerifyJSONRepresenting(&expectedRequestBody),
 					ghttp.RespondWith(http.StatusOK, validResponse),
 				),
 			)
 
-			updatedImageReference, err := client.ImageReferences.Update(productSlug, imageReference)
+			updatedArtifactReference, err := client.ArtifactReferences.Update(productSlug, artifactReference)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(updatedImageReference.ID).To(Equal(imageReference.ID))
-			Expect(updatedImageReference.DocsURL).To(Equal(imageReference.DocsURL))
-			Expect(updatedImageReference.SystemRequirements).To(ConsistOf("2", "1"))
-			Expect(updatedImageReference.ReplicationStatus).To(Equal(pivnet.InProgress))
+			Expect(updatedArtifactReference.ID).To(Equal(artifactReference.ID))
+			Expect(updatedArtifactReference.DocsURL).To(Equal(artifactReference.DocsURL))
+			Expect(updatedArtifactReference.SystemRequirements).To(ConsistOf("2", "1"))
+			Expect(updatedArtifactReference.ReplicationStatus).To(Equal(pivnet.InProgress))
 		})
 
 		It("forwards the server-side error", func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("PATCH", updateImageReferenceUrl),
+					ghttp.VerifyRequest("PATCH", updateArtifactReferenceUrl),
 					ghttp.RespondWithJSONEncoded(http.StatusTeapot,
 						pivnetErr{Message: "Meet, scotty, powerdrain!"}),
 				),
 			)
 
-			_, err := client.ImageReferences.Update(productSlug, imageReference)
+			_, err := client.ArtifactReferences.Update(productSlug, artifactReference)
 
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("scotty"))
@@ -690,38 +690,38 @@ var _ = Describe("PivnetClient - image references", func() {
 		It("forwards the unmarshalling error", func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("PATCH", updateImageReferenceUrl),
+					ghttp.VerifyRequest("PATCH", updateArtifactReferenceUrl),
 					ghttp.RespondWith(http.StatusTeapot, "<NOT></JSON>"),
 				),
 			)
-			_, err := client.ImageReferences.Update(productSlug, imageReference)
+			_, err := client.ArtifactReferences.Update(productSlug, artifactReference)
 
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("invalid character"))
 		})
 	})
 
-	Describe("Delete Image Reference", func() {
+	Describe("Delete Artifact Reference", func() {
 		var (
 			id = 1234
 		)
 
-		It("deletes the image reference", func() {
-			response := []byte(`{"image_reference":{"id":1234}}`)
+		It("deletes the artifact reference", func() {
+			response := []byte(`{"artifact_reference":{"id":1234}}`)
 
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest(
 						"DELETE",
-						fmt.Sprintf("%s/products/%s/image_references/%d", apiPrefix, productSlug, id)),
+						fmt.Sprintf("%s/products/%s/artifact_references/%d", apiPrefix, productSlug, id)),
 					ghttp.RespondWith(http.StatusOK, response),
 				),
 			)
 
-			imageReference, err := client.ImageReferences.Delete(productSlug, id)
+			artifactReference, err := client.ArtifactReferences.Delete(productSlug, id)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(imageReference.ID).To(Equal(id))
+			Expect(artifactReference.ID).To(Equal(id))
 		})
 
 		Context("when the server responds with a non-2XX status code", func() {
@@ -738,12 +738,12 @@ var _ = Describe("PivnetClient - image references", func() {
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest(
 							"DELETE",
-							fmt.Sprintf("%s/products/%s/image_references/%d", apiPrefix, productSlug, id)),
+							fmt.Sprintf("%s/products/%s/artifact_references/%d", apiPrefix, productSlug, id)),
 						ghttp.RespondWithJSONEncoded(http.StatusTeapot, response),
 					),
 				)
 
-				_, err := client.ImageReferences.Delete(productSlug, id)
+				_, err := client.ArtifactReferences.Delete(productSlug, id)
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
@@ -754,12 +754,12 @@ var _ = Describe("PivnetClient - image references", func() {
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest(
 							"DELETE",
-							fmt.Sprintf("%s/products/%s/image_references/%d", apiPrefix, productSlug, id)),
+							fmt.Sprintf("%s/products/%s/artifact_references/%d", apiPrefix, productSlug, id)),
 						ghttp.RespondWith(http.StatusTeapot, "%%%"),
 					),
 				)
 
-				_, err := client.ImageReferences.Delete(productSlug, id)
+				_, err := client.ArtifactReferences.Delete(productSlug, id)
 				Expect(err).To(HaveOccurred())
 
 				Expect(err.Error()).To(ContainSubstring("invalid character"))
@@ -767,13 +767,13 @@ var _ = Describe("PivnetClient - image references", func() {
 		})
 	})
 
-	Describe("Add Image Reference to release", func() {
+	Describe("Add Artifact Reference to release", func() {
 		var (
-			productSlug      = "some-product"
-			releaseID        = 2345
-			imageReferenceID = 3456
+			productSlug         = "some-product"
+			releaseID           = 2345
+			artifactReferenceID = 3456
 
-			expectedRequestBody = `{"image_reference":{"id":3456}}`
+			expectedRequestBody = `{"artifact_reference":{"id":3456}}`
 		)
 
 		Context("when the server responds with a 204 status code", func() {
@@ -781,7 +781,7 @@ var _ = Describe("PivnetClient - image references", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
-							"%s/products/%s/releases/%d/add_image_reference",
+							"%s/products/%s/releases/%d/add_artifact_reference",
 							apiPrefix,
 							productSlug,
 							releaseID,
@@ -791,7 +791,7 @@ var _ = Describe("PivnetClient - image references", func() {
 					),
 				)
 
-				err := client.ImageReferences.AddToRelease(productSlug, releaseID, imageReferenceID)
+				err := client.ArtifactReferences.AddToRelease(productSlug, releaseID, artifactReferenceID)
 				Expect(err).NotTo(HaveOccurred())
 			})
 		})
@@ -809,7 +809,7 @@ var _ = Describe("PivnetClient - image references", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
-							"%s/products/%s/releases/%d/add_image_reference",
+							"%s/products/%s/releases/%d/add_artifact_reference",
 							apiPrefix,
 							productSlug,
 							releaseID,
@@ -818,7 +818,7 @@ var _ = Describe("PivnetClient - image references", func() {
 					),
 				)
 
-				err := client.ImageReferences.AddToRelease(productSlug, releaseID, imageReferenceID)
+				err := client.ArtifactReferences.AddToRelease(productSlug, releaseID, artifactReferenceID)
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
@@ -828,7 +828,7 @@ var _ = Describe("PivnetClient - image references", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
-							"%s/products/%s/releases/%d/add_image_reference",
+							"%s/products/%s/releases/%d/add_artifact_reference",
 							apiPrefix,
 							productSlug,
 							releaseID,
@@ -837,7 +837,7 @@ var _ = Describe("PivnetClient - image references", func() {
 					),
 				)
 
-				err := client.ImageReferences.AddToRelease(productSlug, releaseID, imageReferenceID)
+				err := client.ArtifactReferences.AddToRelease(productSlug, releaseID, artifactReferenceID)
 				Expect(err).To(HaveOccurred())
 
 				Expect(err.Error()).To(ContainSubstring("invalid character"))
@@ -845,13 +845,13 @@ var _ = Describe("PivnetClient - image references", func() {
 		})
 	})
 
-	Describe("Remove Image Reference from release", func() {
+	Describe("Remove Artifact Reference from release", func() {
 		var (
-			productSlug      = "some-product"
-			releaseID        = 2345
-			imageReferenceID = 3456
+			productSlug         = "some-product"
+			releaseID           = 2345
+			artifactReferenceID = 3456
 
-			expectedRequestBody = `{"image_reference":{"id":3456}}`
+			expectedRequestBody = `{"artifact_reference":{"id":3456}}`
 		)
 
 		Context("when the server responds with a 204 status code", func() {
@@ -859,7 +859,7 @@ var _ = Describe("PivnetClient - image references", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
-							"%s/products/%s/releases/%d/remove_image_reference",
+							"%s/products/%s/releases/%d/remove_artifact_reference",
 							apiPrefix,
 							productSlug,
 							releaseID,
@@ -869,7 +869,7 @@ var _ = Describe("PivnetClient - image references", func() {
 					),
 				)
 
-				err := client.ImageReferences.RemoveFromRelease(productSlug, releaseID, imageReferenceID)
+				err := client.ArtifactReferences.RemoveFromRelease(productSlug, releaseID, artifactReferenceID)
 				Expect(err).NotTo(HaveOccurred())
 			})
 		})
@@ -887,7 +887,7 @@ var _ = Describe("PivnetClient - image references", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
-							"%s/products/%s/releases/%d/remove_image_reference",
+							"%s/products/%s/releases/%d/remove_artifact_reference",
 							apiPrefix,
 							productSlug,
 							releaseID,
@@ -896,7 +896,7 @@ var _ = Describe("PivnetClient - image references", func() {
 					),
 				)
 
-				err := client.ImageReferences.RemoveFromRelease(productSlug, releaseID, imageReferenceID)
+				err := client.ArtifactReferences.RemoveFromRelease(productSlug, releaseID, artifactReferenceID)
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})
 		})
@@ -906,7 +906,7 @@ var _ = Describe("PivnetClient - image references", func() {
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("PATCH", fmt.Sprintf(
-							"%s/products/%s/releases/%d/remove_image_reference",
+							"%s/products/%s/releases/%d/remove_artifact_reference",
 							apiPrefix,
 							productSlug,
 							releaseID,
@@ -915,7 +915,7 @@ var _ = Describe("PivnetClient - image references", func() {
 					),
 				)
 
-				err := client.ImageReferences.RemoveFromRelease(productSlug, releaseID, imageReferenceID)
+				err := client.ArtifactReferences.RemoveFromRelease(productSlug, releaseID, artifactReferenceID)
 				Expect(err).To(HaveOccurred())
 
 				Expect(err.Error()).To(ContainSubstring("invalid character"))

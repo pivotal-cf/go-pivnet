@@ -34,19 +34,19 @@ type Client struct {
 
 	downloader download.Client
 
-	Auth                  *AuthService
-	EULA                  *EULAsService
-	ProductFiles          *ProductFilesService
-	ImageReferences       *ImageReferencesService
-	FederationToken       *FederationTokenService
-	FileGroups            *FileGroupsService
-	Releases              *ReleasesService
-	Products              *ProductsService
-	UserGroups            *UserGroupsService
-	SubscriptionGroups    *SubscriptionGroupsService
-	ReleaseTypes          *ReleaseTypesService
-	ReleaseDependencies   *ReleaseDependenciesService
-	DependencySpecifiers  *DependencySpecifiersService
+	Auth                 *AuthService
+	EULA                 *EULAsService
+	ProductFiles         *ProductFilesService
+	ArtifactReferences   *ArtifactReferencesService
+	FederationToken      *FederationTokenService
+	FileGroups           *FileGroupsService
+	Releases             *ReleasesService
+	Products             *ProductsService
+	UserGroups           *UserGroupsService
+	SubscriptionGroups   *SubscriptionGroupsService
+	ReleaseTypes         *ReleaseTypesService
+	ReleaseDependencies  *ReleaseDependenciesService
+	DependencySpecifiers *DependencySpecifiersService
 	ReleaseUpgradePaths   *ReleaseUpgradePathsService
 	UpgradePathSpecifiers *UpgradePathSpecifiersService
 	PivnetVersions        *PivnetVersionsService
@@ -161,7 +161,7 @@ func NewClient(
 	client.Auth = &AuthService{client: client}
 	client.EULA = &EULAsService{client: client}
 	client.ProductFiles = &ProductFilesService{client: client}
-	client.ImageReferences = &ImageReferencesService{client: client}
+	client.ArtifactReferences = &ArtifactReferencesService{client: client}
 	client.FederationToken = &FederationTokenService{client: client}
 	client.FileGroups = &FileGroupsService{client: client}
 	client.Releases = &ReleasesService{client: client, l: logger}

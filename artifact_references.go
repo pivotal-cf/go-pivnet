@@ -7,26 +7,26 @@ import (
 	"net/http"
 )
 
-type ImageReferencesService struct {
+type ArtifactReferencesService struct {
 	client Client
 }
 
-type CreateImageReferenceConfig struct {
+type CreateArtifactReferenceConfig struct {
 	ProductSlug        string
 	Description        string
 	DocsURL            string
 	Digest             string
 	Name               string
-	ImagePath          string
+	ArtifactPath       string
 	SystemRequirements []string
 }
 
-type ImageReferencesResponse struct {
-	ImageReferences []ImageReference `json:"image_references,omitempty"`
+type ArtifactReferencesResponse struct {
+	ArtifactReferences []ArtifactReference `json:"artifact_references,omitempty"`
 }
 
-type ImageReferenceResponse struct {
-	ImageReference ImageReference `json:"image_reference,omitempty"`
+type ArtifactReferenceResponse struct {
+	ArtifactReference ArtifactReference `json:"artifact_reference,omitempty"`
 }
 
 type ReplicationStatus string
@@ -37,9 +37,9 @@ const (
 	FailedToReplicate ReplicationStatus = "failed_to_replicate"
 )
 
-type ImageReference struct {
+type ArtifactReference struct {
 	ID                 int               `json:"id,omitempty" yaml:"id,omitempty"`
-	ImagePath          string            `json:"image_path,omitempty" yaml:"image_path,omitempty"`
+	ArtifactPath       string            `json:"artifact_path,omitempty" yaml:"artifact_path,omitempty"`
 	Description        string            `json:"description,omitempty" yaml:"description,omitempty"`
 	Digest             string            `json:"digest,omitempty" yaml:"digest,omitempty"`
 	DocsURL            string            `json:"docs_url,omitempty" yaml:"docs_url,omitempty"`
@@ -49,14 +49,14 @@ type ImageReference struct {
 	ReplicationStatus  ReplicationStatus `json:"replication_status,omitempty" yaml:"replication_status,omitempty"`
 }
 
-type createUpdateImageReferenceBody struct {
-	ImageReference ImageReference `json:"image_reference"`
+type createUpdateArtifactReferenceBody struct {
+	ArtifactReference ArtifactReference `json:"artifact_reference"`
 }
 
-func (p ImageReferencesService) List(productSlug string) ([]ImageReference, error) {
-	url := fmt.Sprintf("/products/%s/image_references", productSlug)
+func (p ArtifactReferencesService) List(productSlug string) ([]ArtifactReference, error) {
+	url := fmt.Sprintf("/products/%s/artifact_references", productSlug)
 
-	var response ImageReferencesResponse
+	var response ArtifactReferencesResponse
 	resp, err := p.client.MakeRequest(
 		"GET",
 		url,
@@ -64,25 +64,25 @@ func (p ImageReferencesService) List(productSlug string) ([]ImageReference, erro
 		nil,
 	)
 	if err != nil {
-		return []ImageReference{}, err
+		return []ArtifactReference{}, err
 	}
 	defer resp.Body.Close()
 
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
-		return []ImageReference{}, err
+		return []ArtifactReference{}, err
 	}
 
-	return response.ImageReferences, nil
+	return response.ArtifactReferences, nil
 }
 
-func (p ImageReferencesService) ListForDigest(productSlug string, digest string) ([]ImageReference, error) {
-	url := fmt.Sprintf("/products/%s/image_references", productSlug)
+func (p ArtifactReferencesService) ListForDigest(productSlug string, digest string) ([]ArtifactReference, error) {
+	url := fmt.Sprintf("/products/%s/artifact_references", productSlug)
 	params := []QueryParameter{
 		{"digest", digest},
 	}
 
-	var response ImageReferencesResponse
+	var response ArtifactReferencesResponse
 	resp, err := p.client.MakeRequestWithParams(
 		"GET",
 		url,
@@ -91,26 +91,26 @@ func (p ImageReferencesService) ListForDigest(productSlug string, digest string)
 		nil,
 	)
 	if err != nil {
-		return []ImageReference{}, err
+		return []ArtifactReference{}, err
 	}
 	defer resp.Body.Close()
 
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
-		return []ImageReference{}, err
+		return []ArtifactReference{}, err
 	}
 
-	return response.ImageReferences, nil
+	return response.ArtifactReferences, nil
 }
 
-func (p ImageReferencesService) ListForRelease(productSlug string, releaseID int) ([]ImageReference, error) {
+func (p ArtifactReferencesService) ListForRelease(productSlug string, releaseID int) ([]ArtifactReference, error) {
 	url := fmt.Sprintf(
-		"/products/%s/releases/%d/image_references",
+		"/products/%s/releases/%d/artifact_references",
 		productSlug,
 		releaseID,
 	)
 
-	var response ImageReferencesResponse
+	var response ArtifactReferencesResponse
 	resp, err := p.client.MakeRequest(
 		"GET",
 		url,
@@ -118,26 +118,26 @@ func (p ImageReferencesService) ListForRelease(productSlug string, releaseID int
 		nil,
 	)
 	if err != nil {
-		return []ImageReference{}, err
+		return []ArtifactReference{}, err
 	}
 	defer resp.Body.Close()
 
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
-		return []ImageReference{}, err
+		return []ArtifactReference{}, err
 	}
 
-	return response.ImageReferences, nil
+	return response.ArtifactReferences, nil
 }
 
-func (p ImageReferencesService) Get(productSlug string, imageReferenceID int) (ImageReference, error) {
+func (p ArtifactReferencesService) Get(productSlug string, artifactReferenceID int) (ArtifactReference, error) {
 	url := fmt.Sprintf(
-		"/products/%s/image_references/%d",
+		"/products/%s/artifact_references/%d",
 		productSlug,
-		imageReferenceID,
+		artifactReferenceID,
 	)
 
-	var response ImageReferenceResponse
+	var response ArtifactReferenceResponse
 	resp, err := p.client.MakeRequest(
 		"GET",
 		url,
@@ -145,36 +145,36 @@ func (p ImageReferencesService) Get(productSlug string, imageReferenceID int) (I
 		nil,
 	)
 	if err != nil {
-		return ImageReference{}, err
+		return ArtifactReference{}, err
 	}
 	defer resp.Body.Close()
 
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
-		return ImageReference{}, err
+		return ArtifactReference{}, err
 	}
 
-	return response.ImageReference, nil
+	return response.ArtifactReference, nil
 }
 
-func (p ImageReferencesService) Update(productSlug string, imageReference ImageReference) (ImageReference, error) {
-	url := fmt.Sprintf("/products/%s/image_references/%d", productSlug, imageReference.ID)
+func (p ArtifactReferencesService) Update(productSlug string, artifactReference ArtifactReference) (ArtifactReference, error) {
+	url := fmt.Sprintf("/products/%s/artifact_references/%d", productSlug, artifactReference.ID)
 
-	body := createUpdateImageReferenceBody{
-		ImageReference: ImageReference{
-			Description:        imageReference.Description,
-			Name:               imageReference.Name,
-			DocsURL:            imageReference.DocsURL,
-			SystemRequirements: imageReference.SystemRequirements,
+	body := createUpdateArtifactReferenceBody{
+		ArtifactReference: ArtifactReference{
+			Description:        artifactReference.Description,
+			Name:               artifactReference.Name,
+			DocsURL:            artifactReference.DocsURL,
+			SystemRequirements: artifactReference.SystemRequirements,
 		},
 	}
 
 	b, err := json.Marshal(body)
 	if err != nil {
-		return ImageReference{}, err
+		return ArtifactReference{}, err
 	}
 
-	var response ImageReferenceResponse
+	var response ArtifactReferenceResponse
 	resp, err := p.client.MakeRequest(
 		"PATCH",
 		url,
@@ -182,27 +182,27 @@ func (p ImageReferencesService) Update(productSlug string, imageReference ImageR
 		bytes.NewReader(b),
 	)
 	if err != nil {
-		return ImageReference{}, err
+		return ArtifactReference{}, err
 	}
 	defer resp.Body.Close()
 
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
-		return ImageReference{}, err
+		return ArtifactReference{}, err
 	}
 
-	return response.ImageReference, nil
+	return response.ArtifactReference, nil
 }
 
-func (p ImageReferencesService) GetForRelease(productSlug string, releaseID int, imageReferenceID int) (ImageReference, error) {
+func (p ArtifactReferencesService) GetForRelease(productSlug string, releaseID int, artifactReferenceID int) (ArtifactReference, error) {
 	url := fmt.Sprintf(
-		"/products/%s/releases/%d/image_references/%d",
+		"/products/%s/releases/%d/artifact_references/%d",
 		productSlug,
 		releaseID,
-		imageReferenceID,
+		artifactReferenceID,
 	)
 
-	var response ImageReferenceResponse
+	var response ArtifactReferenceResponse
 	resp, err := p.client.MakeRequest(
 		"GET",
 		url,
@@ -210,24 +210,24 @@ func (p ImageReferencesService) GetForRelease(productSlug string, releaseID int,
 		nil,
 	)
 	if err != nil {
-		return ImageReference{}, err
+		return ArtifactReference{}, err
 	}
 	defer resp.Body.Close()
 
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
-		return ImageReference{}, err
+		return ArtifactReference{}, err
 	}
 
-	return response.ImageReference, nil
+	return response.ArtifactReference, nil
 }
 
-func (p ImageReferencesService) Create(config CreateImageReferenceConfig) (ImageReference, error) {
-	url := fmt.Sprintf("/products/%s/image_references", config.ProductSlug)
+func (p ArtifactReferencesService) Create(config CreateArtifactReferenceConfig) (ArtifactReference, error) {
+	url := fmt.Sprintf("/products/%s/artifact_references", config.ProductSlug)
 
-	body := createUpdateImageReferenceBody{
-		ImageReference: ImageReference{
-			ImagePath:          config.ImagePath,
+	body := createUpdateArtifactReferenceBody{
+		ArtifactReference: ArtifactReference{
+			ArtifactPath:       config.ArtifactPath,
 			Description:        config.Description,
 			Digest:             config.Digest,
 			DocsURL:            config.DocsURL,
@@ -240,10 +240,10 @@ func (p ImageReferencesService) Create(config CreateImageReferenceConfig) (Image
 	if err != nil {
 		// Untested as we cannot force an error because we are marshalling
 		// a known-good body
-		return ImageReference{}, err
+		return ArtifactReference{}, err
 	}
 
-	var response ImageReferenceResponse
+	var response ArtifactReferenceResponse
 	resp, err := p.client.MakeRequest(
 		"POST",
 		url,
@@ -253,29 +253,29 @@ func (p ImageReferencesService) Create(config CreateImageReferenceConfig) (Image
 	if err != nil {
 		_, ok := err.(ErrTooManyRequests)
 		if ok {
-			return ImageReference{}, fmt.Errorf("You have hit the image reference creation limit. Please wait before creating more image references. Contact pivnet-eng@pivotal.io with additional questions.")
+			return ArtifactReference{}, fmt.Errorf("You have hit the artifact reference creation limit. Please wait before creating more artifact references. Contact pivnet-eng@pivotal.io with additional questions.")
 		} else {
-			return ImageReference{}, err
+			return ArtifactReference{}, err
 		}
 	}
 	defer resp.Body.Close()
 
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
-		return ImageReference{}, err
+		return ArtifactReference{}, err
 	}
 
-	return response.ImageReference, nil
+	return response.ArtifactReference, nil
 }
 
-func (p ImageReferencesService) Delete(productSlug string, id int) (ImageReference, error) {
+func (p ArtifactReferencesService) Delete(productSlug string, id int) (ArtifactReference, error) {
 	url := fmt.Sprintf(
-		"/products/%s/image_references/%d",
+		"/products/%s/artifact_references/%d",
 		productSlug,
 		id,
 	)
 
-	var response ImageReferenceResponse
+	var response ArtifactReferenceResponse
 	resp, err := p.client.MakeRequest(
 		"DELETE",
 		url,
@@ -283,32 +283,32 @@ func (p ImageReferencesService) Delete(productSlug string, id int) (ImageReferen
 		nil,
 	)
 	if err != nil {
-		return ImageReference{}, err
+		return ArtifactReference{}, err
 	}
 	defer resp.Body.Close()
 
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
-		return ImageReference{}, err
+		return ArtifactReference{}, err
 	}
 
-	return response.ImageReference, nil
+	return response.ArtifactReference, nil
 }
 
-func (p ImageReferencesService) AddToRelease(
+func (p ArtifactReferencesService) AddToRelease(
 	productSlug string,
 	releaseID int,
-	imageReferenceID int,
+	artifactReferenceID int,
 ) error {
 	url := fmt.Sprintf(
-		"/products/%s/releases/%d/add_image_reference",
+		"/products/%s/releases/%d/add_artifact_reference",
 		productSlug,
 		releaseID,
 	)
 
-	body := createUpdateImageReferenceBody{
-		ImageReference: ImageReference{
-			ID: imageReferenceID,
+	body := createUpdateArtifactReferenceBody{
+		ArtifactReference: ArtifactReference{
+			ID: artifactReferenceID,
 		},
 	}
 
@@ -333,20 +333,20 @@ func (p ImageReferencesService) AddToRelease(
 	return nil
 }
 
-func (p ImageReferencesService) RemoveFromRelease(
+func (p ArtifactReferencesService) RemoveFromRelease(
 	productSlug string,
 	releaseID int,
-	imageReferenceID int,
+	artifactReferenceID int,
 ) error {
 	url := fmt.Sprintf(
-		"/products/%s/releases/%d/remove_image_reference",
+		"/products/%s/releases/%d/remove_artifact_reference",
 		productSlug,
 		releaseID,
 	)
 
-	body := createUpdateImageReferenceBody{
-		ImageReference: ImageReference{
-			ID: imageReferenceID,
+	body := createUpdateArtifactReferenceBody{
+		ArtifactReference: ArtifactReference{
+			ID: artifactReferenceID,
 		},
 	}
 
