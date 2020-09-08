@@ -3,7 +3,7 @@ package download_test
 import (
 	"net/http"
 
-	"github.com/pivotal-cf/go-pivnet/v5/download"
+	"github.com/pivotal-cf/go-pivnet/v6/download"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
