@@ -12,11 +12,12 @@ type EULAsService struct {
 }
 
 type EULA struct {
-	Slug    string `json:"slug,omitempty" yaml:"slug,omitempty"`
-	ID      int    `json:"id,omitempty" yaml:"id,omitempty"`
-	Name    string `json:"name,omitempty" yaml:"name,omitempty"`
-	Content string `json:"content,omitempty" yaml:"content,omitempty"`
-	Links   *Links `json:"_links,omitempty" yaml:"_links,omitempty"`
+	Slug        string  `json:"slug,omitempty" yaml:"slug,omitempty"`
+	ID          int     `json:"id,omitempty" yaml:"id,omitempty"`
+	Name        string  `json:"name,omitempty" yaml:"name,omitempty"`
+	Content     string  `json:"content,omitempty" yaml:"content,omitempty"`
+	ArchivedAt  string  `json:"archived_at,omitempty" yaml:"archived_at,omitempty"`
+	Links       *Links  `json:"_links,omitempty" yaml:"_links,omitempty"`
 }
 
 type EULAsResponse struct {
