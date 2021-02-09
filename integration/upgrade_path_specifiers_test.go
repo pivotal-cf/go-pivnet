@@ -21,7 +21,7 @@ var _ = Describe("Upgrade Path Specifier Integration", func() {
 			ProductSlug: testProductSlug,
 			Version:     "some-test-version",
 			ReleaseType: "Beta Release",
-			EULASlug:    "pivotal_beta_eula",
+			EULASlug:    "vmware-prerelease-eula",
 		})
 		Expect(err).NotTo(HaveOccurred())
 	})
