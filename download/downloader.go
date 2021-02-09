@@ -2,18 +2,19 @@ package download
 
 import (
 	"fmt"
-	"github.com/pivotal-cf/go-pivnet/v6/logger"
-	"golang.org/x/sync/errgroup"
 	"io"
 	"net"
 	"net/http"
 	"os"
+	"path"
 	"strings"
 	"syscall"
-	"github.com/shirou/gopsutil/disk"
-	"github.com/onsi/gomega/gbytes"
 	"time"
-	"path"
+
+	"github.com/onsi/gomega/gbytes"
+	"github.com/pivotal-cf/go-pivnet/v7/logger"
+	"github.com/shirou/gopsutil/disk"
+	"golang.org/x/sync/errgroup"
 )
 
 //go:generate counterfeiter -o ./fakes/ranger.go --fake-name Ranger . ranger

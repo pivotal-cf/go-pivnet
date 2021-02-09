@@ -9,18 +9,19 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/pivotal-cf/go-pivnet/v6/download"
-	"github.com/pivotal-cf/go-pivnet/v6/download/fakes"
+	"github.com/pivotal-cf/go-pivnet/v7/download"
+	"github.com/pivotal-cf/go-pivnet/v7/download/fakes"
 
 	"fmt"
+	"math"
+	"net"
+	"os"
+	"syscall"
+	"time"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"net"
-	"syscall"
-	"math"
-	"time"
-	"github.com/pivotal-cf/go-pivnet/v6/logger/loggerfakes"
-	"os"
+	"github.com/pivotal-cf/go-pivnet/v7/logger/loggerfakes"
 )
 
 type EOFReader struct{}
