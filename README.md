@@ -3,7 +3,7 @@
 
 # go-pivnet API library
 
-A golang library for [Pivotal Network](https://network.pivotal.io).
+A golang library for [Pivotal Network](https://network.tanzu.vmware.com).
 
 **NOTE**
 This library is intended to be used by pivnet-cli and pivnet-resource. If you are using this library on its own, be aware of possible breaking changes following new releases of pivnet-cli/resource.
@@ -51,7 +51,7 @@ go get -u github.com/onsi/ginkgo/ginkgo
 The tests require a valid Pivotal Network API token and host.
 
 Refer to the
-[official docs](https://network.pivotal.io/docs/api#how-to-authenticate)
+[official docs](https://network.tanzu.vmware.com/docs/api#how-to-authenticate)
 for more details on obtaining a Pivotal Network API token.
 
 It is advised to run the acceptance tests against the Pivotal Network integration

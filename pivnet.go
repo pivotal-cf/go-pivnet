@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	DefaultHost         = "https://network.pivotal.io"
+	DefaultHost         = "https://network.tanzu.vmware.com"
 	apiVersion          = "/api/v2"
 	concurrentDownloads = 10
 )
@@ -34,19 +34,19 @@ type Client struct {
 
 	downloader download.Client
 
-	Auth                 *AuthService
-	EULA                 *EULAsService
-	ProductFiles         *ProductFilesService
-	ArtifactReferences   *ArtifactReferencesService
-	FederationToken      *FederationTokenService
-	FileGroups           *FileGroupsService
-	Releases             *ReleasesService
-	Products             *ProductsService
-	UserGroups           *UserGroupsService
-	SubscriptionGroups   *SubscriptionGroupsService
-	ReleaseTypes         *ReleaseTypesService
-	ReleaseDependencies  *ReleaseDependenciesService
-	DependencySpecifiers *DependencySpecifiersService
+	Auth                  *AuthService
+	EULA                  *EULAsService
+	ProductFiles          *ProductFilesService
+	ArtifactReferences    *ArtifactReferencesService
+	FederationToken       *FederationTokenService
+	FileGroups            *FileGroupsService
+	Releases              *ReleasesService
+	Products              *ProductsService
+	UserGroups            *UserGroupsService
+	SubscriptionGroups    *SubscriptionGroupsService
+	ReleaseTypes          *ReleaseTypesService
+	ReleaseDependencies   *ReleaseDependenciesService
+	DependencySpecifiers  *DependencySpecifiersService
 	ReleaseUpgradePaths   *ReleaseUpgradePathsService
 	UpgradePathSpecifiers *UpgradePathSpecifiersService
 	PivnetVersions        *PivnetVersionsService
@@ -60,7 +60,7 @@ type AccessTokenOrLegacyToken struct {
 }
 
 type QueryParameter struct {
-	Key string
+	Key   string
 	Value string
 }
 

@@ -59,7 +59,7 @@ func NewFileInfo(file *os.File) (*FileInfo, error) {
 		return nil, err
 	}
 
-	fileInfo := &FileInfo {
+	fileInfo := &FileInfo{
 		Name: file.Name(),
 		Mode: stat.Mode(),
 	}
@@ -82,7 +82,7 @@ func (c Client) Get(
 		return fmt.Errorf("failed to construct HEAD request: %s", err)
 	}
 
-	req.Header.Add("Referer","https://go-pivnet.network.pivotal.io")
+	req.Header.Add("Referer", "https://go-pivnet.network.tanzu.vmware.com")
 
 	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
@@ -159,7 +159,7 @@ Retry:
 		return fmt.Errorf("could not get new request: %s", err)
 	}
 
-	rangeHeader.Add("Referer", "https://go-pivnet.network.pivotal.io")
+	rangeHeader.Add("Referer", "https://go-pivnet.network.tanzu.vmware.com")
 	req.Header = rangeHeader
 
 	resp, err := c.HTTPClient.Do(req)
@@ -193,13 +193,12 @@ Retry:
 	var proxyReader io.Reader
 	proxyReader = c.Bar.NewProxyReader(resp.Body)
 
-
 	var timeoutReader io.Reader
 	timeoutReader = gbytes.TimeoutReader(proxyReader, timeout)
 
 	bytesWritten, err := io.Copy(fileWriter, timeoutReader)
 	if err != nil {
-		if err == io.ErrUnexpectedEOF || err == gbytes.ErrTimeout{
+		if err == io.ErrUnexpectedEOF || err == gbytes.ErrTimeout {
 			c.Logger.Debug(fmt.Sprintf("retrying %v", err))
 			c.Bar.Add(int(-1 * bytesWritten))
 			goto Retry

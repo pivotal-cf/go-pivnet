@@ -47,7 +47,8 @@ func (ne NetError) Timeout() bool {
 	return true
 }
 
-type ReaderThatDoesntRead struct {}
+type ReaderThatDoesntRead struct{}
+
 func (r ReaderThatDoesntRead) Read(p []byte) (int, error) {
 	for {
 		time.Sleep(time.Second)
@@ -82,12 +83,12 @@ var _ = Describe("Downloader", func() {
 					0,
 					9,
 					http.Header{"Range": []string{"bytes=0-9"}},
-			),
+				),
 				download.NewRange(
 					10,
 					19,
 					http.Header{"Range": []string{"bytes=10-19"}},
-			),
+				),
 			}, nil)
 
 			var receivedRequests []*http.Request
@@ -128,7 +129,7 @@ var _ = Describe("Downloader", func() {
 				HTTPClient: httpClient,
 				Ranger:     ranger,
 				Bar:        bar,
-				Timeout:    5*time.Millisecond,
+				Timeout:    5 * time.Millisecond,
 			}
 
 			tmpFile, err := ioutil.TempFile("", "")
@@ -167,7 +168,7 @@ var _ = Describe("Downloader", func() {
 				receivedRequests[1].Header.Get("Range"),
 				receivedRequests[2].Header.Get("Range"),
 			}
-			refererHeaders := []string {
+			refererHeaders := []string{
 				receivedRequests[0].Header.Get("Referer"),
 				receivedRequests[1].Header.Get("Referer"),
 				receivedRequests[2].Header.Get("Referer"),
@@ -177,10 +178,10 @@ var _ = Describe("Downloader", func() {
 			Expect(urls).To(ConsistOf([]string{"https://example.com/some-file", "https://example.com/some-file", "https://example.com/some-file"}))
 			Expect(headers).To(ConsistOf([]string{"bytes=0-9", "bytes=10-19"}))
 			Expect(refererHeaders).To(ConsistOf([]string{
-				"https://go-pivnet.network.pivotal.io",
-				"https://go-pivnet.network.pivotal.io",
-				"https://go-pivnet.network.pivotal.io",
-				}))
+				"https://go-pivnet.network.tanzu.vmware.com",
+				"https://go-pivnet.network.tanzu.vmware.com",
+				"https://go-pivnet.network.tanzu.vmware.com",
+			}))
 
 			Expect(bar.FinishCallCount()).To(Equal(1))
 		})
@@ -188,9 +189,9 @@ var _ = Describe("Downloader", func() {
 
 	Context("when a retryable error occurs", func() {
 		var (
-			responses             []*http.Response
-			responseErrors        []error
-			tmpFile               *os.File
+			responses      []*http.Response
+			responseErrors []error
+			tmpFile        *os.File
 		)
 
 		JustBeforeEach(func() {
@@ -215,14 +216,14 @@ var _ = Describe("Downloader", func() {
 				return responses[count], responseErrors[count]
 			}
 
-			ranger.BuildRangeReturns([]download.Range{download.NewRange(0,15, http.Header{})}, nil)
+			ranger.BuildRangeReturns([]download.Range{download.NewRange(0, 15, http.Header{})}, nil)
 
 			downloader := download.Client{
 				Logger:     &loggerfakes.FakeLogger{},
 				HTTPClient: httpClient,
 				Ranger:     ranger,
 				Bar:        bar,
-				Timeout: 	5*time.Millisecond,
+				Timeout:    5 * time.Millisecond,
 			}
 
 			var err error
@@ -374,13 +375,12 @@ var _ = Describe("Downloader", func() {
 					return responses[count], errors[count]
 				}
 
-
 				downloader := download.Client{
 					Logger:     &loggerfakes.FakeLogger{},
 					HTTPClient: httpClient,
 					Ranger:     ranger,
 					Bar:        bar,
-					Timeout: 	5 * time.Millisecond,
+					Timeout:    5 * time.Millisecond,
 				}
 
 				file, err := ioutil.TempFile("", "")
@@ -419,13 +419,12 @@ var _ = Describe("Downloader", func() {
 					return responses[count], errors[count]
 				}
 
-
 				downloader := download.Client{
 					Logger:     &loggerfakes.FakeLogger{},
 					HTTPClient: httpClient,
 					Ranger:     ranger,
 					Bar:        bar,
-					Timeout: 	5 * time.Millisecond,
+					Timeout:    5 * time.Millisecond,
 				}
 
 				file, err := ioutil.TempFile("", "")
@@ -446,7 +445,7 @@ var _ = Describe("Downloader", func() {
 					HTTPClient: nil,
 					Ranger:     nil,
 					Bar:        nil,
-					Timeout: 	5 * time.Millisecond,
+					Timeout:    5 * time.Millisecond,
 				}
 				downloadLinkFetcher.NewDownloadLinkStub = func() (string, error) {
 					return "%%%", nil
@@ -466,7 +465,7 @@ var _ = Describe("Downloader", func() {
 					HTTPClient: httpClient,
 					Ranger:     nil,
 					Bar:        nil,
-					Timeout: 	5 * time.Millisecond,
+					Timeout:    5 * time.Millisecond,
 				}
 
 				err := downloader.Get(nil, downloadLinkFetcher, GinkgoWriter)
@@ -492,7 +491,7 @@ var _ = Describe("Downloader", func() {
 					HTTPClient: httpClient,
 					Ranger:     ranger,
 					Bar:        nil,
-					Timeout: 	5 * time.Millisecond,
+					Timeout:    5 * time.Millisecond,
 				}
 
 				err := downloader.Get(nil, downloadLinkFetcher, GinkgoWriter)
@@ -528,7 +527,7 @@ var _ = Describe("Downloader", func() {
 					HTTPClient: httpClient,
 					Ranger:     ranger,
 					Bar:        bar,
-					Timeout: 	5 * time.Millisecond,
+					Timeout:    5 * time.Millisecond,
 				}
 
 				file, err := ioutil.TempFile("", "")
@@ -573,7 +572,7 @@ var _ = Describe("Downloader", func() {
 					HTTPClient: httpClient,
 					Ranger:     ranger,
 					Bar:        bar,
-					Timeout: 	5 * time.Millisecond,
+					Timeout:    5 * time.Millisecond,
 				}
 
 				file, err := ioutil.TempFile("", "")
