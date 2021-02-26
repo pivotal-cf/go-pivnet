@@ -122,7 +122,7 @@ func NewClient(
 	baseURL := fmt.Sprintf("%s%s", config.Host, apiVersion)
 
 	httpClient := &http.Client{
-		Timeout: 60 * time.Second,
+		Timeout: 10 * time.Minute,
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: config.SkipSSLValidation,
@@ -146,7 +146,7 @@ func NewClient(
 		HTTPClient: downloadClient,
 		Ranger:     ranger,
 		Logger:     logger,
-		Timeout:    5 * time.Second,
+		Timeout:    30 * time.Second,
 	}
 
 	client := Client{
