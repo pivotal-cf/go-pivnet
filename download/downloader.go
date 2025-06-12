@@ -13,7 +13,7 @@ import (
 
 	"github.com/onsi/gomega/gbytes"
 	"github.com/pivotal-cf/go-pivnet/v7/logger"
-	"github.com/shirou/gopsutil/disk"
+	"github.com/shirou/gopsutil/v4/disk"
 	"golang.org/x/sync/errgroup"
 )
 
