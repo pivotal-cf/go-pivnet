@@ -2,14 +2,15 @@ package pivnet_test
 
 import (
 	"fmt"
-	"github.com/onsi/gomega/ghttp"
-	"github.com/pivotal-cf/go-pivnet/v7"
-	"github.com/pivotal-cf/go-pivnet/v7/go-pivnetfakes"
-	"github.com/pivotal-cf/go-pivnet/v7/logger"
-	"github.com/pivotal-cf/go-pivnet/v7/logger/loggerfakes"
 	"net/http"
 
-	. "github.com/onsi/ginkgo"
+	"github.com/onsi/gomega/ghttp"
+	"github.com/pivotal-cf/go-pivnet/v7"
+	gopivnetfakes "github.com/pivotal-cf/go-pivnet/v7/go-pivnetfakes"
+	"github.com/pivotal-cf/go-pivnet/v7/logger"
+	"github.com/pivotal-cf/go-pivnet/v7/logger/loggerfakes"
+
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
@@ -145,9 +146,9 @@ var _ = Describe("PivnetClient - artifact references", func() {
 					Name: "something",
 				},
 				{
-					ID:   2345,
-					Name: "something-else",
-					ReleaseVersions: []string{"1.0.0","1.2.3"},
+					ID:              2345,
+					Name:            "something-else",
+					ReleaseVersions: []string{"1.0.0", "1.2.3"},
 				},
 			}}
 
