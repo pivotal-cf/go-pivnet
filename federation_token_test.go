@@ -15,6 +15,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
+// test go-pivnet CI
 var _ = Describe("PivnetClient - federation token", func() {
 	type requestBody struct {
 		ProductID string `json:"product_id"`
