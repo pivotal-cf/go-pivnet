@@ -14,7 +14,7 @@ import (
 	"testing"
 )
 
-const testProductSlug = "pivnet-resource-test"
+const testProductSlug = "apm"
 
 var client pivnet.Client
 
