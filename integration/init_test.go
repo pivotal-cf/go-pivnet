@@ -5,16 +5,16 @@ import (
 	"os"
 
 	"github.com/pivotal-cf/go-pivnet/v7"
+	"github.com/pivotal-cf/go-pivnet/v7/integration"
 	"github.com/pivotal-cf/go-pivnet/v7/logger"
-	"github.com/robdimsdale/sanitizer"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"testing"
 )
 
-const testProductSlug = "pivnet-resource-test"
+const testProductSlug = "apm"
 
 var client pivnet.Client
 
@@ -39,7 +39,7 @@ var _ = BeforeSuite(func() {
 	sanitized := map[string]string{
 		APIToken: "***sanitized-api-token***",
 	}
-	sanitizedWriter := sanitizer.NewSanitizer(sanitized, GinkgoWriter)
+	sanitizedWriter := integration.NewSanitizer(sanitized, GinkgoWriter)
 	GinkgoWriter = sanitizedWriter
 
 	accessTokenService := pivnet.NewAccessTokenOrLegacyToken(APIToken, Host, false)

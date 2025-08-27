@@ -2,15 +2,16 @@ package pivnet_test
 
 import (
 	"fmt"
-	"github.com/pivotal-cf/go-pivnet/v7/go-pivnetfakes"
 	"net/http"
+
+	gopivnetfakes "github.com/pivotal-cf/go-pivnet/v7/go-pivnetfakes"
 
 	"github.com/onsi/gomega/ghttp"
 	"github.com/pivotal-cf/go-pivnet/v7"
 	"github.com/pivotal-cf/go-pivnet/v7/logger"
 	"github.com/pivotal-cf/go-pivnet/v7/logger/loggerfakes"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
@@ -46,8 +47,8 @@ var _ = Describe("PivnetClient - pivnet versions", func() {
 
 	Describe("List", func() {
 		var (
-			pivnetResourceVersion  = "7.8.9"
-			pivnetCliVersion       = "2.3.4"
+			pivnetResourceVersion = "7.8.9"
+			pivnetCliVersion      = "2.3.4"
 		)
 
 		Context("valid requests", func() {
