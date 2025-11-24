@@ -94,6 +94,7 @@ type ClientConfig struct {
 	Host              string
 	UserAgent         string
 	SkipSSLValidation bool
+	Transport         http.RoundTripper // Optional custom transport for proxy authentication
 }
 
 //go:generate counterfeiter . AccessTokenService
@@ -121,24 +122,28 @@ func NewClient(
 ) Client {
 	baseURL := fmt.Sprintf("%s%s", config.Host, apiVersion)
 
-	httpClient := &http.Client{
-		Timeout: 10 * time.Minute,
-		Transport: &http.Transport{
+	var transport http.RoundTripper
+	if config.Transport != nil {
+		// Use provided transport for both HTTP client and download client
+		transport = config.Transport
+	} else {
+		// Create default transport to preserve original behavior
+		transport = &http.Transport{
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: config.SkipSSLValidation,
 			},
 			Proxy: http.ProxyFromEnvironment,
-		},
+		}
+	}
+
+	httpClient := &http.Client{
+		Timeout:   10 * time.Minute,
+		Transport: transport,
 	}
 
 	downloadClient := &http.Client{
-		Timeout: 0,
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: config.SkipSSLValidation,
-			},
-			Proxy: http.ProxyFromEnvironment,
-		},
+		Timeout:   0,
+		Transport: transport,
 	}
 
 	ranger := download.NewRanger(concurrentDownloads)
