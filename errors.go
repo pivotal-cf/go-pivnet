@@ -93,3 +93,19 @@ func newErrTooManyRequests() ErrTooManyRequests {
 		Message: "You have hit a rate limit for this request",
 	}
 }
+
+type ErrProxyAuthenticationRequired struct {
+	ResponseCode int    `json:"response_code" yaml:"response_code"`
+	Message      string `json:"message" yaml:"message"`
+}
+
+func (e ErrProxyAuthenticationRequired) Error() string {
+	return e.Message
+}
+
+func newErrProxyAuthenticationRequired(message string) ErrProxyAuthenticationRequired {
+	return ErrProxyAuthenticationRequired{
+		ResponseCode: http.StatusProxyAuthRequired,
+		Message:      message,
+	}
+}
