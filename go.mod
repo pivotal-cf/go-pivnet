@@ -1,9 +1,8 @@
 module github.com/pivotal-cf/go-pivnet/v7
 
 require (
-	github.com/StackExchange/wmi v0.0.0-20180725035823-b12b22c5341f // indirect
 	github.com/fatih/color v1.7.0 // indirect
-	github.com/go-ole/go-ole v0.0.0-20180625085808-7a0fa49edf48 // indirect
+	github.com/jcmturner/gokrb5/v8 v8.4.4
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/mattn/go-colorable v0.0.9 // indirect
 	github.com/mattn/go-isatty v0.0.4 // indirect
@@ -11,11 +10,8 @@ require (
 	github.com/onsi/ginkgo v1.6.0
 	github.com/onsi/gomega v1.4.2
 	github.com/robdimsdale/sanitizer v0.0.0-20160522134901-ab2334cb7539
-	github.com/shirou/gopsutil v0.0.0-20180927124308-a11c78ba2c13
-	golang.org/x/crypto v0.0.0-20200302210943-78000ba7a073 // indirect
-	golang.org/x/net v0.0.0-20190813141303-74dc4d7220e7 // indirect
-	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f
-	golang.org/x/text v0.3.2 // indirect
+	github.com/shirou/gopsutil/v3 v3.24.5
+	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/cheggaaa/pb.v1 v1.0.26
 )

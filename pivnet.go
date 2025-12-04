@@ -90,10 +90,20 @@ func AuthorizationHeader(accessToken string) (string, error) {
 	}
 }
 
+// ProxyAuthConfig contains proxy authentication configuration
+type ProxyAuthConfig struct {
+	ProxyURL   string        // Proxy URL (e.g., "http://proxy.example.com:8080")
+	AuthType   ProxyAuthType // Type of proxy authentication (basic, spnego)
+	Username   string        // Username for proxy authentication
+	Password   string        // Password for proxy authentication
+	Krb5Config string        // Path to Kerberos config file (optional, for SPNEGO)
+}
+
 type ClientConfig struct {
 	Host              string
 	UserAgent         string
 	SkipSSLValidation bool
+	ProxyAuthConfig   ProxyAuthConfig // Proxy authentication configuration (optional)
 }
 
 //go:generate counterfeiter . AccessTokenService
@@ -114,38 +124,92 @@ func NewAccessTokenOrLegacyToken(token string, host string, skipSSLValidation bo
 	}
 }
 
+// createProxyAuthTransport creates an HTTP transport with proxy authentication
+func createProxyAuthTransport(config ClientConfig) (http.RoundTripper, error) {
+	// Validate required fields for proxy authentication
+	// Note: For Basic auth, username and password can be empty (though both empty means no auth header)
+	// For SPNEGO, username, password, and proxyURL are all required (validated in NewSPNEGOProxyAuth)
+	if config.ProxyAuthConfig.ProxyURL == "" {
+		return nil, fmt.Errorf("proxy URL is required when proxy authentication is specified")
+	}
+
+	// Parse proxy URL
+	proxyURL, err := url.Parse(config.ProxyAuthConfig.ProxyURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse proxy URL: %w", err)
+	}
+
+	// Create base transport
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: config.SkipSSLValidation,
+		},
+		Proxy: http.ProxyURL(proxyURL),
+	}
+
+	// Create authenticator
+	authenticator, err := NewProxyAuthenticator(config.ProxyAuthConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create proxy authenticator: %w", err)
+	}
+
+	// Wrap transport with proxy authentication
+	proxyAuthTransport, err := NewProxyAuthTransport(transport, authenticator)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize proxy authentication: %w", err)
+	}
+	return proxyAuthTransport, nil
+}
+
+// initializeClientServices initializes all service endpoints for the client
+func initializeClientServices(client *Client, lgr logger.Logger) {
+	client.Auth = &AuthService{client: *client}
+	client.EULA = &EULAsService{client: *client}
+	client.ProductFiles = &ProductFilesService{client: *client}
+	client.ArtifactReferences = &ArtifactReferencesService{client: *client}
+	client.FederationToken = &FederationTokenService{client: *client}
+	client.FileGroups = &FileGroupsService{client: *client}
+	client.Releases = &ReleasesService{client: *client, l: lgr}
+	client.Products = &ProductsService{client: *client, l: lgr}
+	client.UserGroups = &UserGroupsService{client: *client}
+	client.SubscriptionGroups = &SubscriptionGroupsService{client: *client}
+	client.ReleaseTypes = &ReleaseTypesService{client: *client}
+	client.ReleaseDependencies = &ReleaseDependenciesService{client: *client}
+	client.DependencySpecifiers = &DependencySpecifiersService{client: *client}
+	client.ReleaseUpgradePaths = &ReleaseUpgradePathsService{client: *client}
+	client.UpgradePathSpecifiers = &UpgradePathSpecifiersService{client: *client}
+	client.PivnetVersions = &PivnetVersionsService{client: *client}
+}
+
 func NewClient(
 	token AccessTokenService,
 	config ClientConfig,
-	logger logger.Logger,
+	lgr logger.Logger,
 ) Client {
 	baseURL := fmt.Sprintf("%s%s", config.Host, apiVersion)
 
-	httpClient := &http.Client{
-		Timeout: 10 * time.Minute,
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: config.SkipSSLValidation,
-			},
-			Proxy: http.ProxyFromEnvironment,
+	baseTransport := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: config.SkipSSLValidation,
 		},
+		Proxy: http.ProxyFromEnvironment,
+	}
+
+	httpClient := &http.Client{
+		Timeout:   10 * time.Minute,
+		Transport: baseTransport,
 	}
 
 	downloadClient := &http.Client{
-		Timeout: 0,
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: config.SkipSSLValidation,
-			},
-			Proxy: http.ProxyFromEnvironment,
-		},
+		Timeout:   0,
+		Transport: baseTransport,
 	}
 
 	ranger := download.NewRanger(concurrentDownloads)
 	downloader := download.Client{
 		HTTPClient: downloadClient,
 		Ranger:     ranger,
-		Logger:     logger,
+		Logger:     lgr,
 		Timeout:    30 * time.Second,
 	}
 
@@ -153,29 +217,64 @@ func NewClient(
 		baseURL:    baseURL,
 		token:      token,
 		userAgent:  config.UserAgent,
-		logger:     logger,
+		logger:     lgr,
 		downloader: downloader,
 		HTTP:       httpClient,
 	}
 
-	client.Auth = &AuthService{client: client}
-	client.EULA = &EULAsService{client: client}
-	client.ProductFiles = &ProductFilesService{client: client}
-	client.ArtifactReferences = &ArtifactReferencesService{client: client}
-	client.FederationToken = &FederationTokenService{client: client}
-	client.FileGroups = &FileGroupsService{client: client}
-	client.Releases = &ReleasesService{client: client, l: logger}
-	client.Products = &ProductsService{client: client, l: logger}
-	client.UserGroups = &UserGroupsService{client: client}
-	client.SubscriptionGroups = &SubscriptionGroupsService{client: client}
-	client.ReleaseTypes = &ReleaseTypesService{client: client}
-	client.ReleaseDependencies = &ReleaseDependenciesService{client: client}
-	client.DependencySpecifiers = &DependencySpecifiersService{client: client}
-	client.ReleaseUpgradePaths = &ReleaseUpgradePathsService{client: client}
-	client.UpgradePathSpecifiers = &UpgradePathSpecifiersService{client: client}
-	client.PivnetVersions = &PivnetVersionsService{client: client}
+	initializeClientServices(&client, lgr)
 
 	return client
+}
+
+// NewClientWithProxy creates a new Pivnet client with optional proxy authentication support
+func NewClientWithProxy(
+	token AccessTokenService,
+	config ClientConfig,
+	lgr logger.Logger,
+) (Client, error) {
+	var transport http.RoundTripper
+	var err error
+
+	// If proxy authentication is configured, use it; otherwise use standard transport
+	if config.ProxyAuthConfig.AuthType != "" {
+		transport, err = createProxyAuthTransport(config)
+		if err != nil {
+			return Client{}, err
+		}
+	} else {
+		// Use standard transport with environment proxy support
+		transport = &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: config.SkipSSLValidation,
+			},
+			Proxy: http.ProxyFromEnvironment,
+		}
+	}
+
+	client := Client{
+		baseURL:   fmt.Sprintf("%s%s", config.Host, apiVersion),
+		token:     token,
+		userAgent: config.UserAgent,
+		logger:    lgr,
+		HTTP: &http.Client{
+			Timeout:   10 * time.Minute,
+			Transport: transport,
+		},
+		downloader: download.Client{
+			HTTPClient: &http.Client{
+				Timeout:   0,
+				Transport: transport,
+			},
+			Ranger:  download.NewRanger(concurrentDownloads),
+			Logger:  lgr,
+			Timeout: 30 * time.Second,
+		},
+	}
+
+	initializeClientServices(&client, lgr)
+
+	return client, nil
 }
 
 func (c Client) CreateRequest(
@@ -335,6 +434,8 @@ func (c Client) handleUnexpectedResponse(resp *http.Response) error {
 		return newErrNotFound(pErr.Message)
 	case http.StatusUnavailableForLegalReasons:
 		return newErrUnavailableForLegalReasons(pErr.Message)
+	case http.StatusProxyAuthRequired:
+		return newErrProxyAuthenticationRequired(pErr.Message)
 	default:
 		return ErrPivnetOther{
 			ResponseCode: resp.StatusCode,
