@@ -12,9 +12,10 @@ import (
 	"time"
 
 	"github.com/onsi/gomega/gbytes"
-	"github.com/pivotal-cf/go-pivnet/v7/logger"
-	"github.com/shirou/gopsutil/v3/disk"
+	"github.com/shirou/gopsutil/disk"
 	"golang.org/x/sync/errgroup"
+
+	"github.com/pivotal-cf/go-pivnet/v7/logger"
 )
 
 //go:generate counterfeiter -o ./fakes/ranger.go --fake-name Ranger . ranger

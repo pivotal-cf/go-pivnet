@@ -2,10 +2,12 @@ package pivnet_test
 
 import (
 	"fmt"
-	"github.com/pivotal-cf/go-pivnet/v7/go-pivnetfakes"
 	"net/http"
 
+	gopivnetfakes "github.com/pivotal-cf/go-pivnet/v7/go-pivnetfakes"
+
 	"github.com/onsi/gomega/ghttp"
+
 	"github.com/pivotal-cf/go-pivnet/v7"
 	"github.com/pivotal-cf/go-pivnet/v7/logger"
 	"github.com/pivotal-cf/go-pivnet/v7/logger/loggerfakes"
@@ -21,10 +23,10 @@ type pivnetErr struct {
 
 var _ = Describe("PivnetClient", func() {
 	var (
-		server       *ghttp.Server
-		client       pivnet.Client
-		userAgent    string
-		token        string
+		server    *ghttp.Server
+		client    pivnet.Client
+		userAgent string
+		token     string
 
 		releases pivnet.ReleasesResponse
 
@@ -514,6 +516,375 @@ var _ = Describe("PivnetClient", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(req.Header.Get("Authorization")).To(Equal(""))
 			Expect(req.Header.Get("Content-Type")).To(Equal("application/json"))
+		})
+	})
+
+	Describe("NewClientWithProxy", func() {
+		var (
+			proxyConfig pivnet.ClientConfig
+		)
+
+		BeforeEach(func() {
+			proxyConfig = pivnet.ClientConfig{
+				Host:      server.URL(),
+				UserAgent: userAgent,
+			}
+		})
+
+		Context("when no proxy auth is configured", func() {
+			It("creates a client successfully", func() {
+				client, err := pivnet.NewClientWithProxy(fakeAccessTokenService, proxyConfig, fakeLogger)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(client).NotTo(BeNil())
+			})
+
+			It("creates a client with default transport", func() {
+				client, err := pivnet.NewClientWithProxy(fakeAccessTokenService, proxyConfig, fakeLogger)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(client.HTTP).NotTo(BeNil())
+			})
+
+			It("initializes all client services", func() {
+				client, err := pivnet.NewClientWithProxy(fakeAccessTokenService, proxyConfig, fakeLogger)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(client.Auth).NotTo(BeNil())
+				Expect(client.EULA).NotTo(BeNil())
+				Expect(client.ProductFiles).NotTo(BeNil())
+				Expect(client.FileGroups).NotTo(BeNil())
+				Expect(client.Releases).NotTo(BeNil())
+				Expect(client.Products).NotTo(BeNil())
+				Expect(client.UserGroups).NotTo(BeNil())
+			})
+		})
+
+		Context("when Basic proxy auth is configured", func() {
+			BeforeEach(func() {
+				proxyConfig.ProxyAuthConfig = pivnet.ProxyAuthConfig{
+					AuthType: pivnet.ProxyAuthTypeBasic,
+					ProxyURL: "http://proxy.example.com:8080",
+					Username: "proxyuser",
+					Password: "proxypass",
+				}
+			})
+
+			It("creates a client with proxy auth transport", func() {
+				client, err := pivnet.NewClientWithProxy(fakeAccessTokenService, proxyConfig, fakeLogger)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(client).NotTo(BeNil())
+			})
+
+			It("creates a client with custom transport", func() {
+				client, err := pivnet.NewClientWithProxy(fakeAccessTokenService, proxyConfig, fakeLogger)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(client.HTTP).NotTo(BeNil())
+				Expect(client.HTTP.Transport).NotTo(BeNil())
+			})
+
+			It("accepts special characters in username", func() {
+				proxyConfig.ProxyAuthConfig.Username = "user@domain.com"
+				client, err := pivnet.NewClientWithProxy(fakeAccessTokenService, proxyConfig, fakeLogger)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(client).NotTo(BeNil())
+			})
+
+			It("accepts special characters in password", func() {
+				proxyConfig.ProxyAuthConfig.Password = "p@$$w0rd!#%"
+				client, err := pivnet.NewClientWithProxy(fakeAccessTokenService, proxyConfig, fakeLogger)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(client).NotTo(BeNil())
+			})
+
+			It("accepts HTTPS proxy URL", func() {
+				proxyConfig.ProxyAuthConfig.ProxyURL = "https://proxy.example.com:8443"
+				client, err := pivnet.NewClientWithProxy(fakeAccessTokenService, proxyConfig, fakeLogger)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(client).NotTo(BeNil())
+			})
+		})
+
+		Context("when SPNEGO proxy auth is configured", func() {
+			BeforeEach(func() {
+				proxyConfig.ProxyAuthConfig = pivnet.ProxyAuthConfig{
+					AuthType:   pivnet.ProxyAuthTypeSPNEGO,
+					ProxyURL:   "http://proxy.example.com:8080",
+					Username:   "user@REALM.COM",
+					Password:   "password",
+					Krb5Config: "/tmp/krb5.conf",
+				}
+			})
+
+			It("returns an error when Kerberos login fails", func() {
+				// SPNEGO will fail because there's no real KDC
+				_, err := pivnet.NewClientWithProxy(fakeAccessTokenService, proxyConfig, fakeLogger)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("failed to create proxy authenticator"))
+			})
+
+			It("returns an error with empty username", func() {
+				proxyConfig.ProxyAuthConfig.Username = ""
+				_, err := pivnet.NewClientWithProxy(fakeAccessTokenService, proxyConfig, fakeLogger)
+				Expect(err).To(HaveOccurred())
+			})
+
+			It("returns an error with empty password", func() {
+				proxyConfig.ProxyAuthConfig.Password = ""
+				_, err := pivnet.NewClientWithProxy(fakeAccessTokenService, proxyConfig, fakeLogger)
+				Expect(err).To(HaveOccurred())
+			})
+
+			It("returns an error with empty Krb5Config", func() {
+				proxyConfig.ProxyAuthConfig.Krb5Config = ""
+				_, err := pivnet.NewClientWithProxy(fakeAccessTokenService, proxyConfig, fakeLogger)
+				Expect(err).To(HaveOccurred())
+			})
+		})
+
+		Context("when proxy auth type is invalid", func() {
+			BeforeEach(func() {
+				proxyConfig.ProxyAuthConfig = pivnet.ProxyAuthConfig{
+					AuthType: "invalid",
+					ProxyURL: "http://proxy.example.com:8080",
+				}
+			})
+
+			It("returns an error", func() {
+				_, err := pivnet.NewClientWithProxy(fakeAccessTokenService, proxyConfig, fakeLogger)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("failed to create proxy authenticator"))
+			})
+		})
+
+		Context("when proxy URL is empty but auth type is set", func() {
+			BeforeEach(func() {
+				proxyConfig.ProxyAuthConfig = pivnet.ProxyAuthConfig{
+					AuthType: pivnet.ProxyAuthTypeBasic,
+					ProxyURL: "",
+					Username: "user",
+					Password: "pass",
+				}
+			})
+
+			It("returns an error", func() {
+				_, err := pivnet.NewClientWithProxy(fakeAccessTokenService, proxyConfig, fakeLogger)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("proxy URL is required"))
+			})
+		})
+
+		Context("when creating proxy auth transport fails", func() {
+			BeforeEach(func() {
+				proxyConfig.ProxyAuthConfig = pivnet.ProxyAuthConfig{
+					AuthType: pivnet.ProxyAuthTypeBasic,
+					ProxyURL: "", // Empty URL will cause validation error
+				}
+			})
+
+			It("returns an error", func() {
+				_, err := pivnet.NewClientWithProxy(fakeAccessTokenService, proxyConfig, fakeLogger)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("proxy URL is required"))
+			})
+		})
+
+		Context("with SkipSSLValidation", func() {
+			BeforeEach(func() {
+				proxyConfig.SkipSSLValidation = true
+			})
+
+			It("creates a client with SSL validation skipped", func() {
+				client, err := pivnet.NewClientWithProxy(fakeAccessTokenService, proxyConfig, fakeLogger)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(client).NotTo(BeNil())
+			})
+
+			It("works with Basic proxy auth", func() {
+				proxyConfig.ProxyAuthConfig = pivnet.ProxyAuthConfig{
+					AuthType: pivnet.ProxyAuthTypeBasic,
+					ProxyURL: "http://proxy.example.com:8080",
+					Username: "user",
+					Password: "pass",
+				}
+				client, err := pivnet.NewClientWithProxy(fakeAccessTokenService, proxyConfig, fakeLogger)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(client).NotTo(BeNil())
+			})
+		})
+	})
+
+	Describe("ProxyAuthConfig", func() {
+		Context("validation", func() {
+			It("accepts empty ProxyAuthConfig", func() {
+				config := pivnet.ClientConfig{
+					Host:            server.URL(),
+					UserAgent:       userAgent,
+					ProxyAuthConfig: pivnet.ProxyAuthConfig{},
+				}
+				client, err := pivnet.NewClientWithProxy(fakeAccessTokenService, config, fakeLogger)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(client).NotTo(BeNil())
+			})
+
+			It("accepts Basic auth with empty username", func() {
+				config := pivnet.ClientConfig{
+					Host:      server.URL(),
+					UserAgent: userAgent,
+					ProxyAuthConfig: pivnet.ProxyAuthConfig{
+						AuthType: pivnet.ProxyAuthTypeBasic,
+						ProxyURL: "http://proxy.example.com:8080",
+						Username: "",
+						Password: "password",
+					},
+				}
+				client, err := pivnet.NewClientWithProxy(fakeAccessTokenService, config, fakeLogger)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(client).NotTo(BeNil())
+			})
+
+			It("accepts Basic auth with empty password", func() {
+				config := pivnet.ClientConfig{
+					Host:      server.URL(),
+					UserAgent: userAgent,
+					ProxyAuthConfig: pivnet.ProxyAuthConfig{
+						AuthType: pivnet.ProxyAuthTypeBasic,
+						ProxyURL: "http://proxy.example.com:8080",
+						Username: "username",
+						Password: "",
+					},
+				}
+				client, err := pivnet.NewClientWithProxy(fakeAccessTokenService, config, fakeLogger)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(client).NotTo(BeNil())
+			})
+
+			It("accepts Basic auth with both username and password empty", func() {
+				config := pivnet.ClientConfig{
+					Host:      server.URL(),
+					UserAgent: userAgent,
+					ProxyAuthConfig: pivnet.ProxyAuthConfig{
+						AuthType: pivnet.ProxyAuthTypeBasic,
+						ProxyURL: "http://proxy.example.com:8080",
+						Username: "",
+						Password: "",
+					},
+				}
+				client, err := pivnet.NewClientWithProxy(fakeAccessTokenService, config, fakeLogger)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(client).NotTo(BeNil())
+			})
+
+			It("rejects SPNEGO auth without username", func() {
+				config := pivnet.ClientConfig{
+					Host:      server.URL(),
+					UserAgent: userAgent,
+					ProxyAuthConfig: pivnet.ProxyAuthConfig{
+						AuthType:   pivnet.ProxyAuthTypeSPNEGO,
+						ProxyURL:   "http://proxy.example.com:8080",
+						Username:   "",
+						Password:   "password",
+						Krb5Config: "/tmp/krb5.conf",
+					},
+				}
+				_, err := pivnet.NewClientWithProxy(fakeAccessTokenService, config, fakeLogger)
+				Expect(err).To(HaveOccurred())
+			})
+
+			It("rejects SPNEGO auth without password", func() {
+				config := pivnet.ClientConfig{
+					Host:      server.URL(),
+					UserAgent: userAgent,
+					ProxyAuthConfig: pivnet.ProxyAuthConfig{
+						AuthType:   pivnet.ProxyAuthTypeSPNEGO,
+						ProxyURL:   "http://proxy.example.com:8080",
+						Username:   "user@REALM.COM",
+						Password:   "",
+						Krb5Config: "/tmp/krb5.conf",
+					},
+				}
+				_, err := pivnet.NewClientWithProxy(fakeAccessTokenService, config, fakeLogger)
+				Expect(err).To(HaveOccurred())
+			})
+
+			It("rejects SPNEGO auth without Krb5Config", func() {
+				config := pivnet.ClientConfig{
+					Host:      server.URL(),
+					UserAgent: userAgent,
+					ProxyAuthConfig: pivnet.ProxyAuthConfig{
+						AuthType:   pivnet.ProxyAuthTypeSPNEGO,
+						ProxyURL:   "http://proxy.example.com:8080",
+						Username:   "user@REALM.COM",
+						Password:   "password",
+						Krb5Config: "",
+					},
+				}
+				_, err := pivnet.NewClientWithProxy(fakeAccessTokenService, config, fakeLogger)
+				Expect(err).To(HaveOccurred())
+			})
+
+			It("rejects proxy auth without proxy URL", func() {
+				config := pivnet.ClientConfig{
+					Host:      server.URL(),
+					UserAgent: userAgent,
+					ProxyAuthConfig: pivnet.ProxyAuthConfig{
+						AuthType: pivnet.ProxyAuthTypeBasic,
+						ProxyURL: "",
+						Username: "user",
+						Password: "pass",
+					},
+				}
+				_, err := pivnet.NewClientWithProxy(fakeAccessTokenService, config, fakeLogger)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("proxy URL is required"))
+			})
+		})
+
+		Context("auth type constants", func() {
+			It("accepts ProxyAuthTypeBasic constant", func() {
+				config := pivnet.ClientConfig{
+					Host:      server.URL(),
+					UserAgent: userAgent,
+					ProxyAuthConfig: pivnet.ProxyAuthConfig{
+						AuthType: pivnet.ProxyAuthTypeBasic,
+						ProxyURL: "http://proxy.example.com:8080",
+						Username: "user",
+						Password: "pass",
+					},
+				}
+				client, err := pivnet.NewClientWithProxy(fakeAccessTokenService, config, fakeLogger)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(client).NotTo(BeNil())
+			})
+
+			It("rejects uppercase 'BASIC' auth type", func() {
+				config := pivnet.ClientConfig{
+					Host:      server.URL(),
+					UserAgent: userAgent,
+					ProxyAuthConfig: pivnet.ProxyAuthConfig{
+						AuthType: "BASIC",
+						ProxyURL: "http://proxy.example.com:8080",
+						Username: "user",
+						Password: "pass",
+					},
+				}
+				_, err := pivnet.NewClientWithProxy(fakeAccessTokenService, config, fakeLogger)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("unsupported proxy authentication type"))
+			})
+
+			It("rejects mixed case 'Basic' auth type", func() {
+				config := pivnet.ClientConfig{
+					Host:      server.URL(),
+					UserAgent: userAgent,
+					ProxyAuthConfig: pivnet.ProxyAuthConfig{
+						AuthType: "Basic",
+						ProxyURL: "http://proxy.example.com:8080",
+						Username: "user",
+						Password: "pass",
+					},
+				}
+				_, err := pivnet.NewClientWithProxy(fakeAccessTokenService, config, fakeLogger)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("unsupported proxy authentication type"))
+			})
 		})
 	})
 })
