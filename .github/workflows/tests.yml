@@ -1,0 +1,77 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.16'
+          cache: true
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run unit tests
+        run: |
+          # Run tests excluding integration and example packages
+          go test -v -race -coverprofile=coverage.out -covermode=atomic \
+            $(go list ./... | grep -v '/integration' | grep -v '/example')
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: success()
+        with:
+          file: ./coverage.out
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Check for test failures
+        if: failure()
+        run: |
+          echo "::error::Unit tests failed. Please check the logs above."
+          exit 1
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: ['1.16']
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go ${{ matrix.go-version }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+          cache: true
+
+      - name: Build
+        run: |
+          # Build all packages except example (multiple main) and integration (test-only)
+          go build -v $(go list ./... | grep -v '/example' | grep -v '/integration')
+
+      - name: Test compilation
+        run: |
+          # Test compilation for all packages except example
+          go list ./... | grep -v '/example' | xargs -I {} go test -c -o /dev/null {}
+

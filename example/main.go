@@ -11,8 +11,8 @@ import (
 
 func main() {
 	config := pivnet.ClientConfig{
-		Host:      pivnet.DefaultHost,
-		UserAgent: "pivnet-cli-example",
+		Host:              pivnet.DefaultHost,
+		UserAgent:         "pivnet-cli-example",
 		SkipSSLValidation: true,
 	}
 
