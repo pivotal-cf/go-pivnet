@@ -52,8 +52,8 @@ func main() {
 		},
 	}
 
-	// Create access token
-	token := pivnet.NewAccessTokenOrLegacyToken(apiToken, config.Host, config.SkipSSLValidation)
+	// Create access token with proxy auth config
+	token := pivnet.NewAccessTokenOrLegacyTokenWithProxy(apiToken, config.Host, config.SkipSSLValidation, config.ProxyAuthConfig)
 
 	// Create the client with proxy support
 	client, err := pivnet.NewClientWithProxy(token, config, logger)

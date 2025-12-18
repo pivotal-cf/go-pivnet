@@ -57,6 +57,7 @@ type AccessTokenOrLegacyToken struct {
 	refreshToken      string
 	skipSSLValidation bool
 	userAgent         string
+	proxyAuthConfig   ProxyAuthConfig
 }
 
 type QueryParameter struct {
@@ -68,7 +69,7 @@ func (o AccessTokenOrLegacyToken) AccessToken() (string, error) {
 	const legacyAPITokenLength = 20
 	if len(o.refreshToken) > legacyAPITokenLength {
 		baseURL := fmt.Sprintf("%s%s", o.host, apiVersion)
-		tokenFetcher := NewTokenFetcher(baseURL, o.refreshToken, o.skipSSLValidation, o.userAgent)
+		tokenFetcher := NewTokenFetcher(baseURL, o.refreshToken, o.skipSSLValidation, o.userAgent, o.proxyAuthConfig)
 
 		accessToken, err := tokenFetcher.GetToken()
 		if err != nil {
@@ -121,6 +122,22 @@ func NewAccessTokenOrLegacyToken(token string, host string, skipSSLValidation bo
 		host:              host,
 		skipSSLValidation: skipSSLValidation,
 		userAgent:         userAgent,
+		proxyAuthConfig:   ProxyAuthConfig{},
+	}
+}
+
+// NewAccessTokenOrLegacyTokenWithProxy creates an AccessTokenOrLegacyToken with proxy authentication support
+func NewAccessTokenOrLegacyTokenWithProxy(token string, host string, skipSSLValidation bool, proxyAuthConfig ProxyAuthConfig, userAgentOptional ...string) AccessTokenOrLegacyToken {
+	var userAgent = ""
+	if len(userAgentOptional) > 0 {
+		userAgent = userAgentOptional[0]
+	}
+	return AccessTokenOrLegacyToken{
+		refreshToken:      token,
+		host:              host,
+		skipSSLValidation: skipSSLValidation,
+		userAgent:         userAgent,
+		proxyAuthConfig:   proxyAuthConfig,
 	}
 }
 
