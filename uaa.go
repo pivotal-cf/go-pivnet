@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -18,22 +19,62 @@ type TokenFetcher struct {
 	RefreshToken      string
 	SkipSSLValidation bool
 	UserAgent         string
+	ProxyAuthConfig   ProxyAuthConfig
 }
 
-func NewTokenFetcher(endpoint, refreshToken string, skipSSLValidation bool, userAgent string) *TokenFetcher {
-	return &TokenFetcher{endpoint, refreshToken, skipSSLValidation, userAgent }
+func NewTokenFetcher(endpoint, refreshToken string, skipSSLValidation bool, userAgent string, proxyAuthConfig ProxyAuthConfig) *TokenFetcher {
+	return &TokenFetcher{endpoint, refreshToken, skipSSLValidation, userAgent, proxyAuthConfig}
 }
 
 func (t TokenFetcher) GetToken() (string, error) {
-	httpClient := &http.Client{
-		Timeout: 60 * time.Second,
-		Transport: &http.Transport{
+	var transport http.RoundTripper
+	var err error
+
+	// If proxy authentication is configured, use it; otherwise use standard transport
+	if t.ProxyAuthConfig.AuthType != "" {
+		// Create base transport
+		baseTransport := &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: t.SkipSSLValidation,
+			},
+		}
+
+		// Parse proxy URL
+		if t.ProxyAuthConfig.ProxyURL == "" {
+			return "", fmt.Errorf("proxy URL is required when proxy authentication is specified")
+		}
+		proxyURL, err := url.Parse(t.ProxyAuthConfig.ProxyURL)
+		if err != nil {
+			return "", fmt.Errorf("failed to parse proxy URL: %w", err)
+		}
+		baseTransport.Proxy = http.ProxyURL(proxyURL)
+
+		// Create authenticator
+		authenticator, err := NewProxyAuthenticator(t.ProxyAuthConfig)
+		if err != nil {
+			return "", fmt.Errorf("failed to create proxy authenticator: %w", err)
+		}
+
+		// Wrap transport with proxy authentication
+		transport, err = NewProxyAuthTransport(baseTransport, authenticator)
+		if err != nil {
+			return "", fmt.Errorf("failed to initialize proxy authentication: %w", err)
+		}
+	} else {
+		// Use standard transport with environment proxy support
+		transport = &http.Transport{
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: t.SkipSSLValidation,
 			},
 			Proxy: http.ProxyFromEnvironment,
-		},
+		}
 	}
+
+	httpClient := &http.Client{
+		Timeout:   60 * time.Second,
+		Transport: transport,
+	}
+
 	body := AuthBody{RefreshToken: t.RefreshToken}
 	b, err := json.Marshal(body)
 	if err != nil {
