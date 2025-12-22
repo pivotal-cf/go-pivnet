@@ -1,4 +1,4 @@
-module github.com/pivotal-cf/go-pivnet/v7
+module github.com/pivotal-cf/go-pivnet/v9
 
 go 1.16
 
