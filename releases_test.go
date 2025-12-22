@@ -2,14 +2,16 @@ package pivnet_test
 
 import (
 	"fmt"
-	"github.com/pivotal-cf/go-pivnet/v7/go-pivnetfakes"
 	"net/http"
 	"time"
 
+	"github.com/pivotal-cf/go-pivnet/v9/go-pivnetfakes"
+
 	"github.com/onsi/gomega/ghttp"
-	"github.com/pivotal-cf/go-pivnet/v7"
-	"github.com/pivotal-cf/go-pivnet/v7/logger"
-	"github.com/pivotal-cf/go-pivnet/v7/logger/loggerfakes"
+
+	"github.com/pivotal-cf/go-pivnet/v9"
+	"github.com/pivotal-cf/go-pivnet/v9/logger"
+	"github.com/pivotal-cf/go-pivnet/v9/logger/loggerfakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -22,8 +24,8 @@ var _ = Describe("PivnetClient - product files", func() {
 		apiAddress string
 		userAgent  string
 
-		newClientConfig pivnet.ClientConfig
-		fakeLogger      logger.Logger
+		newClientConfig        pivnet.ClientConfig
+		fakeLogger             logger.Logger
 		fakeAccessTokenService *gopivnetfakes.FakeAccessTokenService
 	)
 

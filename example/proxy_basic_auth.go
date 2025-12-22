@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	pivnet "github.com/pivotal-cf/go-pivnet/v7"
-	"github.com/pivotal-cf/go-pivnet/v7/logshim"
+	pivnet "github.com/pivotal-cf/go-pivnet/v9"
+	"github.com/pivotal-cf/go-pivnet/v9/logshim"
 )
 
 // Example demonstrating HTTP Basic proxy authentication

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	pivnet "github.com/pivotal-cf/go-pivnet/v7"
+	pivnet "github.com/pivotal-cf/go-pivnet/v9"
 )
 
 func TestNewSPNEGOProxyAuth(t *testing.T) {

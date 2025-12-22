@@ -6,7 +6,7 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/pivotal-cf/go-pivnet/v7/download"
+	"github.com/pivotal-cf/go-pivnet/v9/download"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

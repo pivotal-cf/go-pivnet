@@ -3,7 +3,8 @@ package integration_test
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	pivnet "github.com/pivotal-cf/go-pivnet/v7"
+
+	pivnet "github.com/pivotal-cf/go-pivnet/v9"
 )
 
 const (

@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/pivotal-cf/go-pivnet/v7/logger"
+	"github.com/pivotal-cf/go-pivnet/v9/logger"
 )
 
 type ReleasesService struct {

@@ -1,11 +1,11 @@
 package pivnet
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
-	"encoding/json"
-	"github.com/pivotal-cf/go-pivnet/v7/logger"
+	"github.com/pivotal-cf/go-pivnet/v9/logger"
 )
 
 type ProductsService struct {
