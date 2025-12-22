@@ -2,13 +2,15 @@ package pivnet_test
 
 import (
 	"fmt"
-	"github.com/pivotal-cf/go-pivnet/v7/go-pivnetfakes"
 	"net/http"
 
+	"github.com/pivotal-cf/go-pivnet/v9/go-pivnetfakes"
+
 	"github.com/onsi/gomega/ghttp"
-	"github.com/pivotal-cf/go-pivnet/v7"
-	"github.com/pivotal-cf/go-pivnet/v7/logger"
-	"github.com/pivotal-cf/go-pivnet/v7/logger/loggerfakes"
+
+	"github.com/pivotal-cf/go-pivnet/v9"
+	"github.com/pivotal-cf/go-pivnet/v9/logger"
+	"github.com/pivotal-cf/go-pivnet/v9/logger/loggerfakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

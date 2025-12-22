@@ -15,7 +15,7 @@ import (
 	"github.com/shirou/gopsutil/disk"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/pivotal-cf/go-pivnet/v7/logger"
+	"github.com/pivotal-cf/go-pivnet/v9/logger"
 )
 
 //go:generate counterfeiter -o ./fakes/ranger.go --fake-name Ranger . ranger

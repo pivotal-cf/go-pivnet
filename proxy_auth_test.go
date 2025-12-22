@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"testing"
 
-	pivnet "github.com/pivotal-cf/go-pivnet/v7"
+	pivnet "github.com/pivotal-cf/go-pivnet/v9"
 )
 
 // mockAuthenticator is a mock implementation of ProxyAuthenticator for testing

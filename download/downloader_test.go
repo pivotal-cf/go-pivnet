@@ -2,26 +2,26 @@ package download_test
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
-	"net/http"
-	"net/url"
-	"strings"
-	"sync"
-
-	"github.com/pivotal-cf/go-pivnet/v7/download"
-	"github.com/pivotal-cf/go-pivnet/v7/download/fakes"
-
-	"fmt"
 	"math"
 	"net"
+	"net/http"
+	"net/url"
 	"os"
+	"strings"
+	"sync"
 	"syscall"
 	"time"
 
+	"github.com/pivotal-cf/go-pivnet/v9/download"
+	"github.com/pivotal-cf/go-pivnet/v9/download/fakes"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/pivotal-cf/go-pivnet/v7/logger/loggerfakes"
+
+	"github.com/pivotal-cf/go-pivnet/v9/logger/loggerfakes"
 )
 
 type EOFReader struct{}

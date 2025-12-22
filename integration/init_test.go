@@ -3,15 +3,15 @@ package integration_test
 import (
 	"fmt"
 	"os"
+	"testing"
 
-	"github.com/pivotal-cf/go-pivnet/v7"
-	"github.com/pivotal-cf/go-pivnet/v7/logger"
 	"github.com/robdimsdale/sanitizer"
+
+	"github.com/pivotal-cf/go-pivnet/v9"
+	"github.com/pivotal-cf/go-pivnet/v9/logger"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
-	"testing"
 )
 
 const testProductSlug = "pivnet-resource-test"

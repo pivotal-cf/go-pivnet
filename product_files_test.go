@@ -2,20 +2,23 @@ package pivnet_test
 
 import (
 	"fmt"
-	"github.com/pivotal-cf/go-pivnet/v7/go-pivnetfakes"
 	"io/ioutil"
 	"net/http"
 	"regexp"
 	"strconv"
 
+	"github.com/pivotal-cf/go-pivnet/v9/go-pivnetfakes"
+
 	"github.com/onsi/gomega/ghttp"
-	"github.com/pivotal-cf/go-pivnet/v7"
-	"github.com/pivotal-cf/go-pivnet/v7/logger"
-	"github.com/pivotal-cf/go-pivnet/v7/logger/loggerfakes"
+
+	"github.com/pivotal-cf/go-pivnet/v9"
+	"github.com/pivotal-cf/go-pivnet/v9/logger"
+	"github.com/pivotal-cf/go-pivnet/v9/logger/loggerfakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/pivotal-cf/go-pivnet/v7/download"
+
+	"github.com/pivotal-cf/go-pivnet/v9/download"
 )
 
 var _ = Describe("PivnetClient - product files", func() {
@@ -667,7 +670,7 @@ var _ = Describe("PivnetClient - product files", func() {
 				)
 
 				_, err := client.ProductFiles.Update(productSlug, productFile)
-				
+
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("foo message"))
 			})

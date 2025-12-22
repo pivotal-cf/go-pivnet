@@ -7,7 +7,8 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/pivotal-cf/go-pivnet/v7/md5sum"
+
+	"github.com/pivotal-cf/go-pivnet/v9/md5sum"
 )
 
 var _ = Describe("MD5", func() {
@@ -16,7 +17,7 @@ var _ = Describe("MD5", func() {
 			tempFilePath string
 			tempDir      string
 			fileContents []byte
-			fileSummer *md5sum.FileSummer
+			fileSummer   *md5sum.FileSummer
 		)
 
 		BeforeEach(func() {
