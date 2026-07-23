@@ -363,16 +363,21 @@ var _ = Describe("PivnetClient", func() {
 			body = []byte(`{"status":"500","error":"foo message"}`)
 		})
 
-		It("returns an error", func() {
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest(
-						"GET",
-						fmt.Sprintf("%s/foo", apiPrefix),
+		It("retries the request and eventually returns an error", func() {
+			// A 500 is retried (PivNet's backend intermittently returns a
+			// non-JSON 500 for what would otherwise be transient errors),
+			// so all 3 attempts need a handler queued.
+			for i := 0; i < 3; i++ {
+				server.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest(
+							"GET",
+							fmt.Sprintf("%s/foo", apiPrefix),
+						),
+						ghttp.RespondWith(http.StatusInternalServerError, body),
 					),
-					ghttp.RespondWith(http.StatusInternalServerError, body),
-				),
-			)
+				)
+			}
 
 			_, err := client.MakeRequest(
 				"GET",
@@ -387,6 +392,7 @@ var _ = Describe("PivnetClient", func() {
 					Message:      "foo message",
 				},
 			))
+			Expect(server.ReceivedRequests()).To(HaveLen(3))
 		})
 
 		Context("when unmarshalling the response from Pivnet returns an error", func() {
@@ -394,16 +400,18 @@ var _ = Describe("PivnetClient", func() {
 				body = []byte(`{"error":1234}`)
 			})
 
-			It("returns an error", func() {
-				server.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest(
-							"GET",
-							fmt.Sprintf("%s/foo", apiPrefix),
+			It("retries the request and eventually returns an error", func() {
+				for i := 0; i < 3; i++ {
+					server.AppendHandlers(
+						ghttp.CombineHandlers(
+							ghttp.VerifyRequest(
+								"GET",
+								fmt.Sprintf("%s/foo", apiPrefix),
+							),
+							ghttp.RespondWith(http.StatusInternalServerError, body),
 						),
-						ghttp.RespondWith(http.StatusInternalServerError, body),
-					),
-				)
+					)
+				}
 
 				_, err := client.MakeRequest(
 					"GET",
@@ -413,6 +421,7 @@ var _ = Describe("PivnetClient", func() {
 				)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("json: cannot unmarshal"))
+				Expect(server.ReceivedRequests()).To(HaveLen(3))
 			})
 		})
 	})

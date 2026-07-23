@@ -1,8 +1,10 @@
 package pivnet
 
 import (
+	"bytes"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -21,7 +23,27 @@ const (
 	DefaultHost         = "https://network.tanzu.vmware.com"
 	apiVersion          = "/api/v2"
 	concurrentDownloads = 10
+
+	// maxRequestRetries is the number of attempts made for a single API
+	// request before giving up. PivNet's backend intermittently returns a
+	// 500 with a generic non-JSON "UnexpectedError" body instead of the
+	// normal JSON response; retrying almost always succeeds on the next
+	// attempt.
+	maxRequestRetries = 3
+	// requestRetryBaseDelay is the base delay between retries; it doubles
+	// on each subsequent attempt (1s, 2s, ...).
+	requestRetryBaseDelay = 1 * time.Second
 )
+
+// retryableError marks an error returned by a request as safe to retry.
+// It is unwrapped before being returned to the caller so error types such
+// as ErrPivnetOther/ErrNotFound continue to work with errors.As.
+type retryableError struct {
+	err error
+}
+
+func (r *retryableError) Error() string { return r.err.Error() }
+func (r *retryableError) Unwrap() error { return r.err }
 
 type Client struct {
 	baseURL       string
@@ -339,34 +361,71 @@ func (c Client) MakeRequest(
 	expectedStatusCode int,
 	body io.Reader,
 ) (*http.Response, error) {
-	req, err := c.CreateRequest(requestType, endpoint, body)
-	if err != nil {
-		return nil, err
-	}
-
-	reqBytes, err := httputil.DumpRequestOut(req, true)
-	if err != nil {
-		return nil, err
-	}
-
-	c.logger.Debug("Making request", logger.Data{"request": string(reqBytes)})
-
-	resp, err := c.HTTP.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	c.logger.Debug("Response status code", logger.Data{"status code": resp.StatusCode})
-	c.logger.Debug("Response headers", logger.Data{"headers": resp.Header})
-
-	if expectedStatusCode > 0 && resp.StatusCode != expectedStatusCode {
-		return nil, c.handleUnexpectedResponse(resp)
-	}
-
-	return resp, nil
+	return c.makeRequestWithRetry(requestType, endpoint, expectedStatusCode, nil, body)
 }
 
 func (c Client) MakeRequestWithParams(
+	requestType string,
+	endpoint string,
+	expectedStatusCode int,
+	params []QueryParameter,
+	body io.Reader,
+) (*http.Response, error) {
+	return c.makeRequestWithRetry(requestType, endpoint, expectedStatusCode, params, body)
+}
+
+// makeRequestWithRetry performs the request, retrying when the response is
+// an unexpected 5xx. The body is buffered up-front so it can be re-sent
+// unchanged on each attempt.
+func (c Client) makeRequestWithRetry(
+	requestType string,
+	endpoint string,
+	expectedStatusCode int,
+	params []QueryParameter,
+	body io.Reader,
+) (*http.Response, error) {
+	var bodyBytes []byte
+	if body != nil {
+		var err error
+		bodyBytes, err = ioutil.ReadAll(body)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	var lastErr error
+	for attempt := 0; attempt < maxRequestRetries; attempt++ {
+		var reqBody io.Reader
+		if bodyBytes != nil {
+			reqBody = bytes.NewReader(bodyBytes)
+		}
+
+		resp, err := c.doRequest(requestType, endpoint, expectedStatusCode, params, reqBody)
+		if err == nil {
+			return resp, nil
+		}
+
+		var retryable *retryableError
+		if !errors.As(err, &retryable) {
+			return nil, err
+		}
+
+		lastErr = retryable.err
+		if attempt == maxRequestRetries-1 {
+			break
+		}
+
+		c.logger.Debug("retrying request after unexpected response", logger.Data{
+			"attempt": attempt + 1,
+			"error":   lastErr.Error(),
+		})
+		time.Sleep(requestRetryBaseDelay * time.Duration(int64(1)<<uint(attempt)))
+	}
+
+	return nil, lastErr
+}
+
+func (c Client) doRequest(
 	requestType string,
 	endpoint string,
 	expectedStatusCode int,
@@ -378,11 +437,13 @@ func (c Client) MakeRequestWithParams(
 		return nil, err
 	}
 
-	q := req.URL.Query()
-	for _, param := range params {
-		q.Add(param.Key, param.Value)
+	if params != nil {
+		q := req.URL.Query()
+		for _, param := range params {
+			q.Add(param.Key, param.Value)
+		}
+		req.URL.RawQuery = q.Encode()
 	}
-	req.URL.RawQuery = q.Encode()
 
 	reqBytes, err := httputil.DumpRequestOut(req, true)
 	if err != nil {
@@ -400,7 +461,11 @@ func (c Client) MakeRequestWithParams(
 	c.logger.Debug("Response headers", logger.Data{"headers": resp.Header})
 
 	if expectedStatusCode > 0 && resp.StatusCode != expectedStatusCode {
-		return nil, c.handleUnexpectedResponse(resp)
+		unexpectedErr := c.handleUnexpectedResponse(resp)
+		if resp.StatusCode >= http.StatusInternalServerError {
+			return nil, &retryableError{err: unexpectedErr}
+		}
+		return nil, unexpectedErr
 	}
 
 	return resp, nil
@@ -431,7 +496,7 @@ func (c Client) handleUnexpectedResponse(resp *http.Response) error {
 		var internalServerError pivnetInternalServerErr
 		err = json.Unmarshal(b, &internalServerError)
 		if err != nil {
-			return err
+			return fmt.Errorf("pivnet returned unexpected 500 response body [%q]: %s", b, err)
 		}
 
 		pErr = pivnetErr{
